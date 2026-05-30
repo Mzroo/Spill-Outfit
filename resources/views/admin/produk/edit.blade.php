@@ -5,141 +5,211 @@
 <div class="container-fluid">
 
     <!-- HEADER -->
-    <div class="mb-4">
+    <div class="text-center mb-4">
+
         <h4 class="fw-bold">Edit Produk</h4>
-        <p class="text-muted">Ubah data produk</p>
+        <p class="text-muted">Perbarui data produk</p>
+
     </div>
 
     <!-- CARD -->
-    <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+    <div class="card border-0 shadow-sm rounded-4">
 
-        <form action="{{ route('produk.update', $produk->id) }}" 
-              method="POST" 
-              enctype="multipart/form-data">
-            @csrf
-            @method('PUT')
+        <div class="card-body p-4">
 
-            <div class="row g-0">
+            <form action="{{ route('admin.produk.update', $produk->id) }}"
+                  method="POST"
+                  enctype="multipart/form-data">
 
-                <!-- KIRI: GAMBAR -->
-                <div class="col-md-5 bg-light d-flex flex-column align-items-center justify-content-center p-4">
+                @csrf
+                @method('PUT')
 
-                    <h6 class="fw-semibold mb-3">Gambar Produk</h6>
+                <div class="row g-4">
 
-                    <!-- PREVIEW -->
-                    <img id="previewImage"
-                         src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/300' }}"
-                         class="img-fluid rounded-3 mb-3"
-                         style="max-height: 300px; object-fit: cover;">
-
-                    <!-- INPUT FILE -->
-                    <input type="file" name="gambar" id="imageInput" class="form-control">
-
-                    <small class="text-muted mt-2">
-                        Kosongkan jika tidak ingin mengganti gambar
-                    </small>
-
-                </div>
-
-                <!-- KANAN: FORM -->
-                <div class="col-md-7 p-4">
-
-                    <div class="row">
+                    <!-- LEFT -->
+                    <div class="col-lg-6">
 
                         <!-- KODE -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kode Produk</label>
-                            <input type="text" name="kode" 
-                                   class="form-control"
-                                   value="{{ $produk->kode }}" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kode Produk</label>
+                            <input type="text"
+                                   name="kode"
+                                   class="form-control rounded-4"
+                                   value="{{ $produk->kode }}"
+                                   required>
                         </div>
 
                         <!-- NAMA -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nama Produk</label>
-                            <input type="text" name="nama" 
-                                   class="form-control"
-                                   value="{{ $produk->nama }}" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nama Produk</label>
+                            <input type="text"
+                                   name="nama"
+                                   id="namaProduk"
+                                   class="form-control rounded-4"
+                                   value="{{ $produk->nama }}"
+                                   required>
                         </div>
 
                         <!-- KATEGORI -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kategori</label>
-                            <select name="kategori_id" class="form-select" required>
-                                @foreach($kategori as $item)
-                                    <option value="{{ $item->id }}"
-                                        {{ $produk->kategori_id == $item->id ? 'selected' : '' }}>
-                                        {{ $item->nama }}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Kategori</label>
+                            <select name="kategori_id"
+                                    class="form-select rounded-4"
+                                    required>
+
+                                @foreach($kategori as $k)
+                                    <option value="{{ $k->id }}"
+                                        {{ $produk->kategori_id == $k->id ? 'selected' : '' }}>
+                                        {{ $k->nama }}
                                     </option>
                                 @endforeach
+
                             </select>
                         </div>
 
-                        <!-- STATUS -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="public" {{ $produk->status == 'public' ? 'selected' : '' }}>
-                                    Public
-                                </option>
-                                <option value="block" {{ $produk->status == 'block' ? 'selected' : '' }}>
-                                    Block
-                                </option>
+                        <!-- BRAND -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Brand</label>
+                            <select name="brand_id"
+                                    class="form-select rounded-4">
+
+                                <option value="">-- Pilih Brand --</option>
+
+                                @foreach($brand as $b)
+                                    <option value="{{ $b->id }}"
+                                        {{ $produk->brand_id == $b->id ? 'selected' : '' }}>
+                                        {{ $b->nama }}
+                                    </option>
+                                @endforeach
+
                             </select>
                         </div>
 
                         <!-- HARGA -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Harga</label>
-                            <input type="number" name="harga" 
-                                   class="form-control"
-                                   value="{{ $produk->harga }}" required>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Harga</label>
+                            <input type="number"
+                                   name="harga"
+                                   class="form-control rounded-4"
+                                   value="{{ $produk->harga }}"
+                                   required>
                         </div>
 
-                        <!-- STOK -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Stok</label>
-                            <input type="number" name="stok" 
-                                   class="form-control"
-                                   value="{{ $produk->stok }}" required>
-                        </div>
+                        <!-- STATUS -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Status</label>
+                            <select name="status"
+                                    class="form-select rounded-4">
 
-                        <!-- DESKRIPSI -->
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Deskripsi</label>
-                            <textarea name="deskripsi" 
-                                      class="form-control" rows="4">{{ $produk->deskripsi }}</textarea>
+                                <option value="public"
+                                    {{ $produk->status == 'public' ? 'selected' : '' }}>
+                                    Aktif
+                                </option>
+
+                                <option value="block"
+                                    {{ $produk->status == 'block' ? 'selected' : '' }}>
+                                    Nonaktif
+                                </option>
+
+                            </select>
                         </div>
 
                     </div>
 
-                    <!-- BUTTON -->
-                    <button type="submit" class="btn btn-primary w-100 fw-semibold">
-                        Update Produk
-                    </button>
+                    <!-- RIGHT -->
+                    <div class="col-lg-6">
+
+                        <!-- DESKRIPSI -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Deskripsi</label>
+                            <textarea name="deskripsi"
+                                      rows="4"
+                                      class="form-control rounded-4">{{ $produk->deskripsi }}</textarea>
+                        </div>
+
+                        <!-- GAMBAR -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Gambar Produk</label>
+
+                            <input type="file"
+                                   name="gambar"
+                                   id="inputGambar"
+                                   accept="image/*"
+                                   class="form-control rounded-4">
+
+                            <small class="text-muted">
+                                Kosongkan jika tidak ingin diganti
+                            </small>
+                        </div>
+
+                        <!-- PREVIEW GAMBAR -->
+                        <div class="border rounded-4 p-3 text-center bg-light">
+
+                            <h6 class="text-muted mb-3">Preview Gambar</h6>
+
+                            <img id="previewImage"
+                                 src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/250x200?text=No+Image' }}"
+                                 class="rounded border"
+                                 style="width:100%; max-height:250px; object-fit:cover;">
+
+                            <h6 class="mt-3 text-muted">Preview Nama</h6>
+
+                            <h5 id="previewNama">{{ $produk->nama }}</h5>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
-            </div>
+                <!-- BUTTON -->
+                <div class="d-flex gap-2 mt-4">
 
-        </form>
+                    <button type="submit"
+                            class="btn btn-warning rounded-pill w-50">
+
+                        Update Produk
+
+                    </button>
+
+                    <a href="{{ route('admin.produk.index') }}"
+                       class="btn btn-secondary rounded-pill w-50">
+
+                        Kembali
+
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
 
     </div>
 
 </div>
 
-<!-- JS PREVIEW -->
+<!-- JS -->
 <script>
-    const input = document.getElementById('imageInput');
-    const previewMain = document.getElementById('previewImage');
+// preview nama
+document.getElementById('namaProduk').addEventListener('input', function () {
+    document.getElementById('previewNama').innerText = this.value || '-';
+});
 
-    input.addEventListener('change', function () {
-        const file = this.files[0];
+// preview gambar
+document.getElementById('inputGambar').addEventListener('change', function (e) {
+    const file = e.target.files[0];
 
-        if (file) {
-            previewMain.src = URL.createObjectURL(file);
+    if (file) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            document.getElementById('previewImage').src = e.target.result;
         }
-    });
+
+        reader.readAsDataURL(file);
+    }
+});
 </script>
 
 @endsection

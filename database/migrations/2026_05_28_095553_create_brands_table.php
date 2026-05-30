@@ -11,16 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('produk', function (Blueprint $table) {
+        Schema::create('brand', function (Blueprint $table) {
+
             $table->id();
-            $table->string('kode')->unique();
+
+            // Nama Brand
             $table->string('nama');
-            $table->foreignId('kategori_id')->constrained('kategori')->cascadeOnDelete();
-            $table->integer('harga');
-            $table->integer('stok');
-            $table->enum('status', ['public', 'block'])->default('public');
+
+            // URL Friendly
+            $table->string('slug')->unique();
+
+            // Logo Brand
+            $table->string('logo')->nullable();
+
+            // Deskripsi Brand
             $table->text('deskripsi')->nullable();
-            $table->string('gambar')->nullable(); // Gambar Utama
+
+            // Status Brand
+            $table->enum('status', [
+                'aktif',
+                'nonaktif'
+            ])->default('aktif');
+
             $table->timestamps();
         });
     }
@@ -30,6 +42,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('produk');
+        Schema::dropIfExists('brand');
     }
 };

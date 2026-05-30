@@ -12,9 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kategori', function (Blueprint $table) {
+
             $table->id();
+
+            // Nama kategori
             $table->string('nama');
+
+            // URL slug
             $table->string('slug')->unique();
+
+            // Gambar kategori
+            $table->string('gambar')->nullable();
+
+            // Deskripsi kategori
+            $table->text('deskripsi')->nullable();
+
+            // Status kategori
+            $table->enum('status', [
+                'aktif',
+                'nonaktif'
+            ])->default('aktif');
+
             $table->timestamps();
         });
     }

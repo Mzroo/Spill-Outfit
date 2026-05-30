@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="{{ asset('assets/css/guest.css') }}">
 
     <!-- Poppins -->
+        <!-- Material Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css">
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cookie&display=swap" rel="stylesheet"></head>
 <body>    <!-- CONTENT -->

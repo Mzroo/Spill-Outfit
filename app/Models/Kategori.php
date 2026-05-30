@@ -16,8 +16,12 @@ class Kategori extends Model
         'slug'
     ];
 
-    // relasi ke produk
-    public function produk(){
+    // =========================
+    // RELASI KE PRODUK
+    // =========================
+
+    public function produk()
+    {
         return $this->hasMany(Produk::class);
     }
 }

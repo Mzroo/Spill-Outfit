@@ -16,116 +16,157 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+<style>
 
+/* ================= GLOBAL ================= */
+
+body{
+    background:#f8f9fc;
+    font-family:'Poppins', sans-serif;
+    overflow-x:hidden;
+}
+
+/* ================= CONTENT ================= */
+
+.content{
+
+    margin-left:290px;
+    margin-top:90px;
+
+    padding:35px;
+
+    min-height:100vh;
+
+    transition:.3s ease;
+
+}
+
+/* SAAT SIDEBAR HIDE */
+
+.content.full{
+
+    margin-left:0;
+
+}
+
+/* CARD DEFAULT (BIAR PREMIUM) */
+
+.content .card{
+
+    border:none;
+
+    border-radius:28px;
+
+    background:#fff;
+
+    box-shadow:
+    0 10px 35px rgba(0,0,0,.05);
+
+}
+
+/* TABLE */
+
+.table{
+
+    border-radius:20px;
+    overflow:hidden;
+}
+
+/* TITLE */
+
+.page-heading{
+
+    margin-bottom:28px;
+}
+
+.page-heading h2{
+
+    font-size:32px;
+    font-weight:700;
+
+    color:#222;
+}
+
+.page-heading p{
+
+    margin:0;
+
+    color:#888;
+}
+
+/* FORM */
+
+.form-control,
+.form-select{
+
+    border-radius:18px;
+
+    min-height:52px;
+
+    border:1px solid #ece4d4;
+}
+
+.form-control:focus,
+.form-select:focus{
+
+    border-color:#B68D40;
+
+    box-shadow:
+    0 0 0 .15rem rgba(182,141,64,.18);
+}
+
+/* BUTTON */
+
+.btn-premium{
+
+    background:
+    linear-gradient(
+        135deg,
+        #8C6A2F,
+        #C9A227
+    );
+
+    color:white;
+
+    border:none;
+
+    border-radius:16px;
+
+    padding:12px 22px;
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+.btn-premium:hover{
+
+    transform:translateY(-2px);
+
+    color:white;
+}
+
+/* MOBILE */
+
+@media(max-width:991px){
+
+    .content{
+
+        margin-left:0;
+        margin-top:90px;
+
+        padding:20px;
+
+    }
+
+}
+
+</style>
 </head>
 
 <body>
-
-    <!-- SIDEBAR -->
-    <div id="sidebar" class="sidebar">
-
-        <!-- LOGO -->
-       <div class="text-center mb-4 logo-text">
-            <h5 class="fw-bold mb-0">
-                Spill <span>Outfit</span>
-            </h5>
-            <small>Fashion Admin</small>
-        </div>
-
-        <!-- DASHBOARD -->
-        <a href="#">
-            <i class="fa fa-home me-2"></i> Dashboard
-        </a>
-
-        <!-- PRODUK (DROPDOWN) -->
-        <a data-bs-toggle="collapse" href="#produkMenu" role="button">
-            <i class="fa fa-shirt me-2"></i> Produk
-            <i class="fa fa-chevron-down float-end"></i>
-        </a>
-
-        <div class="collapse ps-3" id="produkMenu">
-            <a href="{{ route('produk.index') }}"><i class="fa fa-box me-2"></i> Semua Produk</a>
-            <a href="{{ route('kategori.index') }}"><i class="fa fa-tags me-2"></i> Kategori</a>
-            <a href="#"><i class="fa fa-layer-group me-2"></i> Stok Barang</a>
-        </div>
-
-        <!-- TRANSAKSI -->
-        <a data-bs-toggle="collapse" href="#transaksiMenu" role="button">
-            <i class="fa fa-shopping-cart me-2"></i> Transaksi
-            <i class="fa fa-chevron-down float-end"></i>
-        </a>
-
-        <div class="collapse ps-3" id="transaksiMenu">
-            <a href="#"><i class="fa fa-receipt me-2"></i> Pesanan</a>
-            <a href="#"><i class="fa fa-credit-card me-2"></i> Pembayaran</a>
-        </div>
-
-        <!-- USER -->
-        <a href="#">
-            <i class="fa fa-users me-2"></i> Customer
-        </a>
-
-        <!-- LAPORAN -->
-        <a href="#">
-            <i class="fa fa-chart-line me-2"></i> Laporan
-        </a>
-
-        <!-- SETTING -->
-        <a href="#">
-            <i class="fa fa-cog me-2"></i> Pengaturan
-        </a>
-
-    </div>
-
-    <!-- NAVBAR -->
-    <nav id="navbar" class="navbar navbar-light bg-light shadow-sm navbar-custom px-4">
-        
-        <!-- TOGGLE BUTTON -->
-        <button id="toggleBtn" class="btn btn-outline-secondary">
-            <i class="fa fa-bars"></i>
-        </button>
-
-        <div class="ms-auto">
-            <div class="dropdown">
-                <button class="user-btn" data-bs-toggle="dropdown">
-
-                    <img class="img-profile rounded-circle"
-                        src="https://ui-avatars.com/api/?name={{ auth()->user()->name ?? 'Admin' }}">
-
-                </button>
-
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                    
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <i class="fa fa-user me-2 text-secondary"></i>
-                            Profile
-                        </a>
-                    </li>
-
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="#">
-                            <i class="fa fa-cog me-2 text-secondary"></i>
-                            Settings
-                        </a>
-                    </li>
-
-                    <li><hr class="dropdown-divider"></li>
-
-                    <li>
-                        <form action="/logout" method="POST">
-                            @csrf
-                            <button class="dropdown-item d-flex align-items-center text-danger">
-                                <i class="fa fa-sign-out-alt me-2"></i>
-                                Logout
-                            </button>
-                        </form>
-                    </li>
-
-                </ul>
-            </div>
-        </div>
-    </nav>
+    @include('admin.partials.slidebar')
+    @include('admin.partials.navbar')
 
     <!-- CONTENT -->
     <div id="content" class="content">
@@ -137,7 +178,8 @@
     <script src="{{ asset('assets/sweetalert/sweetalert2.all.min.js') }}"></script>
 
 
-    @if(session('success'))
+ {{-- ================= SWEET ALERT SUCCESS ================= --}}
+@if(session('success'))
 <script>
     Swal.fire({
         icon: 'success',
@@ -149,6 +191,8 @@
 </script>
 @endif
 
+
+{{-- ================= SWEET ALERT ERROR ================= --}}
 @if(session('error'))
 <script>
     Swal.fire({
@@ -159,42 +203,157 @@
 </script>
 @endif
 
-<script> 
-        // Toogle
-        const toggleBtn = document.getElementById('toggleBtn');
-        const sidebar = document.getElementById('sidebar');
-        const content = document.getElementById('content');
-        const navbar = document.getElementById('navbar');
 
-        toggleBtn.addEventListener('click', function () {
-            sidebar.classList.toggle('hide');
-            content.classList.toggle('full');
-            navbar.classList.toggle('full');
-        });
+<script>
 
-document.querySelectorAll('.btn-delete').forEach(button => {
-    button.addEventListener('click', function () {
+    // ================= ELEMENT =================
 
-        let form = this.closest('.delete-form');
+    const toggleBtn =
+        document.getElementById('toggleBtn');
 
-        Swal.fire({
-            title: 'Yakin mau hapus?',
-            text: "Data yang dihapus tidak bisa dikembalikan!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#f08a5d',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
-        }).then((result) => {
+    const sidebar =
+        document.getElementById('sidebar');
 
-            if (result.isConfirmed) {
-                form.submit();
+    const content =
+        document.getElementById('content');
+
+    const navbar =
+        document.getElementById('navbar');
+
+
+    // ================= TOGGLE SIDEBAR =================
+
+    if(toggleBtn){
+
+        toggleBtn.addEventListener('click', function(){
+
+            // MOBILE
+            if(window.innerWidth < 992){
+
+                sidebar.classList.toggle('show');
+
+            }
+
+            // DESKTOP
+            else{
+
+                sidebar.classList.toggle('hide');
+
+                content.classList.toggle('full');
+
+                navbar.classList.toggle('full');
+
             }
 
         });
+
+    }
+
+
+    // ================= AUTO CLOSE MOBILE =================
+
+    document.addEventListener('click', function(e){
+
+        if(
+            window.innerWidth < 992 &&
+            sidebar &&
+            toggleBtn &&
+            !sidebar.contains(e.target) &&
+            !toggleBtn.contains(e.target)
+        ){
+
+            sidebar.classList.remove('show');
+
+        }
+
     });
-});
+
+
+    // ================= RESET DESKTOP =================
+
+    window.addEventListener('resize', function(){
+
+        if(window.innerWidth >= 992){
+
+            sidebar.classList.remove('show');
+
+        }
+
+    });
+
+
+    // ================= ACTIVE SIDEBAR MENU =================
+
+    const sidebarLinks =
+        document.querySelectorAll('.sidebar-link');
+
+    sidebarLinks.forEach(link => {
+
+        link.addEventListener('click', function(){
+
+            sidebarLinks.forEach(item => {
+
+                item.classList.remove('active');
+
+            });
+
+            this.classList.add('active');
+
+        });
+
+    });
+
+
+    // ================= SWEET ALERT DELETE =================
+
+    document
+    .querySelectorAll('.btn-delete')
+    .forEach(button => {
+
+        button.addEventListener('click', function(e){
+
+            e.preventDefault();
+
+            let form =
+                this.closest('.delete-form');
+
+            Swal.fire({
+
+                title: 'Yakin mau hapus?',
+
+                text:
+                'Data yang dihapus tidak bisa dikembalikan!',
+
+                icon: 'warning',
+
+                showCancelButton: true,
+
+                confirmButtonColor: '#B68D40',
+
+                cancelButtonColor: '#6c757d',
+
+                confirmButtonText: 'Ya, hapus!',
+
+                cancelButtonText: 'Batal',
+
+                background: '#fff',
+
+                borderRadius: '20px'
+
+            }).then((result) => {
+
+                if(result.isConfirmed){
+
+                    form.submit();
+
+                }
+
+            });
+
+        });
+
+    });
+
 </script>
 
 </body>

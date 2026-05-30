@@ -2,119 +2,176 @@
 
 @section('content')
 
-<div class="auth-wrapper">
+<section class="auth-section">
 
-    <!-- ================= VIDEO BACKGROUND ================= -->
-    <video autoplay muted loop class="video-bg">
-        <source src="{{ asset('assets/images/banner/backgroundLogin.mp4') }}" type="video/mp4">
-    </video>
+    <div class="auth-container">
 
-    <!-- OVERLAY GELAP -->
-    <div class="overlay"></div>
+        <div class="auth-card">
 
-    <!-- CONTENT -->
-    <div class="d-flex align-items-center justify-content-center min-vh-100 position-relative">
+            <div class="row g-0 h-100">
 
-        <div class="card border-0 shadow-lg overflow-hidden auth-card">
+                <!-- ================= LEFT ================= -->
 
-            <div class="row g-0">
+                <div class="col-md-6 auth-left d-none d-md-flex">
 
-                <!-- ================= KIRI (ILUSTRASI) ================= -->
-                <div class="col-md-6 d-none d-md-flex align-items-center justify-content-center bg-light p-4">
+                    <div class="left-content">
 
-                    <div class="text-center">
+                        <div class="brand-logo">
 
-                        <h3 class="fw-bold gradient-text mb-2">Spill Outfit</h3>
-                        <p class="text-muted small mb-4">
-                            Temukan outfit terbaikmu dengan mudah & stylish setiap hari ✨
+                            <i class="mdi mdi-hanger"></i>
+
+                        </div>
+
+                        <h2>
+                            Spill Outfit
+                        </h2>
+
+                        <h5>
+                            Upgrade Style Kamu ✨
+                        </h5>
+
+                        <p>
+                            Temukan outfit terbaik untuk kuliah,
+                            hangout, kerja, hingga daily outfit
+                            dengan tampilan modern dan stylish.
                         </p>
-                        
-                        <img src="{{ asset('assets/images/undraw.svg') }}"
-                             class="img-fluid floating-img"
-                             style="max-height: 260px;">
+
+                        <div class="brand-tag">
+                            Fashion Recommendation Platform
+                        </div>
 
                     </div>
 
                 </div>
 
-                <!-- ================= KANAN (FORM) ================= -->
-                <div class="col-md-6 p-4 bg-white">
+                <!-- ================= RIGHT ================= -->
 
-                    <!-- TAB -->
-                    <div class="d-flex mb-4">
-                        <button id="btnLogin" class="btn w-50 active-tab">Login</button>
-                        <button id="btnRegister" class="btn w-50">Register</button>
-                    </div>
+                <div class="col-md-6 auth-right">
 
-                    <!-- LOGIN -->
-                    <div id="loginForm">
+                    <div class="form-wrapper">
 
-                        <form method="POST" action="">
+                        <div class="text-center mb-4">
+
+                            <h3 class="fw-bold">
+                                Login
+                            </h3>
+
+                            <p class="text-muted">
+                                Selamat datang kembali 👋
+                            </p>
+
+                        </div>
+
+                        <!-- ALERT -->
+
+                        @if(session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if(session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if ($errors->any())
+
+                            <div class="alert alert-danger">
+
+                                @foreach ($errors->all() as $error)
+
+                                    <p class="mb-0">
+                                        {{ $error }}
+                                    </p>
+
+                                @endforeach
+
+                            </div>
+
+                        @endif
+
+                        <!-- FORM -->
+
+                        <form method="POST"
+                              action="{{ route('login.post') }}">
+
                             @csrf
 
+                            <!-- EMAIL -->
+
                             <div class="mb-3">
-                                <input type="email" name="email" class="form-control input-custom"
-                                       placeholder="Email">
+
+                                <label class="form-label">
+                                    Email
+                                </label>
+
+                                <input type="email"
+                                       name="email"
+                                       class="form-control custom-input"
+                                       placeholder="Masukkan email"
+                                       required>
+
                             </div>
 
-                            <div class="mb-3 position-relative">
-                                <input type="password" id="passwordLogin"
-                                       class="form-control pe-5 input-custom"
-                                       placeholder="Password">
+                            <!-- PASSWORD -->
 
-                                <i class="fa-solid fa-eye togglePass"
-                                   data-target="passwordLogin"></i>
+                            <div class="mb-4">
+
+                                <label class="form-label">
+                                    Password
+                                </label>
+
+                                <input type="password"
+                                       name="password"
+                                       class="form-control custom-input"
+                                       placeholder="Masukkan password"
+                                       required>
+
                             </div>
 
-                            <button class="btn btn-warning w-100 fw-semibold btn-main">
+                            <!-- BUTTON -->
+
+                            <button type="submit"
+                                    class="btn-login-custom w-100">
+
                                 Login
+
                             </button>
 
                             <!-- DIVIDER -->
-                            <div class="d-flex align-items-center my-3">
-                                <hr class="flex-grow-1">
-                                <span class="px-2 text-muted small">atau</span>
-                                <hr class="flex-grow-1">
+
+                            <div class="divider">
+
+                                <span>
+                                    atau
+                                </span>
+
                             </div>
 
                             <!-- GOOGLE -->
-                            <a href="#" class="btn btn-google w-100">
+
+                            <a href=""
+                               class="btn-google">
+
                                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
+
                                 Login dengan Google
+
                             </a>
 
-                        </form>
+                            <!-- REGISTER -->
 
-                    </div>
+                            <div class="register-text">
 
-                    <!-- REGISTER -->
-                    <div id="registerForm" style="display:none;">
+                                Belum punya akun?
 
-                        <form method="POST" action="">
-                            @csrf
+                                <a href="{{ route('register') }}">
+                                    Register
+                                </a>
 
-                            <div class="mb-3">
-                                <input type="text" class="form-control input-custom"
-                                       placeholder="Nama">
                             </div>
-
-                            <div class="mb-3">
-                                <input type="email" class="form-control input-custom"
-                                       placeholder="Email">
-                            </div>
-
-                            <div class="mb-3 position-relative">
-                                <input type="password" id="passwordRegister"
-                                       class="form-control pe-5 input-custom"
-                                       placeholder="Password">
-
-                                <i class="fa-solid fa-eye togglePass"
-                                   data-target="passwordRegister"></i>
-                            </div>
-
-                            <button class="btn btn-dark w-100 fw-semibold btn-main">
-                                Register
-                            </button>
 
                         </form>
 
@@ -127,162 +184,362 @@
         </div>
 
     </div>
-</div>
 
-<!-- ================= STYLE ================= -->
+</section>
+
 <style>
+/* ================= SECTION ================= */
 
-/* WRAPPER */
-.auth-wrapper {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    overflow: hidden;
+.auth-section{
+    width:100%;
+    min-height:100vh;
+
+    background:
+    linear-gradient(
+        180deg,
+        #ffffff,
+        #faf8f3
+    );
 }
 
-/* VIDEO */
-.video-bg {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    min-width: 100%;
-    min-height: 100%;
-    width: auto;
-    height: auto;
-    transform: translate(-50%, -50%);
-    object-fit: cover;
-    z-index: -2;
+/* ================= CENTER ================= */
+
+.auth-container{
+
+    width:100%;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
 }
 
-/* OVERLAY HITAM */
-.overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5); /* opacity */
-    z-index: 1;
+/* ================= CARD ================= */
+
+.auth-card{
+
+    width:100%;
+    max-width:920px;
+
+    height:560px;
+
+    background:white;
+
+    border-radius:32px;
+
+    overflow:hidden;
+
+    border:1px solid #f2ead8;
+
+    box-shadow:
+    0 18px 50px rgba(0,0,0,.06);
+
+    margin:auto;
 }
 
-/* CARD */
-.auth-card {
-    max-width: 900px;
-    width: 100%;
-    border-radius: 20px;
-    z-index: 2;
+/* ================= LEFT ================= */
+
+.auth-left{
+
+    background:
+    linear-gradient(
+        180deg,
+        #faf8f3,
+        #f5efdf
+    );
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:45px;
+
+    text-align:center;
 }
 
-/* TAB */
-.active-tab {
-    background: #F9ED69;
-    font-weight: 600;
+.left-content{
+    max-width:320px;
+}
+
+/* LOGO */
+
+.brand-logo{
+
+    width:78px;
+    height:78px;
+
+    border-radius:24px;
+
+    margin:auto auto 22px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #8C6A2F,
+        #C9A227
+    );
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:white;
+
+    font-size:34px;
+}
+
+/* TITLE */
+
+.left-content h2{
+
+    font-size:34px;
+    font-weight:700;
+
+    color:#222;
+}
+
+.left-content h5{
+
+    margin-top:8px;
+
+    color:#8C6A2F;
+
+    font-size:18px;
+
+    font-weight:600;
+}
+
+.left-content p{
+
+    margin-top:18px;
+
+    color:#666;
+
+    line-height:1.8;
+
+    font-size:14px;
+}
+
+/* TAG */
+
+.brand-tag{
+
+    margin-top:24px;
+
+    display:inline-block;
+
+    background:white;
+
+    color:#8C6A2F;
+
+    padding:10px 18px;
+
+    border-radius:50px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    box-shadow:
+    0 8px 20px rgba(0,0,0,.05);
+}
+
+/* ================= RIGHT ================= */
+
+.auth-right{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:white;
+}
+
+/* FORM */
+
+.form-wrapper{
+
+    width:100%;
+    max-width:360px;
+
+    padding:35px;
+}
+
+.form-wrapper h3{
+    font-size:30px;
 }
 
 /* INPUT */
-.input-custom {
-    border-radius: 10px;
-    transition: 0.3s;
+
+.custom-input{
+
+    height:52px;
+
+    border-radius:16px;
+
+    border:1px solid #eee;
+
+    background:#fafafa;
+
+    padding:0 18px;
+
+    font-size:14px;
 }
 
-.input-custom:focus {
-    box-shadow: 0 0 0 2px rgba(249,237,105,0.4);
+.custom-input:focus{
+
+    border-color:#B68D40;
+
+    box-shadow:none;
 }
 
 /* BUTTON */
-.btn-main {
-    border-radius: 10px;
-    transition: 0.3s;
+
+.btn-login-custom{
+
+    width:100%;
+    height:52px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #8C6A2F,
+        #C9A227
+    );
+
+    color:white;
+
+    font-weight:600;
+
+    font-size:15px;
+
+    transition:.3s;
 }
 
-.btn-main:hover {
-    transform: translateY(-2px);
+.btn-login-custom:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+    0 10px 20px rgba(182,141,64,.22);
+}
+
+/* DIVIDER */
+
+.divider{
+
+    margin:22px 0;
+
+    text-align:center;
+
+    position:relative;
+}
+
+.divider::before{
+
+    content:"";
+
+    position:absolute;
+
+    width:100%;
+    height:1px;
+
+    background:#eee;
+
+    top:50%;
+    left:0;
+}
+
+.divider span{
+
+    position:relative;
+
+    background:white;
+
+    padding:0 14px;
+
+    color:#888;
+
+    font-size:13px;
 }
 
 /* GOOGLE */
 
-.btn-google img {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
+.btn-google{
+
+    height:52px;
+
+    border:1px solid #eee;
+
+    border-radius:16px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    gap:10px;
+
+    font-size:14px;
+
+    color:#333;
+
+    transition:.3s;
 }
 
-.btn-google {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    background: #fff;
-    transition: 0.3s;
-    text-decoration: none;
-    color: #333;
+.btn-google img{
+    width:18px;
 }
 
-.btn-google:hover {
-    transform: scale(1.03);
+.btn-google:hover{
+
+    border-color:#B68D40;
+    color:#333;
 }
 
-/* ICON PASSWORD */
-.togglePass {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    cursor: pointer;
+/* REGISTER */
+
+.register-text{
+
+    margin-top:20px;
+
+    text-align:center;
+
+    font-size:14px;
+
+    color:#666;
 }
 
-/* TEXT */
-.gradient-text {
-    background: linear-gradient(90deg, #f08a5d, #b83b5e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+.register-text a{
+
+    color:#B68D40;
+
+    font-weight:600;
 }
 
-/* ANIMASI */
-.floating-img {
-    animation: float 3s ease-in-out infinite;
-}
+/* ================= MOBILE ================= */
 
-@keyframes float {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0); }
+@media(max-width:768px){
+
+    .auth-card{
+
+        max-width:430px;
+        height:auto;
+
+        border-radius:28px;
+    }
+
+    .form-wrapper{
+        padding:28px;
+    }
+
 }
 
 </style>
-
-<!-- ================= JS ================= -->
-<script>
-
-const btnLogin = document.getElementById('btnLogin');
-const btnRegister = document.getElementById('btnRegister');
-
-const loginForm = document.getElementById('loginForm');
-const registerForm = document.getElementById('registerForm');
-
-btnLogin.onclick = () => {
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-    btnLogin.classList.add('active-tab');
-    btnRegister.classList.remove('active-tab');
-};
-
-btnRegister.onclick = () => {
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-    btnRegister.classList.add('active-tab');
-    btnLogin.classList.remove('active-tab');
-};
-
-// TOGGLE PASSWORD
-document.querySelectorAll('.togglePass').forEach(icon => {
-    icon.onclick = function () {
-        const input = document.getElementById(this.dataset.target);
-        input.type = input.type === 'password' ? 'text' : 'password';
-    }
-});
-
-</script>
 
 @endsection
