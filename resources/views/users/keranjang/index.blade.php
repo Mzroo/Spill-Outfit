@@ -214,12 +214,10 @@
 
                     @if($keranjang->count())
 
-                        <a
-                            href="#"
-                            class="btn-checkout"
-                        >
-                            Checkout
-                        </a>
+                    <a href="{{ route('pesanan.checkout') }}"
+                        class="btn-checkout">
+                        Checkout
+                    </a>
 
                     @endif
 

@@ -9,6 +9,9 @@
     <!-- Bootstrap -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 
+    {{-- Font Alsome --}}
+    <link rel="stylesheet" href="{{ asset('assets/fontawesome/css/all.min.css') }}">
+
     <!-- Material Design Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css">
 
@@ -621,10 +624,10 @@
 
                 </a>
 
-                <div class="sidebar-item">
+                <a href="{{ route('chat.index') }}" class="sidebar-item">
                     <i class="mdi mdi-chat-processing"></i>
-                    <span class="sidebar-text">Chat</span>
-                </div>
+                <span class="sidebar-text">Chat</span>
+                </a>
 
                <a href="{{ route('about') }}" class="sidebar-item">
                 <i class="mdi mdi-information-outline"></i>

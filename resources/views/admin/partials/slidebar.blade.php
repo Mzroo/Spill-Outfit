@@ -159,6 +159,13 @@
                 <span>Review</span>
             </a>
 
+            <a href="{{ route('admin.chat.index')}}">
+                <i class="fa-solid fa-message"></i>
+                <span>Chat</span>
+            </a>
+
+
+
         </div>
 
         <!-- LAPORAN -->

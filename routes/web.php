@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminChatController;
 use Illuminate\Support\Facades\Route;
 
 // =========================
@@ -24,6 +25,9 @@ use App\Http\Controllers\Admin\ProdukVarianController;
 use App\Http\Controllers\Admin\StokBarangController;
 use App\Http\Controllers\Admin\UkuranController;
 use App\Http\Controllers\Admin\WarnaController;
+use App\Http\Controllers\User\ChatController;
+use App\Http\Controllers\User\PembayaranController;
+use App\Http\Controllers\User\PesananController;
 use App\Models\ProdukVarian;
 
 /*
@@ -176,6 +180,46 @@ Route::put(
         [KeranjangController::class, 'destroy']
     )->name('keranjang.destroy');
 
+       /*
+    |--------------------------------------------------------------------------
+    | PESANAN
+    |--------------------------------------------------------------------------
+    */
+
+    // list semua pesanan user
+    Route::get('/pesanan', [PesananController::class, 'index'])
+        ->name('pesanan.index');
+
+    // checkout page (dari keranjang)
+    Route::get('/checkout', [PesananController::class, 'checkout'])
+        ->name('pesanan.checkout');
+
+    // proses buat pesanan
+    Route::post('/checkout', [PesananController::class, 'store'])
+        ->name('pesanan.store');
+
+    // detail pesanan
+    Route::get('/pesanan/{id}', [PesananController::class, 'show'])
+        ->name('pesanan.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | PEMBAYARAN
+    |--------------------------------------------------------------------------
+    */
+
+    // form pembayaran (upload bukti / pilih metode)
+    Route::get('/pembayaran/{pesanan_id}', [PembayaranController::class, 'create'])
+        ->name('pembayaran.create');
+
+    // simpan pembayaran
+    Route::post('/pembayaran/{pesanan_id}', [PembayaranController::class, 'store'])
+        ->name('pembayaran.store');
+
+    // Chat Halaman
+        Route::get('/chat',[ChatController::class, 'index'])->name('chat.index');
+        
+        Route::post('/chat/send',[ChatController::class, 'send'])->name('chat.send');
 });
 
 
@@ -364,5 +408,26 @@ Route::prefix('admin')->group(function(){
 
     Route::delete('/produk-varian/{id}', [ProdukVarianController::class, 'destroy'])
         ->name('admin.produk-varian.destroy');
+
+     /*
+        |--------------------------------------------------------------------------
+        | CHAT CUSTOMER
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/chat',
+            [AdminChatController::class, 'index']
+        )->name('admin.chat.index');
+
+        Route::get(
+            '/chat/{id}',
+            [AdminChatController::class, 'show']
+        )->name('admin.chat.show');
+
+        Route::post(
+            '/chat/{id}/send',
+            [AdminChatController::class, 'send']
+        )->name('admin.chat.send');
 
 });

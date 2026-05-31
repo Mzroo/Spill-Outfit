@@ -52,4 +52,17 @@ class User extends Authenticatable
 {
     return $this->hasMany(Komunitas::class);
 }
+
+/*
+|--------------------------------------------------------------------------
+| CHAT ROOM
+|--------------------------------------------------------------------------
+*/
+public function chatRoom()
+{
+    return $this->hasOne(
+        ChatRoom::class,
+        'user_id'
+    );
+}
 }
