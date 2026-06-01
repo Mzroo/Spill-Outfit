@@ -634,7 +634,7 @@
                 <span class="sidebar-text">About</span>
                 </a>
 
-                <a href="{{ route('komunitas.index') }}" class="sidebar-item">
+                <a href="{{ route('community.index') }}" class="sidebar-item">
                     <i class="mdi mdi-account-group"></i>
                     <span class="sidebar-text">Community</span>
                 </a>

@@ -40,7 +40,7 @@
 
                         </a>
 
-                        <a href="{{ route('komunitas.index') }}"
+                        <a href="{{ route('community.index') }}"
                            class="btn-outline-user">
 
                             Community

@@ -14,8 +14,6 @@ use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\User\UserProdukController;
 use App\Http\Controllers\User\KeranjangController;
 use App\Http\Controllers\User\UserKategoriController;
-use App\Http\Controllers\KomunitasController;
-
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\KategoriController;
@@ -26,6 +24,7 @@ use App\Http\Controllers\Admin\StokBarangController;
 use App\Http\Controllers\Admin\UkuranController;
 use App\Http\Controllers\Admin\WarnaController;
 use App\Http\Controllers\User\ChatController;
+use App\Http\Controllers\User\CommunityController;
 use App\Http\Controllers\User\PembayaranController;
 use App\Http\Controllers\User\PesananController;
 use App\Models\ProdukVarian;
@@ -114,19 +113,6 @@ Route::get('/kategori/{id}', [UserKategoriController::class, 'show'])
 
 Route::get('/about', [UserController::class, 'about'])
     ->name('about');
-
-// =========================
-// KOMUNITAS
-// =========================
-
-// FEED
-Route::get('/komunitas', [KomunitasController::class, 'index'])
-    ->name('komunitas.index');
-
-// POSTING
-Route::post('/komunitas/store', [KomunitasController::class, 'store'])
-    ->middleware('auth')
-    ->name('komunitas.store');
 
 
 // =========================
@@ -220,6 +206,55 @@ Route::put(
         Route::get('/chat',[ChatController::class, 'index'])->name('chat.index');
         
         Route::post('/chat/send',[ChatController::class, 'send'])->name('chat.send');
+
+        /*
+    |--------------------------------------------------------------------------
+    | COMMUNITY
+    |--------------------------------------------------------------------------
+    */
+
+    // halaman community
+    Route::get(
+        '/community',
+        [CommunityController::class, 'index']
+    )->name('community.index');
+
+    // halaman create
+    Route::get(
+        '/community/create',
+        [CommunityController::class, 'create']
+    )->name('community.create');
+
+    // simpan post
+    Route::post(
+        '/community/store',
+        [CommunityController::class, 'store']
+    )->name('community.store');
+
+    // detail post
+    Route::get(
+        '/community/{id}',
+        [CommunityController::class, 'show']
+    )->name('community.show');
+
+    // like post
+    Route::post(
+        '/community/{id}/like',
+        [CommunityController::class, 'like']
+    )->name('community.like');
+
+    // komentar
+    Route::post(
+        '/community/{id}/comment',
+        [CommunityController::class, 'comment']
+    )->name('community.comment');
+
+    // hapus post
+    Route::delete(
+        '/community/{id}',
+        [CommunityController::class, 'destroy']
+    )->name('community.destroy');
+
 });
 
 

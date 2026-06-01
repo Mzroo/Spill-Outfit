@@ -48,11 +48,6 @@ class User extends Authenticatable
     return $this->hasOne(Profile::class);
 }
 
-    public function komunitas()
-{
-    return $this->hasMany(Komunitas::class);
-}
-
 /*
 |--------------------------------------------------------------------------
 | CHAT ROOM
@@ -63,6 +58,42 @@ public function chatRoom()
     return $this->hasOne(
         ChatRoom::class,
         'user_id'
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| COMMUNITY POST
+|--------------------------------------------------------------------------
+*/
+public function communityPosts()
+{
+    return $this->hasMany(
+        CommunityPost::class
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| COMMUNITY LIKE
+|--------------------------------------------------------------------------
+*/
+public function communityLikes()
+{
+    return $this->hasMany(
+        CommunityLike::class
+    );
+}
+
+/*
+|--------------------------------------------------------------------------
+| COMMUNITY COMMENT
+|--------------------------------------------------------------------------
+*/
+public function communityComments()
+{
+    return $this->hasMany(
+        CommunityComment::class
     );
 }
 }

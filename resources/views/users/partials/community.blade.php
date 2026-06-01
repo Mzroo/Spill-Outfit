@@ -22,7 +22,7 @@
 
         </div>
 
-        <a href="{{ route('komunitas.index') }}"
+        <a href="{{ route('community.index') }}"
            class="btn-community">
 
             Explore Community
