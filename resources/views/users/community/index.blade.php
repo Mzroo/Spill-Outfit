@@ -14,11 +14,11 @@
         </span>
 
         <h2>
-            Community Outfit 🔥
+            Outfit Community 🔥
         </h2>
 
         <p>
-            Bagikan style terbaik kamu, cari inspirasi outfit,
+            Bagikan style terbaikmu, cari inspirasi outfit,
             dan terhubung dengan komunitas fashion.
         </p>
 
@@ -37,7 +37,7 @@
 
     @endif
 
-    <!-- ACTION -->
+    <!-- BUTTON -->
     <div class="top-community-action">
 
         <a
@@ -60,63 +60,86 @@
 
         <div class="post-card">
 
-            <!-- USER -->
-            <div class="post-user">
+            <a
+                href="{{ route('community.show', $post->id) }}"
+                class="card-link"
+            >
 
-                <div class="avatar">
+                <!-- IMAGE WRAPPER -->
+                <div class="image-wrapper">
 
-                    @if($post->user?->profile?->foto)
+                    @if($post->gambar)
 
-                        <img
-                            src="{{ asset('storage/' . $post->user->profile->foto) }}"
-                            alt=""
-                        >
+                    <img
+                        src="{{ asset('storage/' . $post->gambar) }}"
+                        class="post-image"
+                        alt=""
+                    >
 
                     @else
 
-                        {{ strtoupper(substr($post->user?->name ?? 'U',0,1)) }}
+                    <div class="image-placeholder">
+
+                        <i class="fa-solid fa-shirt"></i>
+
+                    </div>
 
                     @endif
 
+                    <!-- USER OVERLAY -->
+                    <div class="post-user-overlay">
+
+                        <div class="avatar">
+
+                            @if($post->user?->profile?->foto)
+
+                                <img
+                                    src="{{ asset('storage/' . $post->user->profile->foto) }}"
+                                    alt=""
+                                >
+
+                            @else
+
+                                {{ strtoupper(substr($post->user?->name ?? 'U',0,1)) }}
+
+                            @endif
+
+                        </div>
+
+                        <div class="user-info">
+
+                            <h5>
+                                {{ $post->user?->name }}
+                            </h5>
+
+                            <small>
+                                {{ $post->created_at->diffForHumans() }}
+                            </small>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div>
+                <!-- CONTENT -->
+                <div class="post-content">
 
-                    <h5>
-                        {{ $post->user?->name }}
-                    </h5>
+                    @if($post->judul)
 
-                    <small>
-                        {{ $post->created_at->diffForHumans() }}
-                    </small>
+                    <h3 class="post-title">
+                        {{ $post->judul }}
+                    </h3>
+
+                    @endif
+
+                    <p class="post-caption">
+                        {{ $post->caption }}
+                    </p>
 
                 </div>
 
-            </div>
-
-            <!-- TITLE -->
-            @if($post->judul)
-
-            <h3 class="post-title">
-                {{ $post->judul }}
-            </h3>
-
-            @endif
-
-            <!-- CAPTION -->
-            <p class="post-caption">
-                {{ $post->caption }}
-            </p>
-
-            <!-- IMAGE -->
-            @if($post->gambar)
-
-            <img
-                src="{{ asset('storage/' . $post->gambar) }}"
-                class="post-image"
-            >
-
-            @endif
+            </a>
 
             <!-- ACTION -->
             <div class="post-action">
@@ -169,7 +192,7 @@
             </h3>
 
             <p>
-                Jadilah orang pertama yang membagikan outfit.
+                Jadilah orang pertama yang spill outfit 🔥
             </p>
 
         </div>
@@ -183,7 +206,7 @@
 <style>
 
 .community-section{
-    max-width:950px;
+    max-width:1500px;
     margin:auto;
 }
 
@@ -204,10 +227,9 @@
 }
 
 .community-header h2{
-    font-size:52px;
-    font-weight:800;
-    color:#2d2d2d;
+    font-size:50px;
     margin:15px 0;
+    color:#222;
 }
 
 .community-header p{
@@ -220,7 +242,7 @@
 .success-alert{
     background:#dff5e5;
     color:#1d6b3c;
-    padding:18px 22px;
+    padding:18px 20px;
     border-radius:20px;
     margin-bottom:25px;
 
@@ -229,25 +251,24 @@
     gap:12px;
 }
 
-/* ACTION */
+/* BUTTON */
 
 .top-community-action{
     display:flex;
     justify-content:flex-end;
-    margin-bottom:30px;
+    margin-bottom:35px;
 }
 
 .create-post-btn{
     text-decoration:none;
+    color:white;
+    font-weight:700;
+    border-radius:999px;
+    padding:15px 26px;
+
     display:flex;
     align-items:center;
     gap:10px;
-
-    padding:15px 26px;
-    border-radius:999px;
-
-    color:white;
-    font-weight:700;
 
     background:
     linear-gradient(
@@ -263,32 +284,93 @@
     transform:translateY(-2px);
 }
 
-/* POST */
+/* GRID */
+
+.post-wrapper{
+    display:grid;
+    grid-template-columns:
+    repeat(4,1fr);
+
+    gap:22px;
+}
+
+/* CARD */
 
 .post-card{
     background:white;
-    padding:28px;
     border-radius:30px;
-    margin-bottom:24px;
+    overflow:hidden;
 
     box-shadow:
-    0 10px 30px rgba(0,0,0,.05);
+    0 10px 35px rgba(0,0,0,.05);
+
+    transition:.3s;
 }
 
-/* USER */
+.post-card:hover{
+    transform:translateY(-5px);
+}
 
-.post-user{
+.card-link{
+    text-decoration:none;
+}
+
+/* IMAGE */
+
+.image-wrapper{
+    position:relative;
+}
+
+.post-image{
+    width:100%;
+    height:280px;
+    object-fit:cover;
+    display:block;
+}
+
+.image-placeholder{
+    height:280px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#f8f5ed;
+    color:#C9A227;
+    font-size:50px;
+}
+
+/* USER OVERLAY */
+
+.post-user-overlay{
+    position:absolute;
+    top:8px;
+    left:8px;
+
     display:flex;
     align-items:center;
-    gap:14px;
-    margin-bottom:20px;
+    
+    gap:12px;
+    background: rgba(255, 255, 255, 0.4);
+    padding:5px 9px;
+    border-radius:999px;
+
+    box-shadow:
+    0 8px 20px rgba(0,0,0,.08);
 }
 
 .avatar{
-    width:60px;
-    height:60px;
+    width:33px;
+    height:33px;
     border-radius:50%;
     overflow:hidden;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-weight:700;
+    color:white;
 
     background:
     linear-gradient(
@@ -297,14 +379,7 @@
         #C9A227
     );
 
-    color:white;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    font-weight:700;
-    font-size:18px;
+    flex-shrink:0;
 }
 
 .avatar img{
@@ -313,53 +388,70 @@
     object-fit:cover;
 }
 
+.user-info h5{
+    margin:0;
+    color: #333;
+    font-size:13px;
+}
+
+.user-info small{
+    font-size:10px;
+    color: #444;
+}
+
 /* CONTENT */
 
+.post-content{
+    padding:18px;
+}
+
 .post-title{
-    margin-bottom:12px;
-    color:#2d2d2d;
+    color:#222;
+    font-size:18px;
+    margin-bottom:10px;
+    line-height:1.5;
 }
 
 .post-caption{
-    color:#555;
-    line-height:1.8;
-}
+    color:#666;
+    line-height:1.7;
+    font-size:14px;
 
-/* IMAGE */
-
-.post-image{
-    width:100%;
-    border-radius:25px;
-    margin-top:20px;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
 }
 
 /* ACTION */
 
 .post-action{
     display:flex;
-    gap:15px;
-    margin-top:20px;
+    gap:10px;
+    padding:0 18px 18px;
+}
+
+.post-action form{
+    flex:1;
 }
 
 .action-btn{
+    width:100%;
     border:none;
-    outline:none;
     background:#f8f5ed;
-
-    padding:14px 20px;
-
     border-radius:999px;
+    padding:13px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
 
     cursor:pointer;
 
-    color:#8C6A2F;
     text-decoration:none;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    font-weight:600;
+    color:#8C6A2F;
+    font-weight:700;
 
     transition:.3s;
 }
@@ -371,8 +463,9 @@
 /* EMPTY */
 
 .empty-community{
+    grid-column:1/-1;
     text-align:center;
-    padding:80px;
+    padding:90px;
 }
 
 .empty-community i{
@@ -389,20 +482,38 @@
     color:#777;
 }
 
-/* MOBILE */
+/* RESPONSIVE */
 
-@media(max-width:768px){
+@media(max-width:1300px){
+
+    .post-wrapper{
+        grid-template-columns:
+        repeat(3,1fr);
+    }
+
+}
+
+@media(max-width:900px){
+
+    .post-wrapper{
+        grid-template-columns:
+        repeat(2,1fr);
+    }
+
+}
+
+@media(max-width:600px){
+
+    .post-wrapper{
+        grid-template-columns:1fr;
+    }
 
     .community-header h2{
-        font-size:38px;
+        font-size:35px;
     }
 
     .top-community-action{
         justify-content:center;
-    }
-
-    .post-action{
-        flex-wrap:wrap;
     }
 
 }

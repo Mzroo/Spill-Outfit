@@ -6,6 +6,9 @@
 
     <title>@yield('title', 'Spill Outfit')</title>
 
+    {{-- Icon --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/images/outfit.svg') }}">
+
     <!-- Bootstrap -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 

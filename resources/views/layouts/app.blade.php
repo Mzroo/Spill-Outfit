@@ -9,6 +9,10 @@
     <!-- Bootstrap -->
     <link href="{{ asset('assets/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 
+    {{-- Icon --}}
+        <link rel="icon" type="image/svg+xml" href="{{ asset('assets/images/outfit.svg') }}">
+
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('assets/fontawesome/css/all.min.css') }}">
 
