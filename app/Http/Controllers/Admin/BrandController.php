@@ -11,16 +11,26 @@ use Illuminate\Support\Str;
 class BrandController extends Controller
 {
     /**
-     * INDEX
+     * INDEX (Display a listing of the brands with search & pagination)
      */
-    public function index()
+    public function index(Request $request)
     {
-        $brands = Brand::latest()->get();
+        $keyword = $request->get('search');
+        $query = Brand::latest('id');
 
-        return view(
-            'admin.brand.index',
-            compact('brands')
-        );
+        if (!empty($keyword)) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('nama', 'LIKE', "%{$keyword}%")
+                  ->orWhere('kode_brand', 'LIKE', "%{$keyword}%")
+                  ->orWhere('slug', 'LIKE', "%{$keyword}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$keyword}%");
+            });
+        }
+
+        // Variabel tunggal $brand agar langsung klop dengan view index Anda
+        $brand = $query->paginate(10)->withQueryString();
+
+        return view('admin.brand.index', compact('brand'));
     }
 
     /**
@@ -37,40 +47,30 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama' => 'required|max:255',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status' => 'required'
+            'nama'      => 'required|string|max:255',
+            'logo'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048', // Mendukung webp
+            'status'    => 'required|in:aktif,nonaktif'
         ]);
 
         $logo = null;
 
-        // upload logo
+        // Proses unggah file logo
         if ($request->hasFile('logo')) {
-
-            $logo = $request
-                ->file('logo')
-                ->store('brand', 'public');
+            $logo = $request->file('logo')->store('brand', 'public');
         }
 
+        // Cukup kirim field ini saja, 'kode_brand' akan diurus otomatis oleh Model Event!
         Brand::create([
-
-            'nama' => $request->nama,
-
-            'slug' => Str::slug($request->nama),
-
-            'logo' => $logo,
-
+            'nama'      => $request->nama,
+            'slug'      => Str::slug($request->nama),
+            'logo'      => $logo,
             'deskripsi' => $request->deskripsi,
-
-            'status' => $request->status,
+            'status'    => $request->status,
         ]);
 
         return redirect()
             ->route('admin.brand.index')
-            ->with(
-                'success',
-                'Brand berhasil ditambahkan'
-            );
+            ->with('success', 'Brand baru berhasil ditambahkan dan kode otomatis telah dibuat.');
     }
 
     /**
@@ -80,73 +80,43 @@ class BrandController extends Controller
     {
         $brand = Brand::findOrFail($id);
 
-        return view(
-            'admin.brand.edit',
-            compact('brand')
-        );
+        return view('admin.brand.edit', compact('brand'));
     }
 
     /**
      * UPDATE
      */
-    public function update(
-        Request $request,
-        $id
-    ) {
-
+    public function update(Request $request, $id)
+    {
         $request->validate([
-            'nama' => 'required|max:255',
-            'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'status' => 'required'
+            'nama'      => 'required|string|max:255',
+            'logo'      => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'status'    => 'required|in:aktif,nonaktif'
         ]);
 
-        $brand =
-            Brand::findOrFail($id);
+        $brand = Brand::findOrFail($id);
+        $logo = $brand->logo;
 
-        $logo =
-            $brand->logo;
-
-        // jika upload baru
         if ($request->hasFile('logo')) {
-
-            // hapus logo lama
-            if (
-                $brand->logo &&
-                Storage::disk('public')
-                    ->exists($brand->logo)
-            ) {
-
-                Storage::disk('public')
-                    ->delete($brand->logo);
+            // Bersihkan file logo lama dari disk public jika ada
+            if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
+                Storage::disk('public')->delete($brand->logo);
             }
 
-            $logo = $request
-                ->file('logo')
-                ->store('brand', 'public');
+            $logo = $request->file('logo')->store('brand', 'public');
         }
 
         $brand->update([
-
-            'nama' => $request->nama,
-
-            'slug' =>
-                Str::slug($request->nama),
-
-            'logo' => $logo,
-
-            'deskripsi' =>
-                $request->deskripsi,
-
-            'status' =>
-                $request->status,
+            'nama'      => $request->nama,
+            'slug'      => Str::slug($request->nama),
+            'logo'      => $logo,
+            'deskripsi' => $request->deskripsi,
+            'status'    => $request->status,
         ]);
 
         return redirect()
             ->route('admin.brand.index')
-            ->with(
-                'success',
-                'Brand berhasil diupdate'
-            );
+            ->with('success', 'Brand berhasil diupdate');
     }
 
     /**
@@ -154,27 +124,16 @@ class BrandController extends Controller
      */
     public function destroy($id)
     {
-        $brand =
-            Brand::findOrFail($id);
+        $brand = Brand::findOrFail($id);
 
-        // hapus logo
-        if (
-            $brand->logo &&
-            Storage::disk('public')
-                ->exists($brand->logo)
-        ) {
-
-            Storage::disk('public')
-                ->delete($brand->logo);
+        if ($brand->logo && Storage::disk('public')->exists($brand->logo)) {
+            Storage::disk('public')->delete($brand->logo);
         }
 
         $brand->delete();
 
         return redirect()
             ->route('admin.brand.index')
-            ->with(
-                'success',
-                'Brand berhasil dihapus'
-            );
+            ->with('success', 'Brand berhasil dihapus');
     }
 }

@@ -1,206 +1,360 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Warna')
+@section('title', 'Tambah Warna Baru')
 
 @section('content')
 
 <div class="container-fluid">
 
-    <!-- HEADER -->
-    <div class="text-center mb-4">
-
-        <h4 class="fw-bold">
-            Tambah Warna
-        </h4>
-
-        <p class="text-muted">
-            Tambahkan warna produk outfit
-        </p>
-
+    <div class="page-header mb-4">
+        <div>
+            <h1 class="page-title">Tambah Warna Baru</h1>
+            <p class="page-subtitle">Buat varietas warna baru untuk stok produk outfit, tentukan kode HEX, dan kontrol status aktifnya.</p>
+        </div>
+        <a href="{{ route('admin.warna.index') }}" class="btn-back">
+            <i class="fa-solid fa-arrow-left-long me-2"></i>Kembali ke Daftar
+        </a>
     </div>
 
-    <!-- CARD -->
-    <div class="card border-0 shadow-lg rounded-4">
+    <div class="custom-card p-4 p-md-5">
+        <form action="{{ route('admin.warna.store') }}" method="POST">
+            @csrf
 
-        <div class="card-body p-4">
-
-            <form action="{{ route('admin.warna.store') }}"
-                  method="POST">
-
-                @csrf
-
-                <div class="row g-4">
-
-                    <!-- FORM -->
-                    <div class="col-lg-6">
-
-                        <!-- NAMA WARNA -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
-                                Nama Warna
-                            </label>
-
-                            <input
-                                type="text"
-                                name="nama"
-                                id="namaWarna"
-                                class="form-control rounded-4"
-                                placeholder="Contoh: Hitam"
-                                required
-                            >
-
-                        </div>
-
-                        <!-- KODE WARNA -->
-                        <div class="mb-3">
-
-                            <label class="form-label fw-semibold">
-                                Pilih Warna
-                            </label>
-
-                            <input
-                                type="color"
-                                name="kode_warna"
-                                id="kodeWarna"
-                                class="form-control form-control-color w-100 rounded-4"
-                                value="#000000"
-                            >
-
-                        </div>
-
-                        <!-- STATUS -->
-                        <div class="mb-4">
-
-                            <label class="form-label fw-semibold">
-                                Status
-                            </label>
-
-                            <select
-                                name="status"
-                                class="form-select rounded-4"
-                            >
-
-                                <option value="aktif">
-                                    Aktif
-                                </option>
-
-                                <option value="nonaktif">
-                                    Nonaktif
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <!-- BUTTON -->
-                        <div class="d-flex gap-2">
-
-                            <button
-                                type="submit"
-                                class="btn btn-warning rounded-pill w-50">
-
-                                Simpan
-
-                            </button>
-
-                            <a href="{{ route('admin.warna.index') }}"
-                               class="btn btn-secondary rounded-pill w-50">
-
-                                Kembali
-
-                            </a>
-
-                        </div>
-
+            <div class="row g-5">
+                
+                <div class="col-lg-6">
+                    
+                    <div class="mb-4">
+                        <label class="custom-form-label mb-2">Nama Warna <span class="text-danger">*</span></label>
+                        <input type="text"
+                               name="nama"
+                               id="namaWarna"
+                               class="form-control custom-input @error('nama') is-invalid @enderror"
+                               placeholder="Contoh: Onyx Black, Creamy White, Sage Green"
+                               value="{{ old('nama') }}"
+                               required>
+                        @error('nama')
+                            <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <!-- PREVIEW -->
-                    <div class="col-lg-6">
-
-                        <div class="border rounded-4 p-5 h-100 d-flex flex-column justify-content-center align-items-center text-center">
-
-                            <h6 class="text-muted mb-4">
-                                Preview Warna
-                            </h6>
-
-                            <!-- CIRCLE -->
-                            <div id="previewColor"
-                                style="
-                                    width:140px;
-                                    height:140px;
-                                    border-radius:50%;
-                                    background:#000000;
-                                    border:6px solid #f3f3f3;
-                                    box-shadow:0 8px 25px rgba(0,0,0,.08);
-                                ">
+                    <div class="mb-4">
+                        <label class="custom-form-label mb-2">Pilih Palet Warna <span class="text-danger">*</span></label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="color"
+                                   name="kode_warna"
+                                   id="kodeWarna"
+                                   class="form-control form-control-color custom-color-picker @error('kode_warna') is-invalid @enderror"
+                                   value="{{ old('kode_warna', '#8C6A2F') }}"
+                                   title="Klik untuk memilih warna">
+                            <div class="text-muted small ps-2">
+                                Klik kotak di samping untuk membuka panel pemilih warna visual (*color picker*).
                             </div>
-
-                            <h4 id="previewNama"
-                                class="mt-4 fw-bold">
-
-                                Hitam
-
-                            </h4>
-
-                            <small id="previewKode"
-                                   class="text-muted">
-
-                                #000000
-
-                            </small>
-
                         </div>
+                        @error('kode_warna')
+                            <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
+                        @enderror
+                    </div>
 
+                    <div class="mb-5">
+                        <label class="custom-form-label mb-2">Status Publikasi</label>
+                        <select name="status" class="form-select custom-input">
+                            <option value="aktif" {{ old('status') == 'aktif' ? 'selected' : '' }}>Aktif (Tersedia untuk variasi produk)</option>
+                            <option value="nonaktif" {{ old('status') == 'nonaktif' ? 'selected' : '' }}>Nonaktif (Disembunyikan sementara)</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn-submit-form">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Simpan Warna
+                        </button>
+                        <a href="{{ route('admin.warna.index') }}" class="btn-cancel-form">
+                            Batal
+                        </a>
                     </div>
 
                 </div>
 
-            </form>
+                <div class="col-lg-6">
+                    <div class="sticky-preview-wrapper">
+                        <div class="preview-card-frame">
+                            <div class="preview-header-badge">
+                                <i class="fa-solid fa-eye me-2"></i>Live Dynamic Preview
+                            </div>
+                            
+                            <div class="preview-content-center">
+                                <div class="preview-color-circle-wrapper">
+                                    <div id="previewColor" class="main-preview-circle"></div>
+                                </div>
 
-        </div>
+                                <h4 class="preview-color-name" id="previewNama">Warna Baru</h4>
 
+                                <div class="preview-divider"></div>
+
+                                <span class="preview-hex-badge" id="previewKode">#8C6A2F</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </form>
     </div>
-
 </div>
 
-<!-- JS PREVIEW -->
+<style>
+/* ================= TYPOGRAPHY & HEADER MANAGEMENT ================= */
+.container-fluid {
+    font-family: 'Poppins', sans-serif;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.btn-back {
+    background: #ffffff;
+    color: #666;
+    border: 1px solid #ebdcb9;
+    text-decoration: none;
+    padding: 12px 22px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+    background: #faf6ed;
+    color: #8C6A2F;
+    border-color: #ebdcb9;
+}
+
+/* ================= CUSTOM CARD FORM CONTAINER ================= */
+.custom-card {
+    background: white;
+    border-radius: 28px;
+    border: 1px solid #f5efe2;
+    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03);
+}
+
+.custom-form-label {
+    font-weight: 700;
+    font-size: 14px;
+    color: #333;
+    display: block;
+}
+
+/* INPUT FORM FIELD STYLING */
+.custom-input {
+    border: 1px solid #ebdcb9 !important;
+    background-color: #faf8f5 !important;
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+    font-size: 14.5px !important;
+    color: #333 !important;
+    transition: all 0.2s ease !important;
+}
+
+.custom-input:focus {
+    background-color: #ffffff !important;
+    border-color: #8C6A2F !important;
+    box-shadow: 0 0 0 4px rgba(140, 106, 47, 0.1) !important;
+}
+
+/* COLOR PICKER INPUT FIELD */
+.custom-color-picker {
+    width: 60px !important;
+    height: 50px !important;
+    padding: 4px !important;
+    border-radius: 12px !important;
+    border: 1px solid #ebdcb9 !important;
+    background-color: #faf8f5 !important;
+    cursor: pointer;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.03);
+}
+
+/* BUTTON HANDLERS */
+.btn-submit-form {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 6px 15px rgba(140, 106, 47, 0.15);
+    flex: 2;
+}
+
+.btn-submit-form:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(140, 106, 47, 0.3);
+}
+
+.btn-cancel-form {
+    background: #f5f4f8;
+    color: #777;
+    border: 1px solid #e5e4e9;
+    text-decoration: none;
+    padding: 14px 28px;
+    border-radius: 16px;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+    flex: 1;
+}
+
+.btn-cancel-form:hover {
+    background: #e74c3c;
+    color: white;
+    border-color: transparent;
+}
+
+/* ================= INTERACTIVE STICKY PREVIEW CARD ================= */
+.sticky-preview-wrapper {
+    position: sticky;
+    top: 30px;
+}
+
+.preview-card-frame {
+    background: #faf8f4;
+    border: 1px dashed #ebdcb9;
+    border-radius: 24px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-header-badge {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #f4ebd6;
+    color: #8C6A2F;
+    text-align: center;
+    padding: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.preview-content-center {
+    text-align: center;
+    padding-top: 15px;
+}
+
+.preview-color-circle-wrapper {
+    display: inline-block;
+    padding: 8px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    border: 1px solid #ebdcb9;
+    margin-bottom: 10px;
+}
+
+.main-preview-circle {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.preview-color-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222;
+    margin-top: 15px;
+    word-break: break-all;
+}
+
+.preview-divider {
+    height: 2px;
+    background: #ebdcb9;
+    width: 60px;
+    margin: 15px auto;
+}
+
+.preview-hex-badge {
+    background: #ffffff;
+    color: #555;
+    padding: 6px 16px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    font-family: 'SF Mono', Consolas, monospace;
+    border: 1px solid #e5e4e9;
+    display: inline-block;
+}
+
+/* INVALID FEEDBACK CUSTOMIZATION */
+.is-invalid {
+    border-color: #e74c3c !important;
+}
+.invalid-feedback {
+    color: #e74c3c;
+    font-size: 13px;
+}
+</style>
+
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const namaInput = document.getElementById('namaWarna');
+        const kodeInput = document.getElementById('kodeWarna');
 
-    const namaWarna =
-        document.getElementById('namaWarna');
+        const previewNama = document.getElementById('previewNama');
+        const previewKode = document.getElementById('previewKode');
+        const previewColor = document.getElementById('previewColor');
 
-    const kodeWarna =
-        document.getElementById('kodeWarna');
+        // Set state inisial dari nilai default input
+        previewColor.style.backgroundColor = kodeInput.value;
+        previewKode.innerText = kodeInput.value.toUpperCase();
+        if(namaInput.value.trim() !== "") {
+            previewNama.innerText = namaInput.value;
+        } else {
+            previewNama.innerText = 'Warna Baru';
+        }
 
-    const previewNama =
-        document.getElementById('previewNama');
+        // Jalankan event input untuk perubahan nama
+        namaInput.addEventListener('input', function () {
+            previewNama.innerText = this.value.trim() || 'Warna Baru';
+        });
 
-    const previewKode =
-        document.getElementById('previewKode');
-
-    const previewColor =
-        document.getElementById('previewColor');
-
-    // update nama
-    namaWarna.addEventListener('keyup', function(){
-
-        previewNama.innerText =
-            namaWarna.value || 'Nama Warna';
-
+        // Jalankan event input untuk perubahan picker warna
+        kodeInput.addEventListener('input', function () {
+            previewColor.style.backgroundColor = this.value;
+            previewKode.innerText = this.value.toUpperCase();
+        });
     });
-
-    // update warna
-    kodeWarna.addEventListener('input', function(){
-
-        previewColor.style.background =
-            kodeWarna.value;
-
-        previewKode.innerText =
-            kodeWarna.value;
-
-    });
-
 </script>
 
 @endsection

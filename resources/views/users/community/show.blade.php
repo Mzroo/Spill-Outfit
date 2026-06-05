@@ -6,220 +6,137 @@
 
 <section class="community-show-section">
 
-    <!-- BACK -->
-    <a
-        href="{{ route('community.index') }}"
-        class="back-btn"
-    >
-        <i class="fa-solid fa-arrow-left"></i>
-        Kembali
-    </a>
-
-    <!-- ALERT -->
-    @if(session('success'))
-
-    <div class="success-alert">
-
-        <i class="fa-solid fa-circle-check"></i>
-
-        {{ session('success') }}
-
+    <!-- ================= BUTTON BACK ================= -->
+    <div class="back-navigation">
+        <a href="{{ route('community.index') }}" class="back-btn">
+            <i class="fa-solid fa-arrow-left-long"></i>
+            <span>Kembali ke Komunitas</span>
+        </a>
     </div>
 
+    <!-- ================= ALERT SUCCESS ================= -->
+    @if(session('success'))
+    <div class="success-alert">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>{{ session('success') }}</span>
+    </div>
     @endif
 
-    <!-- POST CARD -->
+    <!-- ================= MAIN DETAIL CARD ================= -->
     <div class="post-detail-card">
-
-        <!-- USER -->
-        <div class="post-user">
-
-            <div class="avatar">
-
+        
+        <!-- USER PROFILE HEADER -->
+        <div class="post-user-header">
+            <div class="user-avatar-wrapper">
                 @if($post->user?->profile?->foto)
-
-                    <img
-                        src="{{ asset('storage/' . $post->user->profile->foto) }}"
-                        alt=""
-                    >
-
+                    <img src="{{ asset('storage/' . $post->user->profile->foto) }}" alt="Profile User">
                 @else
-
-                    {{ strtoupper(substr($post->user?->name ?? 'U',0,1)) }}
-
+                    <div class="avatar-initials">
+                        {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
+                    </div>
                 @endif
-
             </div>
 
-            <div>
-
-                <h4>
-                    {{ $post->user?->name }}
-                </h4>
-
-                <small>
-                    {{ $post->created_at->diffForHumans() }}
-                </small>
-
+            <div class="user-meta">
+                <h4>{{ $post->user?->name }}</h4>
+                <p><i class="fa-regular fa-clock"></i> {{ $post->created_at->diffForHumans() }}</p>
             </div>
-
         </div>
 
-        <!-- TITLE -->
-        @if($post->judul)
+        <!-- POST TEXT CONTENT -->
+        <div class="post-main-content">
+            @if($post->judul)
+                <h2 class="post-title">{{ $post->judul }}</h2>
+            @endif
+            <p class="post-caption">{{ $post->caption }}</p>
+        </div>
 
-        <h2 class="post-title">
-            {{ $post->judul }}
-        </h2>
-
-        @endif
-
-        <!-- CAPTION -->
-        <p class="post-caption">
-            {{ $post->caption }}
-        </p>
-
-        <!-- IMAGE -->
+        <!-- POST IMAGE MAIN DISPLAY -->
         @if($post->gambar)
-
-        <img
-            src="{{ asset('storage/' . $post->gambar) }}"
-            class="post-image"
-            alt=""
-        >
-
+        <div class="post-image-container">
+            <img src="{{ asset('storage/' . $post->gambar) }}" class="post-image-src" alt="Spill Outfit Picture">
+        </div>
         @endif
 
-        <!-- ACTION -->
-        <div class="post-actions">
-
-            <!-- LIKE -->
-            <form
-                action="{{ route('community.like', $post->id) }}"
-                method="POST"
-            >
+        <!-- ACTION FOOTER BAR -->
+        <div class="post-actions-bar">
+            <!-- LIKE INTERACTION -->
+            <form action="{{ route('community.like', $post->id) }}" method="POST" class="like-form-wrapper">
                 @csrf
-
-                <button
-                    type="submit"
-                    class="action-btn"
-                >
+                <button type="submit" class="interaction-btn btn-like-action" title="Suka Postingan">
                     <i class="fa-solid fa-heart"></i>
-
-                    {{ $post->total_like }}
-                    Likes
+                    <span>{{ $post->total_like }} Likes</span>
                 </button>
-
             </form>
 
-            <!-- COMMENT TOTAL -->
-            <div class="action-btn">
-
+            <!-- COMMENT COUNTER COUNTER -->
+            <div class="interaction-btn btn-comment-static">
                 <i class="fa-solid fa-comment"></i>
-
-                {{ $post->total_comment }}
-                Komentar
-
+                <span>{{ $post->total_comment }} Komentar</span>
             </div>
-
         </div>
 
     </div>
 
-    <!-- COMMENT -->
-    <div class="comment-card">
+    <!-- ================= COMMENTARY DISCUSSION THREAD ================= -->
+    <div class="comment-card-panel">
+        
+        <div class="panel-header">
+            <h3>Diskusi & Komentar</h3>
+            <span class="comment-count-badge">{{ $post->total_comment }}</span>
+        </div>
 
-        <h3>
-            Komentar
-        </h3>
-
-        <!-- FORM -->
-        <form
-            action="{{ route('community.comment', $post->id) }}"
-            method="POST"
-            class="comment-form"
-        >
-
+        <!-- REACTION / WRITING FORM -->
+        <form action="{{ route('community.comment', $post->id) }}" method="POST" class="comment-write-form">
             @csrf
-
-            <textarea
-                name="comment"
-                placeholder="Tulis komentar..."
-                required
-            ></textarea>
-
-            <button type="submit">
-
-                <i class="fa-solid fa-paper-plane"></i>
-
-                Kirim Komentar
-
-            </button>
-
+            <div class="textarea-wrapper">
+                <textarea name="comment" placeholder="Berikan tanggapan atau tanyakan brand outfit ini..." required rows="3"></textarea>
+            </div>
+            <div class="form-action-row">
+                <button type="submit" class="btn-submit-comment">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kirim Komentar</span>
+                </button>
+            </div>
         </form>
 
-        <!-- COMMENT LIST -->
-        <div class="comment-list">
+        <!-- COMMENT TIMELINE LIST -->
+        <div class="comments-timeline">
 
             @forelse($post->comments as $comment)
-
-            <div class="comment-item">
-
-                <div class="comment-user">
-
-                    <div class="avatar small-avatar">
-
+            <div class="comment-thread-item">
+                
+                <div class="comment-user-node">
+                    <div class="comment-avatar">
                         @if($comment->user?->profile?->foto)
-
-                            <img
-                                src="{{ asset('storage/' . $comment->user->profile->foto) }}"
-                                alt=""
-                            >
-
+                            <img src="{{ asset('storage/' . $comment->user->profile->foto) }}" alt="Comment User Avatar">
                         @else
-
-                            {{ strtoupper(substr($comment->user?->name ?? 'U',0,1)) }}
-
+                            <div class="avatar-initials-small">
+                                {{ strtoupper(substr($comment->user?->name ?? 'U', 0, 1)) }}
+                            </div>
                         @endif
-
                     </div>
 
-                    <div>
-
-                        <h5>
-                            {{ $comment->user?->name }}
-                        </h5>
-
-                        <small>
-                            {{ $comment->created_at->diffForHumans() }}
-                        </small>
-
+                    <div class="comment-meta-node">
+                        <h5>{{ $comment->user?->name }}</h5>
+                        <small>{{ $comment->created_at->diffForHumans() }}</small>
                     </div>
-
                 </div>
 
-                <p class="comment-text">
-                    {{ $comment->comment }}
-                </p>
+                <div class="comment-bubble-text">
+                    <p>{{ $comment->comment }}</p>
+                </div>
 
             </div>
-
             @empty
-
-            <div class="empty-comment">
-
-                <i class="fa-solid fa-comments"></i>
-
-                <h4>
-                    Belum ada komentar
-                </h4>
-
-                <p>
-                    Jadilah orang pertama yang berkomentar.
-                </p>
-
+            <!-- EMPTY FEEDBACK STATE -->
+            <div class="empty-comment-placeholder">
+                <div class="placeholder-icon">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <h4>Belum ada diskusi</h4>
+                <p>Ketikkan sesuatu di atas dan jadilah orang pertama yang mengapresiasi style ini!</p>
             </div>
-
             @endforelse
 
         </div>
@@ -229,216 +146,431 @@
 </section>
 
 <style>
-
-.community-show-section{
-    max-width:900px;
-    margin:auto;
+/* ================= GLOBAL WRAPPER ================= */
+.community-show-section {
+    max-width: 840px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* BACK */
-
-.back-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:25px;
-    text-decoration:none;
-    color:#8C6A2F;
-    font-weight:700;
+/* ================= NAVIGATION BACK ================= */
+.back-navigation {
+    margin-bottom: 25px;
 }
 
-/* ALERT */
-
-.success-alert{
-    background:#dff5e5;
-    color:#1d6b3c;
-    padding:18px 22px;
-    border-radius:20px;
-    margin-bottom:25px;
-
-    display:flex;
-    align-items:center;
-    gap:12px;
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #8C6A2F;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    padding: 8px 0;
 }
 
-/* CARD */
-
-.post-detail-card,
-.comment-card{
-    background:white;
-    border-radius:30px;
-    padding:30px;
-    margin-bottom:25px;
-
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.05);
+.back-btn:hover {
+    color: #C9A227;
+    transform: translateX(-4px);
 }
 
-/* USER */
-
-.post-user,
-.comment-user{
-    display:flex;
-    gap:15px;
-    align-items:center;
+/* ================= NOTIFICATION BANNER ================= */
+.success-alert {
+    background: #eef9f1;
+    border-left: 4px solid #2ecc71;
+    color: #1e7e34;
+    padding: 16px 20px;
+    border-radius: 14px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14.5px;
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.01);
 }
 
-.avatar{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    overflow:hidden;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    font-weight:700;
-    color:white;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
+/* ================= 1. POST DETAIL BASE CARD ================= */
+.post-detail-card {
+    background: white;
+    border-radius: 24px;
+    padding: 35px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f6f6f6;
 }
 
-.avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+/* User Header Card */
+.post-user-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid #f8f6f0;
+    padding-bottom: 20px;
+    margin-bottom: 25px;
 }
 
-.small-avatar{
-    width:50px;
-    height:50px;
+.user-avatar-wrapper, .avatar-initials {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-/* CONTENT */
-
-.post-title{
-    margin:20px 0;
+.user-avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.post-caption{
-    color:#555;
-    line-height:1.9;
+.avatar-initials {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
 }
 
-.post-image{
-    width:100%;
-    border-radius:25px;
-    margin-top:25px;
+.user-meta h4 {
+    margin: 0 0 4px 0;
+    color: #2c2c2c;
+    font-size: 16px;
+    font-weight: 700;
 }
 
-/* ACTION */
-
-.post-actions{
-    display:flex;
-    gap:15px;
-    margin-top:20px;
+.user-meta p {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.action-btn{
-    border:none;
-    background:#f8f5ed;
-    color:#8C6A2F;
-    border-radius:999px;
-    padding:14px 22px;
-    font-weight:600;
-    cursor:pointer;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    transition:.3s;
+/* Typography Content */
+.post-main-content {
+    margin-bottom: 25px;
 }
 
-.action-btn:hover{
-    background:#f3e8cf;
+.post-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.4;
+    margin: 0 0 12px 0;
 }
 
-/* COMMENT */
-
-.comment-form{
-    margin-top:20px;
+.post-caption {
+    color: #4a4a4a;
+    line-height: 1.8;
+    font-size: 15px;
+    margin: 0;
+    white-space: pre-line;
 }
 
-.comment-form textarea{
-    width:100%;
-    border:none;
-    outline:none;
-    resize:none;
-
-    background:#f8f5ed;
-    border-radius:20px;
-
-    height:120px;
-    padding:20px;
-    margin-bottom:15px;
+/* Image Display Box */
+.post-image-container {
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 25px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.04);
+    background-color: #fdfcf9;
 }
 
-.comment-form button{
-    border:none;
-    color:white;
-    padding:14px 26px;
-    border-radius:999px;
-    cursor:pointer;
-    font-weight:700;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
+.post-image-src {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: cover;
+    display: block;
 }
 
-.comment-item{
-    border-top:1px solid #eee;
-    padding:20px 0;
+/* Action Controls Grid */
+.post-actions-bar {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f8f6f0;
 }
 
-.comment-text{
-    margin-top:12px;
-    color:#555;
-    line-height:1.8;
+.like-form-wrapper {
+    flex: 1;
 }
 
-/* EMPTY */
-
-.empty-comment{
-    text-align:center;
-    padding:50px 20px;
-    color:#888;
+.interaction-btn {
+    width: 100%;
+    border: 1px solid #f1ebdc;
+    background: #fdfcf9;
+    color: #555;
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s ease;
 }
 
-.empty-comment i{
-    font-size:50px;
-    margin-bottom:20px;
-    color:#C9A227;
+.btn-comment-static {
+    width: auto;
+    cursor: default;
+    background: #fdfcf9;
+    padding: 14px 28px;
 }
 
-/* MOBILE */
+.btn-like-action:hover {
+    background: #fff5f5;
+    border-color: #ffccd5;
+    color: #e74c3c;
+}
 
-@media(max-width:768px){
+/* ================= 2. DISCUSSION & COMMENT PANEL ================= */
+.comment-card-panel {
+    background: white;
+    border-radius: 24px;
+    padding: 35px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f6f6f6;
+}
 
-    .post-actions{
-        flex-wrap:wrap;
+.panel-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c2c2c;
+}
+
+.comment-count-badge {
+    background: rgba(140, 106, 47, 0.1);
+    color: #8C6A2F;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 30px;
+}
+
+/* Form Write Styles */
+.comment-write-form {
+    margin-bottom: 35px;
+}
+
+.textarea-wrapper {
+    background: #faf8f3;
+    border-radius: 16px;
+    padding: 5px;
+    border: 1px solid #efeae0;
+    transition: all 0.2s ease;
+}
+
+.textarea-wrapper:focus-within {
+    background: white;
+    border-color: #C9A227;
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+}
+
+.comment-write-form textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    background: transparent;
+    padding: 15px;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.form-action-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.btn-submit-comment {
+    border: none;
+    outline: none;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    box-shadow: 0 4px 15px rgba(140, 106, 47, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-submit-comment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(140, 106, 47, 0.3);
+}
+
+/* Comment Thread Component Feed */
+.comments-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.comment-thread-item {
+    border-top: 1px solid #f8f6f0;
+    padding: 25px 0 10px 0;
+}
+
+.comment-user-node {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.comment-avatar, .avatar-initials-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-initials-small {
+    background: #f4eee1;
+    color: #8C6A2F;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.comment-meta-node h5 {
+    margin: 0 0 2px 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #2c2c2c;
+}
+
+.comment-meta-node small {
+    font-size: 11px;
+    color: #999;
+}
+
+.comment-bubble-text {
+    padding-left: 52px; /* Sejajar dengan teks nama di samping avatar */
+}
+
+.comment-bubble-text p {
+    margin: 0;
+    color: #555;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+/* Empty Placeholder System */
+.empty-comment-placeholder {
+    text-align: center;
+    padding: 50px 20px;
+    color: #888;
+}
+
+.placeholder-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(140, 106, 47, 0.06);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.placeholder-icon i {
+    font-size: 26px;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.empty-comment-placeholder h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 6px 0;
+}
+
+.empty-comment-placeholder p {
+    font-size: 13px;
+    color: #777;
+    margin: 0;
+}
+
+/* ==================================================================
+   ================= RESPONSIVE MEDIA BREAKPOINTS ===================
+   ================================================================== */
+
+@media(max-width: 768px) {
+    .community-show-section {
+        margin: 20px auto;
     }
 
-    .post-title{
-        font-size:28px;
+    .post-detail-card, .comment-card-panel {
+        padding: 20px;
+        border-radius: 20px;
     }
 
-}
+    .post-title {
+        font-size: 22px;
+    }
 
+    .post-caption {
+        font-size: 14px;
+    }
+
+    .post-actions-bar {
+        flex-direction: column; /* Tombol bertumpuk di HP agar rapi */
+        gap: 12px;
+    }
+
+    .btn-comment-static {
+        justify-content: center;
+        padding: 14px;
+    }
+
+    .comment-bubble-text {
+        padding-left: 0; /* Kembalikan ruang penuh di layar HP */
+        margin-top: 10px;
+    }
+
+    .btn-submit-comment {
+        width: 100%; /* Tombol kirim full width di HP */
+        justify-content: center;
+    }
+}
 </style>
 
 @endsection

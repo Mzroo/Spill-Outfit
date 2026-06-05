@@ -6,197 +6,106 @@
 
 <section class="community-section">
 
-    <!-- HEADER -->
+    <!-- ================= HEADER SECTION ================= -->
     <div class="community-header">
-
-        <span>
-            COMMUNITY
-        </span>
-
-        <h2>
-            Outfit Community 🔥
-        </h2>
-
-        <p>
-            Bagikan style terbaikmu, cari inspirasi outfit,
-            dan terhubung dengan komunitas fashion.
-        </p>
-
+        <div class="header-text">
+            <span class="community-badge">OUTFIT INSPO</span>
+            <h2>Spill Outfit Community 🔥</h2>
+            <p>Bagikan style terbaikmu, cari inspirasi outfit harian, dan terhubung dengan sesama pencinta fashion modern.</p>
+        </div>
+        
+        <!-- BUTTON AKSI DI HEADER -->
+        <div class="top-community-action">
+            <a href="{{ route('community.create') }}" class="create-post-btn">
+                <i class="fa-solid fa-plus"></i>
+                <span>Buat Postingan</span>
+            </a>
+        </div>
     </div>
 
-    <!-- ALERT -->
+    <!-- ================= ALERT SUCCESS ================= -->
     @if(session('success'))
-
     <div class="success-alert">
-
         <i class="fa-solid fa-circle-check"></i>
-
-        {{ session('success') }}
-
+        <span>{{ session('success') }}</span>
     </div>
-
     @endif
 
-    <!-- BUTTON -->
-    <div class="top-community-action">
-
-        <a
-            href="{{ route('community.create') }}"
-            class="create-post-btn"
-        >
-
-            <i class="fa-solid fa-plus"></i>
-
-            Buat Postingan
-
-        </a>
-
-    </div>
-
-    <!-- POSTS -->
+    <!-- ================= POSTS GRID CONTAINER ================= -->
     <div class="post-wrapper">
 
         @forelse($posts as $post)
-
         <div class="post-card">
-
-            <a
-                href="{{ route('community.show', $post->id) }}"
-                class="card-link"
-            >
-
-                <!-- IMAGE WRAPPER -->
-                <div class="image-wrapper">
-
+            
+            <!-- IMAGE AREA DENGAN PROTEKSI LINK -->
+            <div class="image-container-block">
+                <a href="{{ route('community.show', $post->id) }}" class="card-image-link">
                     @if($post->gambar)
-
-                    <img
-                        src="{{ asset('storage/' . $post->gambar) }}"
-                        class="post-image"
-                        alt=""
-                    >
-
+                        <img src="{{ asset('storage/' . $post->gambar) }}" class="post-image" alt="Outfit Image">
                     @else
-
-                    <div class="image-placeholder">
-
-                        <i class="fa-solid fa-shirt"></i>
-
-                    </div>
-
-                    @endif
-
-                    <!-- USER OVERLAY -->
-                    <div class="post-user-overlay">
-
-                        <div class="avatar">
-
-                            @if($post->user?->profile?->foto)
-
-                                <img
-                                    src="{{ asset('storage/' . $post->user->profile->foto) }}"
-                                    alt=""
-                                >
-
-                            @else
-
-                                {{ strtoupper(substr($post->user?->name ?? 'U',0,1)) }}
-
-                            @endif
-
+                        <div class="image-placeholder">
+                            <i class="fa-solid fa-shirt"></i>
                         </div>
-
-                        <div class="user-info">
-
-                            <h5>
-                                {{ $post->user?->name }}
-                            </h5>
-
-                            <small>
-                                {{ $post->created_at->diffForHumans() }}
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- CONTENT -->
-                <div class="post-content">
-
-                    @if($post->judul)
-
-                    <h3 class="post-title">
-                        {{ $post->judul }}
-                    </h3>
-
                     @endif
-
-                    <p class="post-caption">
-                        {{ $post->caption }}
-                    </p>
-
-                </div>
-
-            </a>
-
-            <!-- ACTION -->
-            <div class="post-action">
-
-                <!-- LIKE -->
-                <form
-                    action="{{ route('community.like', $post->id) }}"
-                    method="POST"
-                >
-
-                    @csrf
-
-                    <button
-                        type="submit"
-                        class="action-btn"
-                    >
-
-                        <i class="fa-solid fa-heart"></i>
-
-                        {{ $post->total_like }}
-
-                    </button>
-
-                </form>
-
-                <!-- COMMENT -->
-                <a
-                    href="{{ route('community.show', $post->id) }}"
-                    class="action-btn"
-                >
-
-                    <i class="fa-solid fa-comment"></i>
-
-                    {{ $post->total_comment }}
-
                 </a>
 
+                <!-- USER GLASSMORPHISM OVERLAY (POSISI KIRI ATAS) -->
+                <div class="post-user-overlay">
+                    <div class="avatar-circle">
+                        @if($post->user?->profile?->foto)
+                            <img src="{{ asset('storage/' . $post->user->profile->foto) }}" alt="Profile">
+                        @else
+                            {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
+                        @endif
+                    </div>
+                    <div class="user-meta-info">
+                        <h5>{{ $post->user?->name }}</h5>
+                        <small>{{ $post->created_at->diffForHumans() }}</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTENT BODY AREA -->
+            <div class="post-content">
+                <a href="{{ route('community.show', $post->id) }}" class="card-text-link">
+                    @if($post->judul)
+                        <h3 class="post-title">{{ $post->judul }}</h3>
+                    @endif
+                    <p class="post-caption">{{ $post->caption }}</p>
+                </a>
+            </div>
+
+            <!-- ACTION BUTTON INTERACTIVE FOOTER -->
+            <div class="post-action-footer">
+                <!-- LIKE SYSTEM -->
+                <form action="{{ route('community.like', $post->id) }}" method="POST" class="like-form">
+                    @csrf
+                    <button type="submit" class="action-btn-item btn-like" title="Suka">
+                        <i class="fa-solid fa-heart"></i>
+                        <span>{{ $post->total_like }}</span>
+                    </button>
+                </form>
+
+                <!-- COMMENT SYSTEM -->
+                <a href="{{ route('community.show', $post->id) }}" class="action-btn-item btn-comment" title="Komentar">
+                    <i class="fa-solid fa-comment"></i>
+                    <span>{{ $post->total_comment }}</span>
+                </a>
             </div>
 
         </div>
-
         @empty
-
-        <div class="empty-community">
-
-            <i class="fa-solid fa-users"></i>
-
-            <h3>
-                Belum ada postingan
-            </h3>
-
-            <p>
-                Jadilah orang pertama yang spill outfit 🔥
-            </p>
-
+        <!-- BLANK STATE JIKA KOSONG -->
+        <div class="empty-community-state">
+            <div class="blank-icon-box">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <h3>Belum Ada Postingan</h3>
+            <p>Jadilah trendsetter pertama yang membagikan ide spill outfit kecemu di sini! 🔥</p>
+            <a href="{{ route('community.create') }}" class="create-post-btn" style="margin-top: 20px;">
+                <i class="fa-solid fa-plus"></i> Mulai Post Sekarang
+            </a>
         </div>
-
         @endforelse
 
     </div>
@@ -204,320 +113,377 @@
 </section>
 
 <style>
-
-.community-section{
-    max-width:1500px;
-    margin:auto;
+/* ================= UTILITIES & GLOBAL COMMUNITY STYLE ================= */
+.community-section {
+    max-width: 1300px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* HEADER */
-
-.community-header{
-    margin-bottom:35px;
+/* Badge Header Gradasi */
+.community-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 50px;
+    background: linear-gradient(135deg, rgba(140, 106, 47, 0.1), rgba(201, 162, 39, 0.1));
+    color: #8C6A2F;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
 }
 
-.community-header span{
-    display:inline-block;
-    padding:10px 18px;
-    border-radius:999px;
-    background:#f3e8cf;
-    color:#8C6A2F;
-    font-size:13px;
-    font-weight:700;
+/* ================= COMMUNITY HEADER FLEX ================= */
+.community-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 45px;
+    gap: 30px;
+    border-bottom: 1px solid #f1f1f1;
+    padding-bottom: 30px;
 }
 
-.community-header h2{
-    font-size:50px;
-    margin:15px 0;
-    color:#222;
+.header-text {
+    max-width: 700px;
 }
 
-.community-header p{
-    color:#777;
-    line-height:1.8;
+.community-header h2 {
+    font-size: 42px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
 }
 
-/* ALERT */
-
-.success-alert{
-    background:#dff5e5;
-    color:#1d6b3c;
-    padding:18px 20px;
-    border-radius:20px;
-    margin-bottom:25px;
-
-    display:flex;
-    align-items:center;
-    gap:12px;
+.community-header p {
+    color: #666;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
 }
 
-/* BUTTON */
-
-.top-community-action{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:35px;
+/* Tombol Floating / Tambah Postingan */
+.create-post-btn {
+    text-decoration: none;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 14px;
+    padding: 14px 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    box-shadow: 0 6px 20px rgba(140, 106, 47, 0.25);
+    transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
-.create-post-btn{
-    text-decoration:none;
-    color:white;
-    font-weight:700;
-    border-radius:999px;
-    padding:15px 26px;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
-
-    transition:.3s;
+.create-post-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(140, 106, 47, 0.35);
 }
 
-.create-post-btn:hover{
-    transform:translateY(-2px);
+/* Alert Box */
+.success-alert {
+    background: #eef9f1;
+    border-left: 4px solid #2ecc71;
+    color: #1e7e34;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
 }
 
-/* GRID */
-
-.post-wrapper{
-    display:grid;
-    grid-template-columns:
-    repeat(4,1fr);
-
-    gap:22px;
+.success-alert i {
+    font-size: 18px;
 }
 
-/* CARD */
-
-.post-card{
-    background:white;
-    border-radius:30px;
-    overflow:hidden;
-
-    box-shadow:
-    0 10px 35px rgba(0,0,0,.05);
-
-    transition:.3s;
+/* ================= GRID DECK SYSTEM ================= */
+.post-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 25px;
 }
 
-.post-card:hover{
-    transform:translateY(-5px);
+/* ================= PREMIUM POST CARD STYLE ================= */
+.post-card {
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.card-link{
-    text-decoration:none;
+.post-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(140, 106, 47, 0.1);
+    border-color: rgba(201, 162, 39, 0.15);
 }
 
-/* IMAGE */
-
-.image-wrapper{
-    position:relative;
+/* Media/Image Area */
+.image-container-block {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    background-color: #fcfbf9;
 }
 
-.post-image{
-    width:100%;
-    height:280px;
-    object-fit:cover;
-    display:block;
+.card-image-link {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
-.image-placeholder{
-    height:280px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    background:#f8f5ed;
-    color:#C9A227;
-    font-size:50px;
+.post-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
 }
 
-/* USER OVERLAY */
-
-.post-user-overlay{
-    position:absolute;
-    top:8px;
-    left:8px;
-
-    display:flex;
-    align-items:center;
-    
-    gap:12px;
-    background: rgba(255, 255, 255, 0.4);
-    padding:5px 9px;
-    border-radius:999px;
-
-    box-shadow:
-    0 8px 20px rgba(0,0,0,.08);
+.post-card:hover .post-image {
+    transform: scale(1.04);
 }
 
-.avatar{
-    width:33px;
-    height:33px;
-    border-radius:50%;
-    overflow:hidden;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    font-weight:700;
-    color:white;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
-
-    flex-shrink:0;
+.image-placeholder {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fdfaf2;
+    color: #C9A227;
+    font-size: 54px;
 }
 
-.avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+/* Glassmorphism User Tag Overlay */
+.post-user-overlay {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+    max-width: 85%;
 }
 
-.user-info h5{
-    margin:0;
-    color: #333;
-    font-size:13px;
+.avatar-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    flex-shrink: 0;
 }
 
-.user-info small{
-    font-size:10px;
-    color: #444;
+.avatar-circle img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* CONTENT */
-
-.post-content{
-    padding:18px;
+.user-meta-info {
+    overflow: hidden;
 }
 
-.post-title{
-    color:#222;
-    font-size:18px;
-    margin-bottom:10px;
-    line-height:1.5;
+.user-meta-info h5 {
+    margin: 0;
+    color: #2c2c2c;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.post-caption{
-    color:#666;
-    line-height:1.7;
-    font-size:14px;
-
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+.user-meta-info small {
+    font-size: 9.5px;
+    color: #777;
+    display: block;
 }
 
-/* ACTION */
-
-.post-action{
-    display:flex;
-    gap:10px;
-    padding:0 18px 18px;
+/* Typography Content Area */
+.post-content {
+    padding: 20px;
+    flex: 1;
 }
 
-.post-action form{
-    flex:1;
+.card-text-link {
+    text-decoration: none;
+    display: block;
 }
 
-.action-btn{
-    width:100%;
-    border:none;
-    background:#f8f5ed;
-    border-radius:999px;
-    padding:13px;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:8px;
-
-    cursor:pointer;
-
-    text-decoration:none;
-    color:#8C6A2F;
-    font-weight:700;
-
-    transition:.3s;
+.post-title {
+    color: #1a1a1a;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+    transition: color 0.2s;
 }
 
-.action-btn:hover{
-    background:#f3e8cf;
+.post-card:hover .post-title {
+    color: #8C6A2F;
 }
 
-/* EMPTY */
-
-.empty-community{
-    grid-column:1/-1;
-    text-align:center;
-    padding:90px;
+.post-caption {
+    color: #666;
+    line-height: 1.6;
+    font-size: 13.5px;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.empty-community i{
-    font-size:60px;
-    color:#C9A227;
-    margin-bottom:20px;
+/* Interactive Footer Action Controls */
+.post-action-footer {
+    display: flex;
+    gap: 12px;
+    padding: 0 20px 20px;
 }
 
-.empty-community h3{
-    margin-bottom:10px;
+.like-form {
+    flex: 1;
 }
 
-.empty-community p{
-    color:#777;
+.action-btn-item {
+    width: 100%;
+    border: 1px solid #f1ebdc;
+    background: #fdfcf9;
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
 }
 
-/* RESPONSIVE */
+.btn-comment {
+    width: auto;
+    padding: 10px 18px;
+}
 
-@media(max-width:1300px){
+/* Hover States Efektif */
+.btn-like:hover {
+    background: #fff5f5;
+    border-color: #ffccd5;
+    color: #e74c3c;
+}
 
-    .post-wrapper{
-        grid-template-columns:
-        repeat(3,1fr);
+.btn-comment:hover {
+    background: #f0f7ff;
+    border-color: #cce5ff;
+    color: #3498db;
+}
+
+/* ================= BLANK STATE DESIGN ================= */
+.empty-community-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    background: #faf8f5;
+    border-radius: 24px;
+    border: 2px dashed #eadecc;
+}
+
+.blank-icon-box {
+    width: 70px;
+    height: 70px;
+    background: rgba(140, 106, 47, 0.08);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.blank-icon-box i {
+    font-size: 32px;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.empty-community-state h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c2c2c;
+    margin: 0 0 8px 0;
+}
+
+.empty-community-state p {
+    color: #777;
+    font-size: 14px;
+    max-width: 340px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* ================= MEDIA BREAKPOINT RESPONSIVE INTERFACES ================= */
+@media(max-width: 1200px) {
+    .post-wrapper {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
     }
-
+    .community-header h2 { font-size: 36px; }
 }
 
-@media(max-width:900px){
-
-    .post-wrapper{
-        grid-template-columns:
-        repeat(2,1fr);
+@media(max-width: 900px) {
+    .post-wrapper {
+        grid-template-columns: repeat(2, 1fr);
     }
-
+    .community-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+    .top-community-action {
+        width: 100%;
+    }
+    .create-post-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
-@media(max-width:600px){
-
-    .post-wrapper{
-        grid-template-columns:1fr;
+@media(max-width: 576px) {
+    .post-wrapper {
+        grid-template-columns: 1fr;
     }
-
-    .community-header h2{
-        font-size:35px;
-    }
-
-    .top-community-action{
-        justify-content:center;
-    }
-
+    .community-header h2 { font-size: 30px; }
+    .image-container-block { height: 280px; }
 }
-
 </style>
 
 @endsection

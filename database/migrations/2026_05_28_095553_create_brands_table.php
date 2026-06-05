@@ -6,40 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('brand', function (Blueprint $table) {
+            $table->id(); // ID Primary Key internal database
+            
+            // Kolom kode unik publik untuk Brand
+            $table->string('kode_brand')->unique(); 
 
-            $table->id();
-
-            // Nama Brand
             $table->string('nama');
-
-            // URL Friendly
             $table->string('slug')->unique();
-
-            // Logo Brand
-            $table->string('logo')->nullable();
-
-            // Deskripsi Brand
+            $table->string('logo')->nullable(); // Kolom logo menggantikan gambar
             $table->text('deskripsi')->nullable();
-
-            // Status Brand
-            $table->enum('status', [
-                'aktif',
-                'nonaktif'
-            ])->default('aktif');
-
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('brand');

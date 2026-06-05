@@ -8,29 +8,28 @@ use App\Models\CommunityPost;
 use App\Models\CommunityLike;
 use App\Models\CommunityComment;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB; // Ditambahkan untuk proteksi database transaction
 
 class CommunityController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | HALAMAN COMMUNITY
+    | HALAMAN COMMUNITY INDEX
     |--------------------------------------------------------------------------
     */
     public function index()
     {
+        // 1. Ambil data dari database
         $posts = CommunityPost::with([
             'user.profile',
-            'likes',
-            'comments.user.profile'
         ])
         ->where('status', 'published')
         ->latest()
         ->get();
 
-        return view(
-            'users.community.index',
-            compact('posts')
-        );
+        // 2. Kirim variabel $posts ke file view blade Anda
+        return view('users.community.index', compact('posts')); 
+        // Pastikan 'users.community.index' sesuai dengan folder letak blade index Anda
     }
 
     /*
@@ -40,9 +39,7 @@ class CommunityController extends Controller
     */
     public function create()
     {
-        return view(
-            'users.community.create'
-        );
+        return view('users.community.create');
     }
 
     /*
@@ -54,16 +51,15 @@ class CommunityController extends Controller
     {
         $post = CommunityPost::with([
             'user.profile',
-            'comments.user.profile',
-            'likes'
+            'comments' => function($query) {
+                $query->where('status', 'show')->latest(); // Memastikan komentar diurutkan dari yang terbaru
+            },
+            'comments.user.profile'
         ])
         ->where('status', 'published')
         ->findOrFail($id);
 
-        return view(
-            'users.community.show',
-            compact('post')
-        );
+        return view('users.community.show', compact('post'));
     }
 
     /*
@@ -76,148 +72,89 @@ class CommunityController extends Controller
         $request->validate([
             'judul'   => 'nullable|string|max:255',
             'caption' => 'required|string|max:2000',
-            'gambar'  => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+            // Gambar diubah menjadi 'required' agar layout grid komunitas tetap estetik dan penuh visual
+            'gambar'  => 'required|image|mimes:jpg,jpeg,png,webp|max:3072' 
         ]);
 
         $gambar = null;
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPLOAD GAMBAR
-        |--------------------------------------------------------------------------
-        */
         if ($request->hasFile('gambar')) {
-
-            $gambar = $request
-                ->file('gambar')
-                ->store(
-                    'community',
-                    'public'
-                );
+            $gambar = $request->file('gambar')->store('community', 'public');
         }
 
         CommunityPost::create([
-
             'user_id' => auth()->id(),
-
-            'judul' => $request->judul,
-
+            'judul'   => $request->judul,
             'caption' => $request->caption,
-
-            'gambar' => $gambar,
-
-            'status' => 'published'
+            'gambar'  => $gambar,
+            'status'  => 'published'
         ]);
 
         return redirect()
             ->route('community.index')
-            ->with(
-                'success',
-                'Postingan berhasil dibuat'
-            );
+            ->with('success', 'Inspirasi outfit kamu berhasil dibagikan ✨');
     }
 
     /*
     |--------------------------------------------------------------------------
-    | LIKE / UNLIKE
+    | LIKE / UNLIKE (Database Transaction Protected)
     |--------------------------------------------------------------------------
     */
     public function like($id)
     {
         $post = CommunityPost::findOrFail($id);
+        $userId = auth()->id();
 
-        $like = CommunityLike::where(
-            'community_post_id',
-            $post->id
-        )
-        ->where(
-            'user_id',
-            auth()->id()
-        )
-        ->first();
+        // Menggunakan Database Transaction mencegah angka total_like tidak akurat saat diakses banyak user sekaligus
+        DB::transaction(function () use ($post, $userId) {
+            $like = CommunityLike::where('community_post_id', $post->id)
+                ->where('user_id', $userId)
+                ->first();
 
-        /*
-        |--------------------------------------------------------------------------
-        | UNLIKE
-        |--------------------------------------------------------------------------
-        */
-        if ($like) {
-
-            $like->delete();
-
-            if ($post->total_like > 0) {
-
-                $post->decrement(
-                    'total_like'
-                );
+            if ($like) {
+                // UNLIKE ACTION
+                $like->delete();
+                if ($post->total_like > 0) {
+                    $post->decrement('total_like');
+                }
+            } else {
+                // LIKE ACTION
+                CommunityLike::create([
+                    'community_post_id' => $post->id,
+                    'user_id'           => $userId
+                ]);
+                $post->increment('total_like');
             }
-
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | LIKE
-        |--------------------------------------------------------------------------
-        */
-        else {
-
-            CommunityLike::create([
-
-                'community_post_id'
-                    => $post->id,
-
-                'user_id'
-                    => auth()->id()
-            ]);
-
-            $post->increment(
-                'total_like'
-            );
-        }
+        });
 
         return back();
     }
 
     /*
     |--------------------------------------------------------------------------
-    | KOMENTAR
+    | KOMENTAR (Database Transaction Protected)
     |--------------------------------------------------------------------------
     */
-    public function comment(
-        Request $request,
-        $id
-    )
+    public function comment(Request $request, $id)
     {
         $request->validate([
-            'comment'
-                => 'required|string|max:1000'
+            'comment' => 'required|string|max:1000'
         ]);
 
         $post = CommunityPost::findOrFail($id);
 
-        CommunityComment::create([
+        DB::transaction(function () use ($request, $post) {
+            CommunityComment::create([
+                'community_post_id' => $post->id,
+                'user_id'           => auth()->id(),
+                'comment'           => $request->comment,
+                'status'            => 'show'
+            ]);
 
-            'community_post_id'
-                => $post->id,
+            $post->increment('total_comment');
+        });
 
-            'user_id'
-                => auth()->id(),
-
-            'comment'
-                => $request->comment,
-
-            'status'
-                => 'show'
-        ]);
-
-        $post->increment(
-            'total_comment'
-        );
-
-        return back()->with(
-            'success',
-            'Komentar berhasil ditambahkan'
-        );
+        return back()->with('success', 'Komentar berhasil ditambahkan ke diskusi');
     }
 
     /*
@@ -229,38 +166,18 @@ class CommunityController extends Controller
     {
         $post = CommunityPost::findOrFail($id);
 
-        /*
-        |--------------------------------------------------------------------------
-        | VALIDASI OWNER
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $post->user_id
-            != auth()->id()
-        ) {
-            abort(403);
+        // Validasi Kepemilikan (Owner)
+        if ($post->user_id != auth()->id()) {
+            abort(403, 'Anda tidak memiliki hak akses untuk menghapus postingan ini.');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | HAPUS GAMBAR
-        |--------------------------------------------------------------------------
-        */
-        if (
-            $post->gambar &&
-            Storage::disk('public')
-                ->exists($post->gambar)
-        ) {
-
-            Storage::disk('public')
-                ->delete($post->gambar);
+        // Hapus file fisik gambar dari storage lokal/cloud
+        if ($post->gambar && Storage::disk('public')->exists($post->gambar)) {
+            Storage::disk('public')->delete($post->gambar);
         }
 
         $post->delete();
 
-        return back()->with(
-            'success',
-            'Postingan berhasil dihapus'
-        );
+        return back()->with('success', 'Postingan Anda berhasil dihapus');
     }
 }

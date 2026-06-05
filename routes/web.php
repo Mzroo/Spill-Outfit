@@ -211,13 +211,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Varian Produk
         Route::controller(ProdukVarianController::class)->prefix('produk-varian')->name('produk-varian.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/create', 'create')->name('create');
             Route::post('/', 'store')->name('store');
-            Route::get('/{id}/edit', 'edit')->name('edit');
             Route::put('/{id}', 'update')->name('update');
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
-
+        
         // Chat Customer (Sisi Admin)
         Route::controller(AdminChatController::class)->prefix('chat')->name('chat.')->group(function () {
             Route::get('/', 'index')->name('index');

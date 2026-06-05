@@ -96,7 +96,7 @@ class AuthController extends Controller
                 if (!$existingUser) {
                     $lastUser = User::latest('id')->first();
                     $number = $lastUser ? $lastUser->id + 1 : 1;
-                    $userCode = 'US' . str_pad($number, 3, '0', STR_PAD_LEFT);
+                    $userCode = 'USR' . str_pad($number, 3, '0', STR_PAD_LEFT);
 
                     return User::create([
                         'user_code' => $userCode,

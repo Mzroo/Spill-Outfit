@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Warna;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -20,5 +22,9 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call(AdminSeeder::class);
+        $this->call(KategoriSeeder::class);
+        $this->call(BrandSeeder::class);
+        $this->call(UkuranSeeder::class);
+        $this->call(WarnaSeeder::class);
     }
 }

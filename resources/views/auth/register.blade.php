@@ -176,17 +176,6 @@
 
                             </div>
 
-                            <!-- GOOGLE -->
-
-                            <a href=""
-                               class="btn-google">
-
-                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg">
-
-                                Register dengan Google
-
-                            </a>
-
                             <!-- LOGIN -->
 
                             <div class="register-text">

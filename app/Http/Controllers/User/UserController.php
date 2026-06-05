@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\CommunityPost;
 use Illuminate\Http\Request;
 use App\Models\Profile;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +12,15 @@ class UserController extends Controller
 {
     public function index()
     {
-        return view('users.dashboard');
+        // 2. Ambil 3 postingan terbaru untuk dipajang di halaman depan
+        $posts = CommunityPost::with(['user.profile'])
+                    ->where('status', 'published')
+                    ->latest()
+                    ->take(3) // Batasi hanya 3 data agar pas dengan grid col-lg-4
+                    ->get();
+
+        // 3. Kirim variabel $posts ke file blade utama Anda
+        return view('users.dashboard', compact('posts'));
     }
 
     public function about()

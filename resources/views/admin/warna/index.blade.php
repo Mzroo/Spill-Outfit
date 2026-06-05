@@ -1,181 +1,507 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Warna')
+@section('title', 'Manajemen Warna')
 
 @section('content')
 
 <div class="container-fluid">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
+    <div class="page-header mb-4">
         <div>
-            <h4 class="fw-bold mb-1">
-                Data Warna
-            </h4>
-
-            <p class="text-muted mb-0">
-                Kelola warna produk outfit
-            </p>
+            <h1 class="page-title">Manajemen Warna</h1>
+            <p class="page-subtitle">Kelola palet warna kain outfit, simpan kode spesifikasi HEX, dan atur status aktif variasi.</p>
         </div>
 
-        <a href="{{ route('admin.warna.create') }}"
-           class="btn btn-warning rounded-pill px-4">
-
-            <i class="fa-solid fa-plus me-2"></i>
-            Tambah Warna
-
+        <a href="{{ route('admin.warna.create') }}" class="btn-add">
+            <i class="fa-solid fa-plus"></i>
+            <span>Tambah Warna</span>
         </a>
-
     </div>
 
-    <!-- ALERT -->
-    @if(session('success'))
-        <div class="alert alert-success rounded-4 border-0 shadow-sm">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <!-- CARD -->
-    <div class="card border-0 shadow-sm rounded-4">
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table align-middle">
-
-                    <thead class="table-light">
-
-                        <tr>
-                            <th width="80">No</th>
-                            <th>Warna</th>
-                            <th>Kode Warna</th>
-                            <th>Status</th>
-                            <th width="180" class="text-center">
-                                Aksi
-                            </th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($warna as $item)
-
-                            <tr>
-
-                                <td>
-                                    {{ $loop->iteration }}
-                                </td>
-
-                                <td>
-
-                                    <div class="d-flex align-items-center gap-3">
-
-                                        <!-- Preview warna -->
-                                        <div
-                                            style="
-                                                width:35px;
-                                                height:35px;
-                                                border-radius:50%;
-                                                background:{{ $item->kode_warna }};
-                                                border:2px solid #eee;
-                                            ">
-                                        </div>
-
-                                        <span class="fw-semibold">
-                                            {{ $item->nama }}
-                                        </span>
-
-                                    </div>
-
-                                </td>
-
-                                <td>
-
-                                    <span class="badge bg-light text-dark border px-3 py-2">
-                                        {{ $item->kode_warna ?? '-' }}
-                                    </span>
-
-                                </td>
-
-                                <td>
-
-                                    @if($item->status == 'aktif')
-
-                                        <span class="badge bg-success">
-                                            Aktif
-                                        </span>
-
-                                    @else
-
-                                        <span class="badge bg-secondary">
-                                            Nonaktif
-                                        </span>
-
-                                    @endif
-
-                                </td>
-
-                                <td class="text-center">
-
-                                    <!-- EDIT -->
-                                    <a href="{{ route('admin.warna.edit', $item->id) }}"
-                                       class="btn btn-sm btn-warning rounded-pill">
-
-                                        <i class="fa-solid fa-pen-to-square"></i>
-
-                                    </a>
-
-                                    <!-- DELETE -->
-                                    <form action="{{ route('admin.warna.destroy', $item->id) }}"
-                                          method="POST"
-                                          class="d-inline">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-danger rounded-pill"
-                                            onclick="return confirm('Yakin hapus warna ini?')">
-
-                                            <i class="fa-solid fa-trash"></i>
-
-                                        </button>
-
-                                    </form>
-
-                                </td>
-
-                            </tr>
-
-                        @empty
-
-                            <tr>
-
-                                <td colspan="5"
-                                    class="text-center text-muted py-5">
-
-                                    Belum ada data warna
-
-                                </td>
-
-                            </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
+    <div class="utility-bar mb-4">
+        <form action="{{ route('admin.warna.index') }}" method="GET" class="search-form">
+            <div class="search-input-group">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input 
+                    type="text" 
+                    name="search" 
+                    class="form-control custom-search-input" 
+                    placeholder="Cari berdasarkan nama warna atau kode HEX..."
+                    value="{{ request('search') }}"
+                >
+                @if(request('search'))
+                    <a href="{{ route('admin.warna.index') }}" class="btn-clear-search" title="Hapus Pencarian">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                @endif
+                <button type="submit" class="btn-search-submit">Cari</button>
             </div>
-
-        </div>
-
+        </form>
     </div>
 
+    <div class="custom-card">
+        <div class="table-responsive">
+            <table class="table custom-table align-middle">
+                <thead>
+                    <tr>
+                        <th width="70" class="text-center">No</th>
+                        <th width="180">Visual Warna</th>
+                        <th>Nama Warna</th>
+                        <th>Kode HEX</th>
+                        <th width="120" class="text-center">Status</th>
+                        <th width="150" class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($warna as $item)
+                    <tr>
+                        <td class="text-center text-muted font-monospace">
+                            {{ ($warna->currentPage() - 1) * $warna->perPage() + $loop->iteration }}
+                        </td>
+
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if($item->kode_warna)
+                                    <div class="color-circle-preview" style="background-color: {{ $item->kode_warna }};"></div>
+                                @else
+                                    <div class="color-circle-preview color-empty" title="Tidak ada kode warna">
+                                        <i class="fa-solid fa-slash" style="font-size: 10px;"></i>
+                                    </div>
+                                @endif
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="color-name-text">{{ $item->nama }}</span>
+                        </td>
+
+                        <td>
+                            <span class="code-badge">
+                                <i class="fa-solid fa-palette me-1" style="font-size: 11px;"></i>{{ $item->kode_warna ?? '-' }}
+                            </span>
+                        </td>
+
+                        <td class="text-center">
+                            @if($item->status == 'aktif')
+                                <span class="status-badge status-active">
+                                    <i class="fa-solid fa-circle-check me-1"></i>Aktif
+                                </span>
+                            @else
+                                <span class="status-badge status-inactive">
+                                    <i class="fa-solid fa-circle-minus me-1"></i>Nonaktif
+                                </span>
+                            @endif
+                        </td>
+
+                        <td>
+                            <div class="action-buttons justify-content-end">
+                                <a href="{{ route('admin.warna.edit', $item->id) }}" class="btn-edit" title="Ubah Warna">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                <form action="{{ route('admin.warna.destroy', $item->id) }}" method="POST" class="delete-form d-inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data warna ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-delete" title="Hapus Warna">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6">
+                            <div class="empty-state">
+                                <div class="empty-icon-wrapper">
+                                    <i class="fa-solid fa-droplet-slash"></i>
+                                </div>
+                                <h3>Data Warna Kosong</h3>
+                                <p>
+                                    @if(request('search'))
+                                        Tidak ditemukan variasi warna dengan kata kunci "{{ request('search') }}". Coba cari padanan nama lainnya.
+                                    @else
+                                        Belum ada varietas warna kain produk yang tersimpan di dalam database.
+                                    @endif
+                                </p>
+                                @if(request('search'))
+                                    <a href="{{ route('admin.warna.index') }}" class="btn-add m-auto mt-3" style="width: max-content;">
+                                        <i class="fa-solid fa-rotate-left"></i> Kembali ke Semua Data
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if($warna->hasPages())
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
+                <div class="text-muted" style="font-size: 13px;">
+                    Menampilkan {{ $warna->firstItem() ?? 0 }} sampai {{ $warna->lastItem() ?? 0 }} dari {{ $warna->total() }} pilihan warna.
+                </div>
+                <div class="custom-pagination-wrapper">
+                    {{ $warna->appends(request()->query())->links('pagination::bootstrap-5') }}
+                </div>
+            </div>
+        @endif
+    </div>
 </div>
+
+<style>
+/* ================= TYPOGRAPHY & COLOR MANAGEMENT ================= */
+.container-fluid {
+    font-family: 'Poppins', sans-serif;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+}
+
+/* ================= ACTION ADD BUTTON ================= */
+.btn-add {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    text-decoration: none;
+    padding: 14px 24px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: none;
+    box-shadow: 0 6px 15px rgba(140, 106, 47, 0.15);
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    color: white;
+    box-shadow: 0 10px 22px rgba(140, 106, 47, 0.3);
+}
+
+/* ================= SEARCH UTILITY BAR ================= */
+.utility-bar {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid #f5efe2;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: #faf8f5;
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid #ebdcb9;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    color: #8C6A2F;
+    font-size: 15px;
+}
+
+.custom-search-input {
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 10px 10px 48px;
+    font-size: 14px;
+    color: #333;
+    box-shadow: none !important;
+    width: 100%;
+}
+
+.custom-search-input::placeholder {
+    color: #aaa;
+}
+
+.btn-clear-search {
+    background: none;
+    border: none;
+    color: #999;
+    padding: 10px;
+    margin-right: 5px;
+    transition: color 0.2s ease;
+}
+
+.btn-clear-search:hover {
+    color: #e74c3c;
+}
+
+.btn-search-submit {
+    background: #8C6A2F;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: background 0.2s ease;
+}
+
+.btn-search-submit:hover {
+    background: #6b4f20;
+}
+
+/* ================= DATATABLE CONTAINER ================= */
+.custom-card {
+    background: white;
+    border-radius: 28px;
+    padding: 24px;
+    border: 1px solid #f5efe2;
+    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03);
+}
+
+.custom-table thead tr {
+    border-bottom: 2px solid #f5efe2;
+}
+
+.custom-table thead th {
+    border: none;
+    color: #555;
+    font-weight: 700;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    background-color: #fafaf8;
+}
+
+.custom-table tbody tr {
+    border-bottom: 1px solid #fcfbf9;
+    transition: background 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+    background: #fdfbf7;
+}
+
+.custom-table tbody td {
+    padding: 18px 20px;
+    border: none;
+}
+
+/* ================= DYNAMIC COMPONENT INNER BADGES ================= */
+.color-circle-preview {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #ebdcb9, 0 4px 8px rgba(0,0,0,0.06);
+}
+
+.color-empty {
+    background: #f5f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #bbb;
+}
+
+.color-name-text {
+    font-weight: 700;
+    color: #222;
+    font-size: 15px;
+}
+
+.code-badge {
+    background: #faf6ed;
+    color: #8C6A2F;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    border: 1px solid #f4ebd6;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    width: max-content;
+    max-width: 100%;
+}
+
+/* STATUS CHIPS */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-active {
+    background: #e8f8f5;
+    color: #1abc9c;
+}
+
+.status-inactive {
+    background: #fef9e7;
+    color: #f39c12;
+}
+
+/* BUTTON CONTROLS ACTION */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-edit, .btn-delete {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: all 0.2s ease;
+}
+
+.btn-edit {
+    background: #faf6ed;
+    color: #B68D40;
+    text-decoration: none;
+}
+
+.btn-delete {
+    background: #fff3f3;
+    color: #e74c3c;
+}
+
+.btn-edit:hover {
+    background: #8C6A2F;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    max-width: 450px;
+    margin: auto;
+}
+
+.empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: #faf6ed;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    color: #B68D40;
+    margin: 0 auto 20px;
+}
+
+.empty-state h3 {
+    font-weight: 700;
+    font-size: 20px;
+    color: #333;
+}
+
+.empty-state p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* ================= BOOTSTRAP PAGINATION CUSTOMIZATION ================= */
+.custom-pagination-wrapper .pagination {
+    margin: 0;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.custom-pagination-wrapper .page-item .page-link {
+    border-radius: 10px;
+    border: 1px solid #f5efe2;
+    color: #555;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+.custom-pagination-wrapper .page-item .page-link:hover {
+    background-color: #faf6ed;
+    color: #8C6A2F;
+    border-color: #ebdcb9;
+}
+
+/* ================= MOBILE BREAKPOINTS ================= */
+@media(max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+        gap: 10px;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+    
+    .custom-search-input {
+        background: #faf8f5 !important;
+        border: 1px solid #ebdcb9 !important;
+        border-radius: 12px;
+    }
+    
+    .btn-search-submit {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+    }
+}
+</style>
 
 @endsection

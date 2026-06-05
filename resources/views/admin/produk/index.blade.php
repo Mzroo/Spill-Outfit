@@ -1,237 +1,560 @@
 @extends('layouts.admin')
 
+@section('title', 'Manajemen Produk')
+
 @section('content')
 
 <div class="container-fluid">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
+    <div class="page-header mb-4">
         <div>
-            <h4 class="fw-bold mb-1">Manajemen Produk</h4>
-            <p class="text-muted mb-0">Kelola semua produk outfit</p>
+            <h1 class="page-title">Manajemen Produk</h1>
+            <p class="page-subtitle">Kelola daftar produk, stok, harga, dan status publikasi website.</p>
         </div>
 
-        <a href="{{ route('admin.produk.create') }}"
-           class="btn btn-warning rounded-pill">
-
-            <i class="fa fa-plus"></i> Tambah Produk
-
+        <a href="{{ route('admin.produk.create') }}" class="btn-add">
+            <i class="fa-solid fa-plus"></i>
+            <span>Tambah Produk</span>
         </a>
-
     </div>
 
-    <!-- CARD -->
-    <div class="card border-0 shadow-sm rounded-4">
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead class="table-light">
-
-                        <tr>
-                            <th>No</th>
-                            <th>Kode</th>
-                            <th>Gambar</th>
-                            <th>Nama</th>
-                            <th>Kategori</th>
-                            <th>Brand</th>
-                            <th>Harga</th>
-                            <th>Total Stok</th>
-                            <th>Status</th>
-                            <th class="text-center">Aksi</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                        @forelse($produk as $item)
-
-                        <tr>
-
-                            <!-- NO -->
-                            <td>{{ $loop->iteration }}</td>
-
-                            <!-- KODE -->
-                            <td>
-                                <span class="badge bg-dark">
-                                    {{ $item->kode }}
-                                </span>
-                            </td>
-
-                            <!-- GAMBAR -->
-                            <td>
-                                @if($item->gambar)
-                                    <img src="{{ asset('storage/'.$item->gambar) }}"
-                                         width="60"
-                                         height="60"
-                                         class="rounded border object-fit-cover">
-                                @else
-                                    <img src="https://via.placeholder.com/60"
-                                         width="60"
-                                         height="60"
-                                         class="rounded border">
-                                @endif
-                            </td>
-
-                            <!-- NAMA -->
-                            <td class="fw-semibold">
-                                {{ $item->nama }}
-                            </td>
-
-                            <!-- KATEGORI -->
-                            <td>
-                                {{ optional($item->kategori)->nama ?? '-' }}
-                            </td>
-
-                            <!-- BRAND -->
-                            <td>
-                                {{ optional($item->brand)->nama ?? '-' }}
-                            </td>
-
-                            <!-- HARGA -->
-                            <td>
-                                Rp {{ number_format($item->harga, 0, ',', '.') }}
-                            </td>
-
-                            <!-- TOTAL STOK (DARI VARIAN) -->
-                            <td>
-
-                                @php
-                                    $stok = $item->total_stok ?? 0;
-                                @endphp
-
-                                @if($stok > 10)
-                                    <span class="badge bg-success">{{ $stok }}</span>
-
-                                @elseif($stok > 0)
-                                    <span class="badge bg-warning text-dark">{{ $stok }}</span>
-
-                                @else
-                                    <span class="badge bg-danger">Habis</span>
-                                @endif
-
-                            </td>
-
-                            <!-- STATUS -->
-                            <td>
-                                @if($item->status == 'public')
-                                    <span class="badge bg-success">Aktif</span>
-                                @else
-                                    <span class="badge bg-secondary">Nonaktif</span>
-                                @endif
-                            </td>
-
-                            <!-- AKSI -->
-                            <td class="text-center align-middle">
-
-                                <div class="d-flex justify-content-center gap-2">
-
-                                    <!-- GAMBAR -->
-                                    <a href="{{ route('admin.produk.gambar', $item->id) }}"
-                                       class="btn btn-sm btn-outline-secondary rounded-circle"
-                                       title="Gambar">
-
-                                        <i class="fa fa-image"></i>
-
-                                    </a>
-
-                                    <!-- EDIT -->
-                                    <a href="{{ route('admin.produk.edit', $item->id) }}"
-                                       class="btn btn-sm btn-outline-primary rounded-circle"
-                                       title="Edit">
-
-                                        <i class="fa fa-edit"></i>
-
-                                    </a>
-
-                                    <!-- DELETE -->
-                                    <form action="{{ route('admin.produk.destroy', $item->id) }}"
-                                          method="POST"
-                                          class="delete-form">
-
-                                        @csrf
-                                        @method('DELETE')
-
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger rounded-circle btn-delete"
-                                                title="Hapus">
-
-                                            <i class="fa fa-trash"></i>
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                        @empty
-
-                        <tr>
-                            <td colspan="10">
-
-                                <div class="text-center py-5">
-
-                                    <div class="mb-3">
-                                        <i class="fa fa-box-open fa-3x text-muted"></i>
-                                    </div>
-
-                                    <h5 class="text-muted">
-                                        Belum ada produk
-                                    </h5>
-
-                                    <p class="text-muted">
-                                        Silakan tambahkan produk terlebih dahulu
-                                    </p>
-
-                                </div>
-
-                            </td>
-                        </tr>
-
-                        @endforelse
-
-                    </tbody>
-
-                </table>
-
+    <div class="utility-bar mb-4">
+        <form action="{{ route('admin.produk.index') }}" method="GET" class="search-form">
+            <div class="search-input-group">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input 
+                    type="text" 
+                    name="search" 
+                    class="form-control custom-search-input" 
+                    placeholder="Cari berdasarkan nama atau kode produk..."
+                    value="{{ request('search') }}"
+                >
+                @if(request('search'))
+                    <a href="{{ route('admin.produk.index') }}" class="btn-clear-search" title="Hapus Pencarian">
+                        <i class="fa-solid fa-xmark"></i>
+                    </a>
+                @endif
+                <button type="submit" class="btn-search-submit">Cari</button>
             </div>
+        </form>
+    </div>
 
+    <div class="custom-card">
+        <div class="table-responsive">
+            <table class="table custom-table align-middle">
+                <thead>
+                    <tr>
+                        <th width="70" class="text-center">No</th>
+                        <th width="120">Kode</th>
+                        <th width="100">Gambar</th>
+                        <th>Nama Produk</th>
+                        <th>Kategori & Brand</th>
+                        <th>Harga</th>
+                        <th width="120" class="text-center">Status</th>
+                        <th width="180" class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($produk as $item)
+                    <tr>
+                        <td class="text-center text-muted font-monospace">
+                            {{ ($produk->currentPage() - 1) * $produk->perPage() + $loop->iteration }}
+                        </td>
+
+                        <td>
+                            <span class="code-badge">
+                                <i class="fa-solid fa-barcode me-1"></i>{{ $item->kode }}
+                            </span>
+                        </td>
+
+                        <td>
+                            @if($item->gambar)
+                                <img src="{{ asset('storage/' . $item->gambar) }}" class="kategori-image" alt="{{ $item->nama }}">
+                            @else
+                                <div class="empty-image">
+                                    <i class="fa-solid fa-shirt"></i>
+                                </div>
+                            @endif
+                        </td>
+
+                        <td>
+                            <h2 class="kategori-name">{{ $item->nama }}</h2>
+                            <small class="text-muted d-block text-truncate table-desc-text">
+                                {{ Str::limit($item->deskripsi, 40) }}
+                            </small>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column" style="font-size: 12.5px;">
+                                <span class="text-dark fw-bold">{{ $item->kategori->nama ?? '-' }}</span>
+                                <span class="text-muted">{{ $item->brand->nama ?? 'Tanpa Brand' }}</span>
+                            </div>
+                        </td>
+
+                        <td class="fw-bold text-dark">
+                            Rp {{ number_format($item->harga, 0, ',', '.') }}
+                        </td>
+
+                        <td class="text-center">
+                            <span class="status-badge {{ $item->status == 'public' ? 'status-active' : 'status-inactive' }}">
+                                <i class="fa-solid {{ $item->status == 'public' ? 'fa-circle-check' : 'fa-circle-minus' }} me-1"></i>
+                                {{ ucfirst($item->status) }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="action-buttons justify-content-end">
+                                <a href="{{ route('admin.produk-varian.index', ['produk_id' => $item->id]) }}" class="btn-variant" title="Kelola Varian & Stok">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                </a>
+
+                                <a href="{{ route('admin.produk.gambar', $item->id) }}" class="btn-gallery" title="Kelola Galeri Gambar">
+                                    <i class="fa-solid fa-images"></i>
+                                </a>
+
+                                <a href="{{ route('admin.produk.edit', $item->id) }}" class="btn-edit" title="Ubah Data Utama">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+
+                                <form action="{{ route('admin.produk.destroy', $item->id) }}" method="POST" class="delete-form d-inline-block">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn-delete" title="Hapus Produk">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-icon-wrapper"><i class="fa-solid fa-box-open"></i></div>
+                                <h3>Data Produk Kosong</h3>
+                                <p>{{ request('search') ? 'Tidak ditemukan produk dengan kata kunci tersebut.' : 'Belum ada produk yang ditambahkan.' }}</p>
+                                @if(request('search'))
+                                    <a href="{{ route('admin.produk.index') }}" class="btn-add m-auto mt-3" style="width: max-content;">
+                                        <i class="fa-solid fa-rotate-left"></i> Kembali ke Semua Data
+                                    </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
 
+        @if($produk->hasPages())
+            <div class="custom-pagination-wrapper mt-4">
+                {{ $produk->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
+        @endif
     </div>
-
 </div>
 
-<!-- DELETE CONFIRM -->
+<style>
+/* ================= TYPOGRAPHY & COLOR MANAGEMENT ================= */
+.container-fluid {
+    font-family: 'Poppins', sans-serif;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
+}
+
+/* ================= ACTION ADD BUTTON ================= */
+.btn-add {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    text-decoration: none;
+    padding: 14px 24px;
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: none;
+    box-shadow: 0 6px 15px rgba(140, 106, 47, 0.15);
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    color: white;
+    box-shadow: 0 10px 22px rgba(140, 106, 47, 0.3);
+}
+
+/* ================= SEARCH UTILITY BAR ================= */
+.utility-bar {
+    background: white;
+    border-radius: 20px;
+    padding: 16px;
+    border: 1px solid #f5efe2;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+}
+
+.search-input-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: #faf8f5;
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid #ebdcb9;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    color: #8C6A2F;
+    font-size: 15px;
+}
+
+.custom-search-input {
+    border: none !important;
+    background: transparent !important;
+    padding: 10px 10px 10px 48px;
+    font-size: 14px;
+    color: #333;
+    box-shadow: none !important;
+    width: 100%;
+}
+
+.custom-search-input::placeholder {
+    color: #aaa;
+}
+
+.btn-clear-search {
+    background: none;
+    border: none;
+    color: #999;
+    padding: 10px;
+    margin-right: 5px;
+    transition: color 0.2s ease;
+}
+
+.btn-clear-search:hover {
+    color: #e74c3c;
+}
+
+.btn-search-submit {
+    background: #8C6A2F;
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: background 0.2s ease;
+}
+
+.btn-search-submit:hover {
+    background: #6b4f20;
+}
+
+/* ================= DATATABLE CONTAINER ================= */
+.custom-card {
+    background: white;
+    border-radius: 28px;
+    padding: 24px;
+    border: 1px solid #f5efe2;
+    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03);
+}
+
+.custom-table thead tr {
+    border-bottom: 2px solid #f5efe2;
+}
+
+.custom-table thead th {
+    border: none;
+    color: #555;
+    font-weight: 700;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    background-color: #fafaf8;
+}
+
+.custom-table tbody tr {
+    border-bottom: 1px solid #fcfbf9;
+    transition: background 0.2s ease;
+}
+
+.custom-table tbody tr:hover {
+    background: #fdfbf7;
+}
+
+.custom-table tbody td {
+    padding: 18px 20px;
+    border: none;
+}
+
+/* ================= COMPONENT INNER BADGES ================= */
+.code-badge {
+    background: #faf6ed;
+    color: #8C6A2F;
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    border: 1px solid #f4ebd6;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    width: max-content;
+    max-width: 100%;
+}
+
+.kategori-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 1px solid #f3ead7;
+}
+
+.empty-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: #faf6ef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #B68D40;
+    font-size: 20px;
+    border: 1px dashed #ebdcb9;
+}
+
+.kategori-name {
+    margin: 0 0 3px 0;
+    font-weight: 700;
+    color: #222;
+    font-size: 16px;
+}
+
+.table-desc-text {
+    font-size: 12px;
+    color: #888;
+}
+
+/* STATUS CHIPS */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.status-active {
+    background: #e8f8f5;
+    color: #1abc9c;
+}
+
+.status-inactive {
+    background: #fef9e7;
+    color: #f39c12;
+}
+
+/* BUTTON CONTROLS ACTION */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-variant, .btn-gallery, .btn-edit, .btn-delete {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-variant {
+    background: #f4f0fa;
+    color: #6f42c1;
+}
+.btn-variant:hover {
+    background: #6f42c1;
+    color: white;
+}
+
+.btn-gallery {
+    background: #eef7f9;
+    color: #03a9f4;
+}
+.btn-gallery:hover {
+    background: #03a9f4;
+    color: white;
+}
+
+.btn-edit {
+    background: #faf6ed;
+    color: #B68D40;
+}
+.btn-edit:hover {
+    background: #8C6A2F;
+    color: white;
+}
+
+.btn-delete {
+    background: #fff3f3;
+    color: #e74c3c;
+    cursor: pointer;
+}
+.btn-delete:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+/* ================= EMPTY STATE ================= */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    max-width: 450px;
+    margin: auto;
+}
+
+.empty-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    background: #faf6ed;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    color: #B68D40;
+    margin: 0 auto 20px;
+}
+
+.empty-state h3 {
+    font-weight: 700;
+    font-size: 20px;
+    color: #333;
+}
+
+.empty-state p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 0;
+}
+
+/* ================= BOOTSTRAP PAGINATION CUSTOMIZATION ================= */
+.custom-pagination-wrapper .pagination {
+    margin: 0;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.custom-pagination-wrapper .page-item .page-link {
+    border-radius: 10px;
+    border: 1px solid #f5efe2;
+    color: #555;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: #fff;
+    transition: all 0.2s ease;
+}
+
+.custom-pagination-wrapper .page-item.active .page-link {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227) !important;
+    border-color: transparent !important;
+    color: white !important;
+}
+
+.custom-pagination-wrapper .page-item .page-link:hover {
+    background-color: #faf6ed;
+    color: #8C6A2F;
+    border-color: #ebdcb9;
+}
+
+/* ================= MOBILE MEDIA BREAKPOINTS ================= */
+@media(max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+        gap: 10px;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+    
+    .custom-search-input {
+        background: #faf8f5 !important;
+        border: 1px solid #ebdcb9 !important;
+        border-radius: 12px;
+    }
+    
+    .btn-search-submit {
+        width: 100%;
+        padding: 12px;
+        border-radius: 12px;
+    }
+}
+</style>
+
 <script>
 document.querySelectorAll('.btn-delete').forEach(button => {
-    button.addEventListener('click', function () {
-
+    button.addEventListener('click', function (e) {
+        e.preventDefault();
         let form = this.closest('.delete-form');
-
         Swal.fire({
             title: 'Yakin hapus produk?',
-            text: "Data tidak bisa dikembalikan!",
+            text: "Data beserta seluruh varian & gambar tambahannya tidak bisa dikembalikan!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#f59e0b',
+            confirmButtonColor: '#8C6A2F',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Ya, hapus!'
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
         }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit();
+            if (result.isConfirmed) { 
+                form.submit(); 
             }
         });
-
     });
 });
 </script>

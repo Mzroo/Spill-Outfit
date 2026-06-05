@@ -6,104 +6,82 @@
 
 <section class="community-create-section">
 
-    <!-- HEADER -->
-    <div class="create-header">
-
-        <a
-            href="{{ route('community.index') }}"
-            class="back-btn"
-        >
-            <i class="fa-solid fa-arrow-left"></i>
-            Kembali
+    <!-- ================= BACK NAVIGATION ================= -->
+    <div class="create-header-nav">
+        <a href="{{ route('community.index') }}" class="back-btn">
+            <i class="fa-solid fa-arrow-left-long"></i>
+            <span>Kembali ke Komunitas</span>
         </a>
-
-        <h2>
-            Buat Postingan Community ✨
-        </h2>
-
-        <p>
-            Bagikan outfit, style, atau inspirasi fashion kamu.
-        </p>
-
     </div>
 
-    <!-- CARD -->
-    <div class="create-card">
-
-        <form
-            action="{{ route('community.store') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
-
+    <!-- ================= MAIN SPLIT CARD FORM ================= -->
+    <div class="create-split-card">
+        
+        <form action="{{ route('community.store') }}" method="POST" enctype="multipart/form-data" class="split-form-wrapper">
             @csrf
 
-            <!-- FOTO PREVIEW -->
-            <div class="preview-wrapper">
+            <!-- SISI KIRI: MEDIA UPLOAD AREA (VISUAL UTAMA) -->
+            <div class="form-media-left">
+                <div class="interactive-preview-box">
+                    <img id="previewImage" src="https://placehold.co/800x1000/faf8f3/8C6A2F?text=Belum+Ada+Foto" alt="Spill Outfit Preview">
+                    
+                    <!-- Overlay Panduan Upload -->
+                    <div class="upload-overlay-guide" id="uploadOverlay">
+                        <div class="guide-content">
+                            <div class="icon-circle">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <h5>Pilih Foto Outfit Terbaikmu</h5>
+                            <p>Mendukung format JPG, PNG atau WEBP</p>
+                        </div>
+                    </div>
+                </div>
 
-                <img
-                    id="previewImage"
-                    src="https://placehold.co/800x500?text=Preview+Foto"
-                >
-
-            </div>
-
-            <!-- UPLOAD -->
-            <label class="upload-btn">
-
-                <i class="fa-solid fa-image"></i>
-                Upload Foto
-
-                <input
-                    type="file"
-                    name="gambar"
-                    id="gambarInput"
-                    hidden
-                >
-
-            </label>
-
-            <!-- JUDUL -->
-            <div class="input-group">
-
-                <label>
-                    Judul (Opsional)
+                <!-- Tombol Trigger File Input -->
+                <label class="custom-upload-trigger">
+                    <i class="fa-solid fa-images"></i>
+                    <span>Pilih Berkas Foto</span>
+                    <input type="file" name="gambar" id="gambarInput" accept="image/*" hidden required>
                 </label>
-
-                <input
-                    type="text"
-                    name="judul"
-                    placeholder="Contoh: Outfit Nongkrong Hari Ini"
-                >
-
             </div>
 
-            <!-- CAPTION -->
-            <div class="input-group">
+            <!-- SISI KANAN: TEXT INPUT AREA (INFORMASI DETAIL) -->
+            <div class="form-inputs-right">
+                <div class="input-section-header">
+                    <h2>Spill Outfit Baru ✨</h2>
+                    <p>Bagikan perpaduan style, detail brand, atau inspirasi estetik fashion harianmu ke semua orang.</p>
+                </div>
 
-                <label>
-                    Caption
-                </label>
+                <div class="fields-stack">
+                    <!-- INPUT JUDUL -->
+                    <div class="custom-input-group">
+                        <label for="judul">
+                            Judul Postingan <span class="optional-tag">(Opsional)</span>
+                        </label>
+                        <div class="input-field-wrapper">
+                            <i class="fa-solid fa-heading field-decorator"></i>
+                            <input type="text" name="judul" id="judul" placeholder="Contoh: Streetwear Retro Style">
+                        </div>
+                    </div>
 
-                <textarea
-                    name="caption"
-                    placeholder="Bagikan cerita outfit kamu..."
-                    required
-                ></textarea>
+                    <!-- INPUT CAPTION -->
+                    <div class="custom-input-group">
+                        <label for="caption">Caption Cerita / Detail Style</label>
+                        <div class="input-field-wrapper textarea-mode">
+                            <i class="fa-solid fa-quote-left field-decorator"></i>
+                            <textarea name="caption" id="caption" placeholder="Spill brand kemeja, celana, atau kombinasinya di sini agar komunitas terinspirasi..." required></textarea>
+                        </div>
+                    </div>
+                </div>
 
+                <!-- BUTTON SUBMIT ACTION -->
+                <div class="action-submit-row">
+                    <button type="submit" class="premium-submit-btn">
+                        <span>Posting Sekarang</span>
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
-
-            <!-- BUTTON -->
-            <button
-                type="submit"
-                class="submit-btn"
-            >
-
-                <i class="fa-solid fa-paper-plane"></i>
-
-                Posting Sekarang
-
-            </button>
 
         </form>
 
@@ -112,185 +90,347 @@
 </section>
 
 <style>
-
-.community-create-section{
-    max-width:900px;
-    margin:auto;
+/* ================= GLOBAL BASE & CONFIG ================= */
+.community-create-section {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* HEADER */
-
-.create-header{
-    margin-bottom:30px;
+/* Back Navigation Link */
+.create-header-nav {
+    margin-bottom: 25px;
 }
 
-.back-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    text-decoration:none;
-    color:#8C6A2F;
-    font-weight:700;
-    margin-bottom:20px;
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #8C6A2F;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    padding: 6px 0;
 }
 
-.create-header h2{
-    font-size:48px;
-    font-weight:800;
-    color:#2d2d2d;
-    margin-bottom:10px;
+.back-btn:hover {
+    color: #C9A227;
+    transform: translateX(-4px);
 }
 
-.create-header p{
-    color:#777;
-    line-height:1.8;
+/* ================= THE TWO-COLUMN SPLIT CARD ================= */
+.create-split-card {
+    background: white;
+    border-radius: 32px;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f6f5f0;
+    overflow: hidden;
 }
 
-/* CARD */
-
-.create-card{
-    background:white;
-    border-radius:35px;
-    padding:35px;
-    box-shadow:
-    0 10px 35px rgba(0,0,0,.06);
+.split-form-wrapper {
+    display: grid;
+    grid-template-columns: 460px 1fr; /* Sisi kiri berukuran tetap, kanan fleksibel */
 }
 
-/* PREVIEW */
-
-.preview-wrapper{
-    margin-bottom:20px;
+/* ================= 1. LEFT SIDE: VISUAL MEDIA COMPONENT ================= */
+.form-media-left {
+    background: #faf8f5;
+    padding: 35px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    border-right: 1px solid #f3eee3;
 }
 
-.preview-wrapper img{
-    width:100%;
-    height:420px;
-    border-radius:28px;
-    object-fit:cover;
-    background:#f5f5f5;
+/* Wadah Pratinjau Gambar */
+.interactive-preview-box {
+    position: relative;
+    width: 100%;
+    height: 480px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.03);
+    background: #fdfcfb;
+    border: 2px dashed #e8e2d5;
 }
 
-/* BUTTON */
-
-.upload-btn{
-    display:inline-flex;
-    align-items:center;
-    gap:10px;
-    cursor:pointer;
-    margin-bottom:25px;
-
-    padding:14px 22px;
-
-    border-radius:999px;
-
-    background:#f3e8cf;
-    color:#8C6A2F;
-    font-weight:700;
+.interactive-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
-/* INPUT */
-
-.input-group{
-    margin-bottom:25px;
+/* Penunjuk Overlay Sebelum Upload */
+.upload-overlay-guide {
+    position: absolute;
+    inset: 0;
+    background: rgba(253, 250, 244, 0.92);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 25px;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Klik tembus ke label/input */
 }
 
-.input-group label{
-    display:block;
-    margin-bottom:12px;
-    font-weight:700;
-    color:#444;
+.guide-content .icon-circle {
+    width: 64px;
+    height: 64px;
+    background: rgba(140, 106, 47, 0.08);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: #8C6A2F;
+    font-size: 24px;
 }
 
-.input-group input,
-.input-group textarea{
-    width:100%;
-    border:none;
-    outline:none;
-    background:#f8f5ed;
-    border-radius:20px;
-    padding:18px 22px;
+.guide-content h5 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #2c2c2c;
 }
 
-.input-group textarea{
-    resize:none;
-    height:180px;
+.guide-content p {
+    margin: 0;
+    font-size: 12px;
+    color: #888;
 }
 
-/* SUBMIT */
-
-.submit-btn{
-    border:none;
-    cursor:pointer;
-
-    display:flex;
-    align-items:center;
-    gap:12px;
-
-    padding:16px 30px;
-
-    border-radius:999px;
-
-    color:white;
-    font-weight:700;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
-
-    transition:.3s;
+/* Tombol Pilih File */
+.custom-upload-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 14px 28px;
+    border-radius: 14px;
+    background: #f4eee1;
+    color: #8C6A2F;
+    font-weight: 600;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
+    transition: all 0.2s ease;
 }
 
-.submit-btn:hover{
-    transform:translateY(-2px);
+.custom-upload-trigger:hover {
+    background: #ebdcb9;
+    color: #614619;
 }
 
-/* MOBILE */
+/* ================= 2. RIGHT SIDE: INPUT FORM COMPONENT ================= */
+.form-inputs-right {
+    padding: 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-@media(max-width:768px){
+.input-section-header {
+    margin-bottom: 30px;
+}
 
-    .create-header h2{
-        font-size:38px;
+.input-section-header h2 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+    margin: 0 0 8px 0;
+}
+
+.input-section-header p {
+    color: #666;
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.fields-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Desain Kelompok Input */
+.custom-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-input-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+
+.optional-tag {
+    font-size: 12px;
+    color: #999;
+    font-weight: 400;
+}
+
+/* Pembungkus Kolom Ketik & Dekorator Ikon */
+.input-field-wrapper {
+    display: flex;
+    align-items: center;
+    background: #faf8f4;
+    border: 1px solid #efebe0;
+    border-radius: 14px;
+    padding: 0 18px;
+    transition: all 0.2s ease;
+}
+
+.input-field-wrapper:focus-within {
+    background: white;
+    border-color: #C9A227;
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+}
+
+.field-decorator {
+    color: #a89f8c;
+    font-size: 16px;
+    margin-right: 14px;
+}
+
+.input-field-wrapper input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 16px 0;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+}
+
+/* Setelan Khusus Textarea */
+.input-field-wrapper.textarea-mode {
+    align-items: flex-start;
+    padding: 16px 18px;
+}
+
+.input-field-wrapper.textarea-mode .field-decorator {
+    margin-top: 3px;
+}
+
+.input-field-wrapper textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    height: 140px;
+    font-size: 14px;
+    color: #333;
+    font-family: inherit;
+    line-height: 1.7;
+}
+
+/* Tombol Publikasikan Premium */
+.action-submit-row {
+    margin-top: 35px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.premium-submit-btn {
+    border: none;
+    outline: none;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    padding: 16px 36px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 5px 20px rgba(140, 106, 47, 0.25);
+    transition: all 0.2s ease;
+}
+
+.premium-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(140, 106, 47, 0.35);
+}
+
+/* ==================================================================
+   ================= RESPONSIVE MEDIA BREAKPOINTS ===================
+   ================================================================== */
+
+@media(max-width: 992px) {
+    .split-form-wrapper {
+        grid-template-columns: 1fr; /* Menjadi 1 kolom di tablet */
     }
 
-    .create-card{
-        padding:25px;
+    .form-media-left {
+        border-right: none;
+        border-bottom: 1px solid #f3eee3;
+        padding: 30px;
     }
 
-    .preview-wrapper img{
-        height:260px;
+    .interactive-preview-box {
+        height: 380px; /* Sedikit penyesuaian tinggi */
     }
 
+    .form-inputs-right {
+        padding: 35px;
+    }
 }
 
+@media(max-width: 576px) {
+    .community-create-section {
+        margin: 20px auto;
+    }
+
+    .create-split-card {
+        border-radius: 24px;
+    }
+
+    .form-inputs-right {
+        padding: 25px;
+    }
+
+    .input-section-header h2 {
+        font-size: 26px;
+    }
+
+    .interactive-preview-box {
+        height: 280px;
+    }
+
+    .premium-submit-btn {
+        width: 100%; /* Tombol memenuhi layar di HP */
+        justify-content: center;
+    }
+}
 </style>
 
 <script>
+const gambarInput = document.getElementById('gambarInput');
+const uploadOverlay = document.getElementById('uploadOverlay');
+const previewImage = document.getElementById('previewImage');
 
-const gambarInput =
-document.getElementById(
-    'gambarInput'
-);
-
-gambarInput.addEventListener(
-    'change',
-    function(e){
-
-        const file =
-        e.target.files[0];
-
-        if(file){
-
-            document.getElementById(
-                'previewImage'
-            ).src =
-            URL.createObjectURL(file);
-        }
+gambarInput.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        previewImage.src = URL.createObjectURL(file);
+        // Menghilangkan petunjuk panduan teks setelah foto berhasil terunggah
+        uploadOverlay.style.opacity = '0';
     }
-);
-
+});
 </script>
 
 @endsection
