@@ -21,7 +21,7 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
             $table->foreignId('user_id')
-                ->constrained()
+                ->constrained('users')
                 ->cascadeOnDelete();
 
             /*
@@ -57,7 +57,18 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | TOTAL
+            | RAJA ONGKIR
+            |--------------------------------------------------------------------------
+            */
+            $table->string('destination_id')
+                ->nullable();
+
+            $table->string('courier')
+                ->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOTAL BELANJA
             |--------------------------------------------------------------------------
             */
             $table->decimal('subtotal', 15, 2)
@@ -79,17 +90,38 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
+            | MIDTRANS
+            |--------------------------------------------------------------------------
+            */
+            $table->string('midtrans_order_id')
+                ->nullable();
+
+            $table->text('snap_token')
+                ->nullable();
+
+            $table->string('transaction_id')
+                ->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
             | STATUS
             |--------------------------------------------------------------------------
             */
             $table->enum('status', [
-                'pending',
-                'dibayar',
+
+                'unpaid',
+
+                'paid',
+
                 'diproses',
+
                 'dikirim',
+
                 'selesai',
+
                 'dibatalkan'
-            ])->default('pending');
+
+            ])->default('unpaid');
 
             $table->timestamps();
         });

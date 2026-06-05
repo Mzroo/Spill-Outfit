@@ -19,7 +19,6 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | RELASI USER
             |--------------------------------------------------------------------------
-            | 1 user = 1 profile
             */
             $table->foreignId('user_id')
                 ->unique()
@@ -28,7 +27,7 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | DATA PROFILE CUSTOMER
+            | DATA PENERIMA
             |--------------------------------------------------------------------------
             */
             $table->string('nama_penerima')
@@ -37,16 +36,35 @@ return new class extends Migration
             $table->string('no_hp')
                 ->nullable();
 
+            /*
+            |--------------------------------------------------------------------------
+            | DATA RAJA ONGKIR
+            |--------------------------------------------------------------------------
+            */
+            $table->string('provinsi_id')
+                ->nullable();
+
+            $table->string('kota_id')
+                ->nullable();
+
             $table->string('provinsi')
                 ->nullable();
 
             $table->string('kota')
                 ->nullable();
 
-            $table->text('alamat')
+            $table->string('kecamatan')
                 ->nullable();
 
             $table->string('kode_pos')
+                ->nullable();
+
+            /*
+            |--------------------------------------------------------------------------
+            | ALAMAT LENGKAP
+            |--------------------------------------------------------------------------
+            */
+            $table->text('alamat')
                 ->nullable();
 
             /*

@@ -42,10 +42,11 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             | SNAPSHOT PRODUK
             |--------------------------------------------------------------------------
-            | Disimpan supaya kalau produk berubah
-            | order lama tetap aman
             */
             $table->string('nama_produk');
+
+            $table->string('nama_varian')
+                ->nullable();
 
             $table->decimal('harga', 15, 2);
 
@@ -54,6 +55,14 @@ return new class extends Migration
 
             $table->decimal('subtotal', 15, 2)
                 ->default(0);
+
+            /*
+            |--------------------------------------------------------------------------
+            | SNAPSHOT GAMBAR
+            |--------------------------------------------------------------------------
+            */
+            $table->string('gambar')
+                ->nullable();
 
             $table->timestamps();
         });

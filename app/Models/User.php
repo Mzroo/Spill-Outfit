@@ -13,21 +13,22 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Mass Assignable
      */
     protected $fillable = [
+        'user_code',
         'name',
         'email',
+        'phone',
         'password',
+        'google_id',
+        'avatar',
         'role',
+        'is_active',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Hidden Attributes
      */
     protected $hidden = [
         'password',
@@ -35,65 +36,85 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
+     * Attribute Casting
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_active' => 'boolean',
     ];
 
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE
+    |--------------------------------------------------------------------------
+    */
     public function profile()
-{
-    return $this->hasOne(Profile::class);
-}
+    {
+        return $this->hasOne(Profile::class);
+    }
 
-/*
-|--------------------------------------------------------------------------
-| CHAT ROOM
-|--------------------------------------------------------------------------
-*/
-public function chatRoom()
-{
-    return $this->hasOne(
-        ChatRoom::class,
-        'user_id'
-    );
-}
+    /*
+    |--------------------------------------------------------------------------
+    | CHAT ROOM
+    |--------------------------------------------------------------------------
+    */
+    public function chatRoom()
+    {
+        return $this->hasOne(
+            ChatRoom::class,
+            'user_id'
+        );
+    }
 
-/*
-|--------------------------------------------------------------------------
-| COMMUNITY POST
-|--------------------------------------------------------------------------
-*/
-public function communityPosts()
-{
-    return $this->hasMany(
-        CommunityPost::class
-    );
-}
+    /*
+    |--------------------------------------------------------------------------
+    | COMMUNITY POST
+    |--------------------------------------------------------------------------
+    */
+    public function communityPosts()
+    {
+        return $this->hasMany(
+            CommunityPost::class
+        );
+    }
 
-/*
-|--------------------------------------------------------------------------
-| COMMUNITY LIKE
-|--------------------------------------------------------------------------
-*/
-public function communityLikes()
-{
-    return $this->hasMany(
-        CommunityLike::class
-    );
-}
+    /*
+    |--------------------------------------------------------------------------
+    | COMMUNITY LIKE
+    |--------------------------------------------------------------------------
+    */
+    public function communityLikes()
+    {
+        return $this->hasMany(
+            CommunityLike::class
+        );
+    }
 
-/*
-|--------------------------------------------------------------------------
-| COMMUNITY COMMENT
-|--------------------------------------------------------------------------
-*/
-public function communityComments()
-{
-    return $this->hasMany(
-        CommunityComment::class
-    );
-}
+    /*
+    |--------------------------------------------------------------------------
+    | COMMUNITY COMMENT
+    |--------------------------------------------------------------------------
+    */
+    public function communityComments()
+    {
+        return $this->hasMany(
+            CommunityComment::class
+        );
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | ROLE
+    |--------------------------------------------------------------------------
+    */
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
 }

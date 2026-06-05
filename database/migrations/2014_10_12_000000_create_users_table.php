@@ -12,13 +12,37 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+
             $table->id();
+
+            // Kode User (US001, US002, dst)
+            $table->string('user_code')->unique()->nullable();
+
+            // Data User
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('phone')->nullable();
+
+            // Login Manual
+            $table->string('password')->nullable();
+
+            // Login Google
+            $table->string('google_id')->nullable()->unique();
+            $table->string('avatar')->nullable();
+
+            // Role
+            $table->enum('role', ['admin', 'user'])
+                ->default('user');
+
+            // Status Akun
+            $table->boolean('is_active')->default(true);
+
+            // Verifikasi Email
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('role')->default('user');
+
+            // Remember Me
             $table->rememberToken();
+
             $table->timestamps();
         });
     }
