@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\ChatRoom;
-use App\Models\ChatMessage;
+use App\Models\Chat;
+use App\Models\User;
 
 class AdminChatController extends Controller
 {
@@ -16,105 +16,70 @@ class AdminChatController extends Controller
     */
     public function index()
     {
-        $rooms = ChatRoom::with([
-            'user',
-            'latestMessage'
-        ])
-        ->latest('last_message_at')
-        ->get();
+        // 1. Ambil ID chat terakhir dari masing-masing user
+        $latestChatIds = Chat::selectRaw('MAX(id) as id')
+            ->groupBy('user_id');
 
-        return view(
-            'admin.chat.index',
-            compact('rooms')
-        );
+        // 2. Tarik data chat utuh, cukup eager load 'user' karena foto sudah di tabel users
+        $chatGrouped = Chat::whereIn('id', $latestChatIds)
+            ->latest()
+            ->with(['user']) // UPDATE: Menghapus .profile karena data sudah menyatu di user
+            ->get();
+
+        return view('admin.chat.index', compact('chatGrouped'));
     }
 
     /*
     |--------------------------------------------------------------------------
-    | DETAIL CHAT
+    | DETAIL CHAT (RUANG OBROLAN SPESIFIK USER)
     |--------------------------------------------------------------------------
     */
-    public function show($id)
+    public function show($user_id)
     {
-        $room = ChatRoom::with([
-            'user',
-            'messages'
-        ])->findOrFail($id);
+        // UPDATE: Langsung findOrFail user tanpa with('profile')
+        $chatUser = User::findOrFail($user_id);
 
         /*
         |--------------------------------------------------------------------------
-        | TANDAI SUDAH DIBACA
+        | TANDAI SUDAH DIBACA BY ADMIN
         |--------------------------------------------------------------------------
         */
-        ChatMessage::where(
-            'chat_room_id',
-            $room->id
-        )
-        ->where('sender_type', 'user')
-        ->where('is_read', false)
-        ->update([
-            'is_read' => true
-        ]);
+        Chat::where('user_id', $user_id)
+            ->where('sender_type', 'user')
+            ->where('is_read', false)
+            ->update([
+                'is_read' => true
+            ]);
 
-        $messages = ChatMessage::where(
-            'chat_room_id',
-            $room->id
-        )
-        ->oldest()
-        ->get();
+        // Ambil riwayat percakapan dari lama ke baru
+        $messages = Chat::where('user_id', $user_id)
+            ->oldest()
+            ->get();
 
-        return view(
-            'admin.chat.show',
-            compact(
-                'room',
-                'messages'
-            )
-        );
+        return view('admin.chat.show', compact('messages', 'chatUser'));
     }
 
     /*
     |--------------------------------------------------------------------------
-    | BALAS CHAT
+    | BALAS CHAT CUSTOMER
     |--------------------------------------------------------------------------
     */
-    public function send(Request $request, $id)
+    public function send(Request $request, $user_id)
     {
         $request->validate([
             'message' => 'required|string'
         ]);
 
-        $room = ChatRoom::findOrFail($id);
+        User::findOrFail($user_id);
 
-        ChatMessage::create([
-
-            'chat_room_id' => $room->id,
-
+        Chat::create([
+            'user_id'     => $user_id,
+            'sender_id'   => auth()->id(),
             'sender_type' => 'admin',
-
-            /*
-            |--------------------------------------------------------------------------
-            | GANTI DENGAN AUTH ADMIN
-            |--------------------------------------------------------------------------
-            */
-            'sender_id' => auth()->id(),
-
-            'message' => $request->message,
-
-            'is_read' => false
+            'message'     => $request->message,
+            'is_read'     => false
         ]);
 
-        /*
-        |--------------------------------------------------------------------------
-        | UPDATE LAST MESSAGE
-        |--------------------------------------------------------------------------
-        */
-        $room->update([
-            'last_message_at' => now()
-        ]);
-
-        return back()->with(
-            'success',
-            'Pesan berhasil dikirim'
-        );
+        return back()->with('with_scroll', true);
     }
 }

@@ -6,7 +6,6 @@
 
 <section class="community-section">
 
-    <!-- ================= HEADER SECTION ================= -->
     <div class="community-header">
         <div class="header-text">
             <span class="community-badge">OUTFIT INSPO</span>
@@ -14,7 +13,6 @@
             <p>Bagikan style terbaikmu, cari inspirasi outfit harian, dan terhubung dengan sesama pencinta fashion modern.</p>
         </div>
         
-        <!-- BUTTON AKSI DI HEADER -->
         <div class="top-community-action">
             <a href="{{ route('community.create') }}" class="create-post-btn">
                 <i class="fa-solid fa-plus"></i>
@@ -23,7 +21,6 @@
         </div>
     </div>
 
-    <!-- ================= ALERT SUCCESS ================= -->
     @if(session('success'))
     <div class="success-alert">
         <i class="fa-solid fa-circle-check"></i>
@@ -31,13 +28,11 @@
     </div>
     @endif
 
-    <!-- ================= POSTS GRID CONTAINER ================= -->
     <div class="post-wrapper">
 
         @forelse($posts as $post)
         <div class="post-card">
             
-            <!-- IMAGE AREA DENGAN PROTEKSI LINK -->
             <div class="image-container-block">
                 <a href="{{ route('community.show', $post->id) }}" class="card-image-link">
                     @if($post->gambar)
@@ -49,11 +44,11 @@
                     @endif
                 </a>
 
-                <!-- USER GLASSMORPHISM OVERLAY (POSISI KIRI ATAS) -->
                 <div class="post-user-overlay">
                     <div class="avatar-circle">
-                        @if($post->user?->profile?->foto)
-                            <img src="{{ asset('storage/' . $post->user->profile->foto) }}" alt="Profile">
+                        {{-- DISESUAIKAN: Membaca langsung dari kolom avatar tabel users & support login Google --}}
+                        @if($post->user?->avatar)
+                            <img src="{{ str_starts_with($post->user->avatar, 'http') ? $post->user->avatar : asset('storage/' . $post->user->avatar) }}" alt="Profile">
                         @else
                             {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
                         @endif
@@ -65,7 +60,6 @@
                 </div>
             </div>
 
-            <!-- CONTENT BODY AREA -->
             <div class="post-content">
                 <a href="{{ route('community.show', $post->id) }}" class="card-text-link">
                     @if($post->judul)
@@ -75,27 +69,29 @@
                 </a>
             </div>
 
-            <!-- ACTION BUTTON INTERACTIVE FOOTER -->
             <div class="post-action-footer">
-                <!-- LIKE SYSTEM -->
                 <form action="{{ route('community.like', $post->id) }}" method="POST" class="like-form">
                     @csrf
-                    <button type="submit" class="action-btn-item btn-like" title="Suka">
-                        <i class="fa-solid fa-heart"></i>
+                    
+                    {{-- DISESUAIKAN: Mengecek status aktif like berdasarkan array JSON liked_by_users --}}
+                    @php
+                        $isLiked = auth()->check() && in_array(auth()->id(), $post->liked_by_users ?? []);
+                    @endphp
+
+                    <button type="submit" class="action-btn-item btn-like {{ $isLiked ? 'has-liked' : '' }}" title="{{ $isLiked ? 'Batal Suka' : 'Suka' }}">
+                        <i class="{{ $isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
                         <span>{{ $post->total_like }}</span>
                     </button>
                 </form>
 
-                <!-- COMMENT SYSTEM -->
                 <a href="{{ route('community.show', $post->id) }}" class="action-btn-item btn-comment" title="Komentar">
-                    <i class="fa-solid fa-comment"></i>
+                    <i class="fa-regular fa-comment"></i>
                     <span>{{ $post->total_comment }}</span>
                 </a>
             </div>
 
         </div>
         @empty
-        <!-- BLANK STATE JIKA KOSONG -->
         <div class="empty-community-state">
             <div class="blank-icon-box">
                 <i class="fa-solid fa-users"></i>
@@ -395,7 +391,7 @@
 }
 
 /* Hover States Efektif */
-.btn-like:hover {
+.btn-like:hover, .btn-like.has-liked {
     background: #fff5f5;
     border-color: #ffccd5;
     color: #e74c3c;

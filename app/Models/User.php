@@ -20,6 +20,13 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        
+        // Kolom alamat baru:
+        'provinsi',
+        'kota',
+        'kode_pos',
+        'alamat',
+        
         'password',
         'google_id',
         'avatar',
@@ -43,29 +50,19 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
     ];
-
+    
     /*
     |--------------------------------------------------------------------------
-    | PROFILE
+    | LIVE CHAT RELATION
     |--------------------------------------------------------------------------
+    | Hubungan One-to-Many antara User dan model Chat tunggal.
+    | Seorang user bisa memiliki banyak baris pesan obrolan di dalam aplikasi.
     */
-    public function profile()
+    public function chats()
     {
-        return $this->hasOne(Profile::class);
+        return $this->hasMany(Chat::class, 'user_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | CHAT ROOM
-    |--------------------------------------------------------------------------
-    */
-    public function chatRoom()
-    {
-        return $this->hasOne(
-            ChatRoom::class,
-            'user_id'
-        );
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -74,21 +71,7 @@ class User extends Authenticatable
     */
     public function communityPosts()
     {
-        return $this->hasMany(
-            CommunityPost::class
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | COMMUNITY LIKE
-    |--------------------------------------------------------------------------
-    */
-    public function communityLikes()
-    {
-        return $this->hasMany(
-            CommunityLike::class
-        );
+        return $this->hasMany(CommunityPost::class);
     }
 
     /*
@@ -98,14 +81,12 @@ class User extends Authenticatable
     */
     public function communityComments()
     {
-        return $this->hasMany(
-            CommunityComment::class
-        );
+        return $this->hasMany(CommunityComment::class);
     }
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE
+    | ROLE CHECK
     |--------------------------------------------------------------------------
     */
     public function isAdmin()

@@ -6,7 +6,6 @@
 
 <section class="community-create-section">
 
-    <!-- ================= BACK NAVIGATION ================= -->
     <div class="create-header-nav">
         <a href="{{ route('community.index') }}" class="back-btn">
             <i class="fa-solid fa-arrow-left-long"></i>
@@ -14,18 +13,15 @@
         </a>
     </div>
 
-    <!-- ================= MAIN SPLIT CARD FORM ================= -->
     <div class="create-split-card">
         
         <form action="{{ route('community.store') }}" method="POST" enctype="multipart/form-data" class="split-form-wrapper">
             @csrf
 
-            <!-- SISI KIRI: MEDIA UPLOAD AREA (VISUAL UTAMA) -->
             <div class="form-media-left">
                 <div class="interactive-preview-box">
                     <img id="previewImage" src="https://placehold.co/800x1000/faf8f3/8C6A2F?text=Belum+Ada+Foto" alt="Spill Outfit Preview">
                     
-                    <!-- Overlay Panduan Upload -->
                     <div class="upload-overlay-guide" id="uploadOverlay">
                         <div class="guide-content">
                             <div class="icon-circle">
@@ -37,15 +33,18 @@
                     </div>
                 </div>
 
-                <!-- Tombol Trigger File Input -->
                 <label class="custom-upload-trigger">
                     <i class="fa-solid fa-images"></i>
                     <span>Pilih Berkas Foto</span>
-                    <input type="file" name="gambar" id="gambarInput" accept="image/*" hidden required>
+                    <input type="file" name="gambar" id="gambarInput" accept="image/png, image/jpeg, image/jpg, image/webp" hidden required>
                 </label>
+                
+                {{-- Validasi Error Server-Side untuk Gambar --}}
+                @error('gambar')
+                    <span class="error-msg-feedback"><i class="fa-solid fa-triangle-exclamation"></i> {{ $message }}</span>
+                @enderror
             </div>
 
-            <!-- SISI KANAN: TEXT INPUT AREA (INFORMASI DETAIL) -->
             <div class="form-inputs-right">
                 <div class="input-section-header">
                     <h2>Spill Outfit Baru ✨</h2>
@@ -53,28 +52,31 @@
                 </div>
 
                 <div class="fields-stack">
-                    <!-- INPUT JUDUL -->
                     <div class="custom-input-group">
                         <label for="judul">
                             Judul Postingan <span class="optional-tag">(Opsional)</span>
                         </label>
-                        <div class="input-field-wrapper">
+                        <div class="input-field-wrapper @error('judul') border-danger-mode @enderror">
                             <i class="fa-solid fa-heading field-decorator"></i>
-                            <input type="text" name="judul" id="judul" placeholder="Contoh: Streetwear Retro Style">
+                            <input type="text" name="judul" id="judul" value="{{ old('judul') }}" placeholder="Contoh: Streetwear Retro Style">
                         </div>
+                        @error('judul')
+                            <span class="error-msg-feedback"><i class="fa-solid fa-triangle-exclamation"></i> {{ $message }}</span>
+                        @enderror
                     </div>
 
-                    <!-- INPUT CAPTION -->
                     <div class="custom-input-group">
                         <label for="caption">Caption Cerita / Detail Style</label>
-                        <div class="input-field-wrapper textarea-mode">
+                        <div class="input-field-wrapper textarea-mode @error('caption') border-danger-mode @enderror">
                             <i class="fa-solid fa-quote-left field-decorator"></i>
-                            <textarea name="caption" id="caption" placeholder="Spill brand kemeja, celana, atau kombinasinya di sini agar komunitas terinspirasi..." required></textarea>
+                            <textarea name="caption" id="caption" placeholder="Spill brand kemeja, celana, atau kombinasinya di sini agar komunitas terinspirasi..." required>{{ old('caption') }}</textarea>
                         </div>
+                        @error('caption')
+                            <span class="error-msg-feedback"><i class="fa-solid fa-triangle-exclamation"></i> {{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
 
-                <!-- BUTTON SUBMIT ACTION -->
                 <div class="action-submit-row">
                     <button type="submit" class="premium-submit-btn">
                         <span>Posting Sekarang</span>
@@ -293,8 +295,8 @@
 
 .input-field-wrapper:focus-within {
     background: white;
-    border-color: #C9A227;
-    box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+    border-color: #8C6A2F;
+    box-shadow: 0 0 0 4px rgba(140, 106, 47, 0.1);
 }
 
 .field-decorator {
@@ -335,6 +337,22 @@
     color: #333;
     font-family: inherit;
     line-height: 1.7;
+}
+
+/* FEEDBACK ERROR DEKORATOR */
+.border-danger-mode {
+    border-color: #e74c3c !important;
+    background: #fff8f8 !important;
+}
+
+.error-msg-feedback {
+    color: #e74c3c;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* Tombol Publikasikan Premium */
@@ -426,8 +444,15 @@ const previewImage = document.getElementById('previewImage');
 gambarInput.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
+        // VALIDASI CLIENT-SIDE: Proteksi Maksimal Gambar 3MB (Sesuai validasi Controller)
+        if (file.size > 3 * 1024 * 1024) {
+            alert('Ukuran file foto terlalu besar! Batas maksimal adalah 3MB.');
+            this.value = ''; // Reset input berkas
+            return;
+        }
+
+        // Jalankan pratinjau instan jika lolos validasi ukuran
         previewImage.src = URL.createObjectURL(file);
-        // Menghilangkan petunjuk panduan teks setelah foto berhasil terunggah
         uploadOverlay.style.opacity = '0';
     }
 });

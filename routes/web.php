@@ -47,8 +47,11 @@ Route::controller(UserProdukController::class)->group(function () {
 });
 
 Route::controller(UserKategoriController::class)->group(function () {
+    // Halaman Utama Semua Kategori
     Route::get('/kategori', 'index')->name('user.kategori.index');
-    Route::get('/kategori/{id}', 'show')->name('user.kategori.show');
+    
+    // Halaman Detail Kategori (Diberi prefix /detail/ agar aman dari bentrok URL)
+    Route::get('/kategori/detail/{id}', 'show')->name('user.kategori.show');
 });
 
 
@@ -89,6 +92,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', 'index')->name('user.dashboard');
         Route::get('/about', 'about')->name('about');
         Route::get('/settings', 'settings')->name('settings');
+        Route::get('/search', [UserController::class, 'search'])->name('user.search');
         Route::post('/settings/update', 'updateSettings')->name('settings.update');
     });
 
@@ -125,10 +129,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
-        Route::get('/{id}', 'show')->name('show');
-        Route::post('/{id}/like', 'like')->name('like');
-        Route::post('/{id}/comment', 'comment')->name('comment');
-        Route::delete('/{id}', 'destroy')->name('destroy');
+        
+        // Mengubah {id} menjadi {post} untuk memanfaatkan Route Model Binding
+        Route::get('/{post}', 'show')->name('show');
+        Route::post('/{post}/like', 'like')->name('like');
+        Route::post('/{post}/comment', 'comment')->name('comment');
+        Route::delete('/{post}', 'destroy')->name('destroy');
     });
 });
 
@@ -216,11 +222,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
         
-        // Chat Customer (Sisi Admin)
         Route::controller(AdminChatController::class)->prefix('chat')->name('chat.')->group(function () {
             Route::get('/', 'index')->name('index');
-            Route::get('/{id}', 'show')->name('show');
-            Route::post('/{id}/send', 'send')->name('send');
+            
+            // DISESUAIKAN: Mengubah {id} menjadi {user_id} agar pas dengan parameter Controller
+            Route::get('/{user_id}', 'show')->name('show');
+            Route::post('/{user_id}/send', 'send')->name('send');
         });
     });
 });

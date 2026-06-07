@@ -3,443 +3,309 @@
 @section('title', 'Checkout')
 
 @section('content')
+<section class="checkout-section py-5 bg-smooth-light">
+    <div class="container">
 
-<section class="checkout-section">
-<div class="container">
-
-    <div class="checkout-header">
-        <h2>Checkout Pesanan</h2>
-        <p>Lengkapi alamat & cek ongkir sebelum bayar</p>
-    </div>
-
-    {{-- Alert error validasi --}}
-    @if ($errors->any())
-        <div class="alert-error">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    <form action="{{ route('pesanan.store') }}" method="POST" id="checkout-form">
-        @csrf
-
-        <div class="checkout-wrapper">
-
-            {{-- ================= LEFT ================= --}}
-            <div class="checkout-left">
-
-                {{-- ALAMAT --}}
-                <div class="checkout-card">
-                    <h4>Alamat Pengiriman</h4>
-
-                    <div class="field-group">
-                        <label>Nama Penerima</label>
-                        <input type="text"
-                            name="nama_penerima"
-                            placeholder="Nama Penerima"
-                            value="{{ old('nama_penerima', auth()->user()->profile?->nama_penerima) }}"
-                            required>
-                    </div>
-
-                    <div class="field-group">
-                        <label>No HP</label>
-                        <input type="text"
-                            name="no_hp"
-                            placeholder="08xxxxxxxxxx"
-                            value="{{ old('no_hp', auth()->user()->profile?->no_hp) }}"
-                            required>
-                    </div>
-
-                    {{-- SEARCH DESTINATION --}}
-                    <div class="field-group dropdown-container">
-                        <label>Kota / Kecamatan Tujuan</label>
-                        <input type="text"
-                            id="search-destination"
-                            placeholder="Ketik min. 3 huruf untuk mencari..."
-                            autocomplete="off">
-                        
-                        {{-- Dropdown diposisikan relatif terhadap kontainer ini --}}
-                        <div id="destination-list" class="destination-dropdown" style="display: none;"></div>
-                    </div>
-
-                    <input type="hidden" name="destination" id="destination-id">
-
-                    <div class="field-group">
-                        <label>Alamat Lengkap</label>
-                        <textarea name="alamat"
-                            placeholder="Nama jalan, nomor rumah, RT/RW, cluster, atau patokan terdekat."
-                            rows="3"
-                            required>{{ old('alamat', auth()->user()->profile?->alamat) }}</textarea>
-                    </div>
-                </div>
-
-                {{-- ONGKIR --}}
-                <div class="checkout-card">
-                    <h4>Pengiriman</h4>
-
-                    <div class="field-group">
-                        <label>Kurir</label>
-                        <select name="courier" id="courier">
-                            <option value="jne">JNE (Jalur Nugraha Ekakurir)</option>
-                            <option value="jnt">J&T Express</option>
-                            <option value="sicepat">SiCepat Ekspres</option>
-                        </select>
-                    </div>
-
-                    <button type="button" id="btn-cek-ongkir" class="btn-secondary">
-                        <span id="btn-ongkir-label">Cek Ongkir</span>
-                        <span id="btn-ongkir-loading" style="display:none">Mengecek Tarif...</span>
-                    </button>
-
-                    <div id="ongkir-result" class="ongkir-result"></div>
-                    <div id="ongkir-error" class="ongkir-error" style="display:none"></div>
-                </div>
-
+        <div class="checkout-header mb-5 p-4 p-md-5 rounded-5 position-relative overflow-hidden shadow-sm">
+            <div class="position-relative z-index-2">
+                <span class="text-uppercase tracking-wider small fw-bold text-gold d-flex align-items-center mb-2 gap-2">
+                    <i class="mdi mdi-lock-check-outline fs-6"></i> Secure Checkout
+                </span>
+                <h2 class="fw-extrabold text-dark m-0 tracking-tight">Checkout Pesanan</h2>
+                <p class="text-muted mt-2 mb-0">Lengkapi alamat & cek ongkos kirim sebelum menyelesaikan pembayaran</p>
             </div>
+            <div class="bg-pattern-overlay"></div>
+        </div>
 
-            {{-- ================= RIGHT ================= --}}
-            <div class="checkout-right">
-
-                <div class="summary-card">
-                    <h4>Ringkasan Pesanan</h4>
-
-                    @php
-                        $subtotal = 0;
-                        $weight   = 0;
-                    @endphp
-
-                    <div class="summary-list">
-                        @foreach($keranjang as $item)
-                            @php
-                                $harga     = $item->varian->harga ?? $item->produk->harga;
-                                $subtotal += $harga * $item->qty;
-                                $weight   += ($item->produk->berat ?? 1000) * $item->qty;
-                            @endphp
-
-                            <div class="summary-item">
-                                <span class="item-name">{{ $item->produk->nama }} <span class="qty">x{{ $item->qty }}</span></span>
-                                <strong>Rp {{ number_format($harga * $item->qty, 0, ',', '.') }}</strong>
-                            </div>
+        {{-- Alert Error Validasi --}}
+        @if ($errors->any())
+            <div class="alert alert-danger border-0 rounded-4 shadow-sm p-4 mb-4 d-flex align-items-start gap-3">
+                <i class="mdi mdi-alert-circle-outline fs-4 text-danger mt-0.5"></i>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold m-0 mb-1">Periksa Kembali Data Anda:</h6>
+                    <ul class="m-0 ps-3 small text-muted">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
                         @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
+        <form action="{{ route('pesanan.store') }}" method="POST" id="checkout-form">
+            @csrf
+
+            <div class="row g-4">
+                {{-- FORM ALAMAT & PENGIRIMAN (KIRI) --}}
+                <div class="col-lg-7 col-xl-8">
+                    
+                    {{-- KARTU ALAMAT --}}
+                    <div class="checkout-premium-card border rounded-4 bg-white p-4 mb-4 shadow-sm">
+                        <h4 class="fw-bold text-dark d-flex align-items-center gap-2 mb-4 pb-2 border-bottom-dashed">
+                            <i class="mdi mdi-map-marker-outline text-gold"></i> Alamat Pengiriman
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating-custom">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Nama Penerima</label>
+                                    <input type="text" name="nama_penerima" class="form-control-luxury" placeholder="Masukkan nama penerima" value="{{ old('nama_penerima', auth()->user()->profile?->nama_penerima) }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-floating-custom">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Nomor Handphone</label>
+                                    <input type="text" name="no_hp" class="form-control-luxury" placeholder="Contoh: 0812XXXXXXXX" value="{{ old('no_hp', auth()->user()->profile?->no_hp) }}" required>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating-custom dropdown-container">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Kota / Kecamatan Tujuan</label>
+                                    <div class="position-relative">
+                                        <input type="text" id="search-destination" class="form-control-luxury ps-5" placeholder="Ketik minimal 3 huruf lokasi Anda..." autocomplete="off">
+                                        <i class="mdi mdi-magnify position-absolute start-0 top-50 translate-middle-y ms-3 fs-5 text-muted"></i>
+                                    </div>
+                                    <div id="destination-list" class="destination-dropdown shadow" style="display: none;"></div>
+                                </div>
+                                <input type="hidden" name="destination" id="destination-id">
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-floating-custom">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Alamat Lengkap</label>
+                                    <textarea name="alamat" class="form-control-luxury py-3" placeholder="Nama jalan, nomor rumah, RT/RW, nomor cluster, atau patokan terdekat." rows="3" required>{{ old('alamat', auth()->user()->profile?->alamat) }}</textarea>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <hr>
+                    {{-- KARTU EKSPEDISI PENGIRIMAN --}}
+                    <div class="checkout-premium-card border rounded-4 bg-white p-4 shadow-sm">
+                        <h4 class="fw-bold text-dark d-flex align-items-center gap-2 mb-4 pb-2 border-bottom-dashed">
+                            <i class="mdi mdi-truck-delivery-outline text-gold"></i> Metode Ekspedisi
+                        </h4>
 
-                    <div class="summary-item">
-                        <span>Subtotal Produk</span>
-                        <strong>Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-8">
+                                <div class="form-floating-custom">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Pilih Agen Kurir</label>
+                                    <div class="position-relative">
+                                        <select name="courier" id="courier" class="form-select-luxury">
+                                            <option value="jne">JNE (Jalur Nugraha Ekakurir)</option>
+                                            <option value="jnt">J&T Express</option>
+                                            <option value="sicepat">SiCepat Ekspres</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" id="btn-cek-ongkir" class="btn-check-fare w-100 d-flex align-items-center justify-content-center py-3 rounded-3 fw-bold shadow-sm transition-base">
+                                    <span id="btn-ongkir-label"><i class="mdi mdi-calculator me-1"></i> Hitung Ongkir</span>
+                                    <span id="btn-ongkir-loading" style="display:none"><i class="mdi mdi-loading mdi-spin me-1"></i> Memuat...</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="ongkir-result" class="ongkir-result mt-4"></div>
+                        <div id="ongkir-error" class="ongkir-error mt-3" style="display:none"></div>
                     </div>
 
-                    <div class="summary-item">
-                        <span>Biaya Pengiriman</span>
-                        <strong id="ongkir-text" class="text-placeholder">— (Belum dipilih)</strong>
-                    </div>
-
-                    <hr>
-
-                    <div class="summary-total">
-                        <span>Total Pembayaran</span>
-                        <strong id="grand-total">Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
-                    </div>
-
-                    <input type="hidden" name="ongkir"  id="ongkir-value" value="-1">
-                    <input type="hidden" name="weight"  id="weight-value" value="{{ $weight }}">
-                    <input type="hidden" id="subtotal-value" value="{{ $subtotal }}">
-
-                    <button type="submit" class="btn-checkout" id="btn-submit" disabled>
-                        Buat Pesanan
-                    </button>
                 </div>
 
+                {{-- RINGKASAN TAGIHAN BELANJA (KANAN) --}}
+                <div class="col-lg-5 col-xl-4">
+                    <div class="summary-checkout-card border bg-white rounded-4 p-4 shadow-sm position-sticky">
+                        <h4 class="fw-extrabold text-dark tracking-tight mb-4 pb-2 border-bottom">Ringkasan Pesanan</h4>
+
+                        @php
+                            $subtotal = 0;
+                            $weight   = 0;
+                        @endphp
+
+                        <div class="summary-list-scroll mb-4 pe-1">
+                            @foreach($keranjang as $item)
+                                @php
+                                    $harga     = $item->varian->harga ?? $item->produk->harga;
+                                    $subtotal += $harga * $item->qty;
+                                    $weight   += ($item->produk->berat ?? 1000) * $item->qty;
+                                @endphp
+
+                                <div class="d-flex justify-content-between align-items-center gap-3 py-2.5 border-bottom-dashed">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <span class="item-name text-dark fw-semibold small d-block text-truncate">{{ $item->produk->nama }}</span>
+                                        <small class="badge-qty px-2 py-0.5 rounded-pill text-gold small fw-bold bg-gold-light mt-1 d-inline-block">
+                                            Kuantitas: {{ $item->qty }}x
+                                        </small>
+                                    </div>
+                                    <strong class="text-dark small flex-shrink-0">
+                                        Rp {{ number_format($harga * $item->qty, 0, ',', '.') }}
+                                    </strong>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2.5">
+                            <span class="text-muted small">Subtotal Produk</span>
+                            <strong class="text-dark">Rp {{ number_format($subtotal, 0, ',', '.') }}</strong>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted small">Biaya Pengiriman</span>
+                            <strong id="ongkir-text" class="text-placeholder small">— Belum Dihitung</strong>
+                        </div>
+
+                        <div class="pt-3 border-top border-2">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span class="fw-bold text-dark fs-6">Total Pembayaran</span>
+                                <span id="grand-total" class="fw-extrabold text-gold fs-4">
+                                    Rp {{ number_format($subtotal, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="ongkir"  id="ongkir-value" value="-1">
+                        <input type="hidden" name="weight"  id="weight-value" value="{{ $weight }}">
+                        <input type="hidden" id="subtotal-value" value="{{ $subtotal }}">
+
+                        <button type="submit" class="btn-checkout-premium w-100 d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill text-decoration-none fw-bold shadow transition-base" id="btn-submit" disabled>
+                            <i class="mdi mdi-credit-card-outline fs-5"></i> Buat Pesanan Sekarang
+                        </button>
+
+                        <div class="text-center mt-3.5">
+                            <span class="text-muted d-inline-flex align-items-center gap-1.5" style="font-size: 11px;">
+                                <i class="mdi mdi-shield-lock-outline text-success fs-6"></i> Pembayaran Terproteksi & Garansi Sistem Aman
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-        </div>
-    </form>
-
-</div>
+        </form>
+    </div>
 </section>
 
-{{-- ================= STYLE ================= --}}
 <style>
-.checkout-section {
-    background: #f8f5ed;
-    min-height: 100vh;
-    padding: 40px 0;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    color: #333;
+/* UTILITIES & BRANDING VARIABLES */
+.checkout-section { font-family: 'Poppins', sans-serif; letter-spacing: -0.1px; }
+.bg-smooth-light { background-color: #fcfbfa; }
+.bg-smooth-gray { background-color: #f5f2eb; }
+.fw-extrabold { font-weight: 800; }
+.text-gold { color: #8C6A2F; }
+.bg-gold-light { background-color: #faf6ed; }
+.tracking-wider { letter-spacing: 1.2px; }
+.tracking-tight { letter-spacing: -0.5px; }
+.z-index-2 { z-index: 2; }
+.fs-7 { font-size: 0.82rem; }
+.border-bottom-dashed { border-bottom: 1px dashed #efe7d3 !important; }
+
+/* TRANSITION LOOPS */
+.transition-base { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+/* HEADER BRANDING BANNER */
+.checkout-header { background: #faf7f2; border: 1px solid #f3ebd9; }
+.checkout-header h2 { font-size: 32px; color: #2d2a24; }
+.bg-pattern-overlay { 
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; pointer-events: none;
+    background-image: radial-gradient(#8C6A2F 1.5px, transparent 0); background-size: 20px 20px; 
 }
 
-.container {
-    max-width: 1140px;
-    margin: 0 auto;
-    padding: 0 15px;
-}
+/* CARDS STRUCTURING */
+.checkout-premium-card, .summary-checkout-card { border-color: #f2ebd9 !important; }
+.summary-checkout-card { top: 100px; }
 
-.checkout-header {
-    text-align: center;
-    margin-bottom: 35px;
-}
-
-.checkout-header h2 {
-    font-size: 32px;
-    font-weight: 800;
-    color: #2d1e0e;
-    margin: 0;
-}
-
-.checkout-header p {
-    color: #777;
-    margin-top: 8px;
-    font-size: 15px;
-}
-
-.alert-error {
-    background: #fff0f0;
-    border: 1px solid #f5c6cb;
-    border-radius: 12px;
-    padding: 14px 20px;
-    margin-bottom: 25px;
-    color: #842029;
-    font-size: 14px;
-}
-.alert-error ul { margin: 0; padding-left: 20px; }
-
-.checkout-wrapper {
-    display: grid;
-    grid-template-columns: 1.6fr 1fr;
-    gap: 30px;
-    align-items: start;
-}
-
-.checkout-card,
-.summary-card {
-    background: #fff;
-    padding: 26px;
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(140, 106, 47, 0.06);
-    margin-bottom: 25px;
-}
-
-.checkout-card h4,
-.summary-card h4 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #2d1e0e;
-    margin-top: 0;
-    margin-bottom: 20px;
-    border-left: 4px solid #8C6A2F;
-    padding-left: 12px;
-}
-
-.field-group {
-    margin-bottom: 18px;
-}
-
-.field-group label {
-    display: block;
-    font-size: 13px;
-    font-weight: 600;
-    color: #444;
-    margin-bottom: 6px;
-}
-
-.checkout-card input[type="text"],
-.checkout-card textarea,
-.checkout-card select {
+/* RE-ENGINEERING FORM INPUT CONTROL */
+.form-control-luxury, .form-select-luxury {
     width: 100%;
-    padding: 12px 15px;
-    border-radius: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
     border: 1px solid #dcd6cc;
     font-size: 14px;
-    transition: all .2s ease;
-    box-sizing: border-box;
-    background-color: #fff;
+    background-color: #fdfcfb;
+    color: #2d2a24;
+    transition: all 0.25s;
+    outline: none !important;
 }
-
-.checkout-card input:focus,
-.checkout-card textarea:focus,
-.checkout-card select:focus {
-    outline: none;
+.form-control-luxury:focus, .form-select-luxury:focus {
     border-color: #8C6A2F;
-    box-shadow: 0 0 0 3px rgba(140, 106, 47, 0.12);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(140, 106, 47, 0.08);
+}
+.form-select-luxury {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238C6A2F' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3csvg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 12px 12px;
+    padding-right: 40px;
 }
 
-.dropdown-container {
-    position: relative;
-}
-
+/* REAL-TIME DROPDOWN RESULTS AREA */
+.dropdown-container { position: relative; }
 .destination-dropdown {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1px solid #dcd6cc;
-    border-radius: 10px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.08);
-    z-index: 999;
-    max-height: 240px;
-    overflow-y: auto;
+    position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+    background: #ffffff; border: 1px solid #ebdcb9; border-radius: 14px;
+    z-index: 1050; max-height: 220px; overflow-y: auto; padding: 6px;
 }
-
 .destination-dropdown .dest-item {
-    padding: 12px 16px;
-    font-size: 14px;
-    cursor: pointer;
-    border-bottom: 1px solid #f5f2eb;
-    color: #333;
-    transition: background .15s, color .15s;
+    padding: 10px 14px; font-size: 13.5px; border-radius: 10px;
+    cursor: pointer; color: #4a453c; transition: all 0.15s;
 }
+.destination-dropdown .dest-item:hover { background: #faf6ed; color: #8C6A2F; font-weight: 600; }
 
-.destination-dropdown .dest-item:last-child {
-    border-bottom: none;
+/* CALCULATION BUTTON INTERACTIVE */
+.btn-check-fare {
+    background-color: #ffffff; color: #8C6A2F; border: 1px solid #8C6A2F; height: 47px;
 }
+.btn-check-fare:hover:not(:disabled) { background-color: #faf6ed; color: #705423; border-color: #705423; }
+.btn-check-fare:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.destination-dropdown .dest-item:hover {
-    background: #fbf9f5;
-    color: #8C6A2F;
-    font-weight: 600;
-}
-
-.btn-secondary {
-    width: 100%;
-    padding: 13px;
-    border: 2px solid #8C6A2F;
-    border-radius: 10px;
-    background: transparent;
-    color: #8C6A2F;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all .2s ease;
-}
-
-.btn-secondary:hover {
-    background: #8C6A2F;
-    color: #fff;
-}
-
-.btn-secondary:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-}
-
-.btn-checkout {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    background: #8C6A2F;
-    color: #fff;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background .2s, transform .1s;
-    box-shadow: 0 4px 12px rgba(140, 106, 47, 0.2);
-}
-
-.btn-checkout:hover { 
-    background: #735624; 
-}
-
-.btn-checkout:disabled {
-    background: #cbd5e1;
-    color: #64748b;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-.ongkir-result {
-    margin-top: 15px;
-}
-
+/* EXPEDITION SHIPPING CONTAINER OPTION CARD */
 .ongkir-result .service-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 16px;
-    border: 1px solid #e0dbd3;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all .2s;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border: 1px solid #ebdcb9; border-radius: 12px;
+    margin-bottom: 10px; cursor: pointer; transition: all 0.25s ease; background-color: #fff;
 }
-
-.ongkir-result .service-option:hover {
-    border-color: #8C6A2F;
-    background: #fdfbf7;
-}
-
+.ongkir-result .service-option:hover { border-color: #8C6A2F; background: #faf8f5; }
 .ongkir-result .service-option.selected {
-    border-color: #8C6A2F;
-    background: #fdf6ec;
-    box-shadow: 0 0 0 1px #8C6A2F;
+    border-color: #8C6A2F; background: #faf6ed; box-shadow: 0 0 0 1px #8C6A2F;
 }
+.service-option .svc-name { font-weight: 700; color: #2d2a24; font-size: 14px; }
+.service-option .svc-etd  { font-size: 11.5px; color: #867d6c; margin-top: 3px; }
+.service-option .svc-cost { font-weight: 800; color: #8C6A2F; font-size: 16px; }
 
-.service-option .svc-name { font-weight: 600; color: #2d1e0e; font-size: 14px; }
-.service-option .svc-etd  { font-size: 12px; color: #777; margin-top: 2px; }
-.service-option .svc-cost { font-weight: 700; color: #8C6A2F; font-size: 15px; }
-
+/* ERROR LOGS FALLBACKS */
 .ongkir-error {
-    margin-top: 12px;
-    padding: 12px 16px;
-    background: #fff0f0;
-    border: 1px solid #f5c6cb;
-    border-radius: 10px;
-    font-size: 13px;
-    color: #842029;
+    padding: 12px 16px; background: #fdf2f2; border: 1px solid #f5c6cb;
+    border-radius: 12px; font-size: 13px; color: #b71c1c;
 }
 
-.summary-list {
-    max-height: 180px;
-    overflow-y: auto;
-    padding-right: 5px;
+/* SIDEBAR SUMMARY SCROLL ELEMENTS */
+.summary-list-scroll { max-height: 165px; overflow-y: auto; }
+.badge-qty { background-color: #faf6ed; border: 1px solid #f2e6cb; font-size: 10px; }
+.text-placeholder { color: #b2ab9c; font-style: italic; font-weight: 400; }
+
+/* MAIN PRIMARY CTA ACTION BUTTON */
+.btn-checkout-premium {
+    background: linear-gradient(135deg, #8C6A2F, #705423); color: white; font-size: 15px; border: none;
 }
+.btn-checkout-premium:hover:not(:disabled) { color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(140, 106, 47, 0.25) !important; }
+.btn-checkout-premium:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: none !important; cursor: not-allowed; }
 
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    font-size: 14px;
-}
+/* CUSTOM SCROLLBAR BAR DESIGN MODULE */
+.summary-list-scroll::-webkit-scrollbar, .destination-dropdown::-webkit-scrollbar { width: 5px; }
+.summary-list-scroll::-webkit-scrollbar-track, .destination-dropdown::-webkit-scrollbar-track { background: transparent; }
+.summary-list-scroll::-webkit-scrollbar-thumb, .destination-dropdown::-webkit-scrollbar-thumb { background: #ebdcb9; border-radius: 10px; }
 
-.summary-item .item-name {
-    color: #555;
-    max-width: 75%;
-}
-
-.summary-item .qty {
-    color: #999;
-    font-size: 12px;
-    font-weight: 600;
-    margin-left: 4px;
-}
-
-.text-placeholder { color: #a39e93; font-style: italic; }
-
-.summary-total {
-    display: flex;
-    justify-content: space-between;
-    font-size: 19px;
-    font-weight: 800;
-    color: #2d1e0e;
-    margin-top: 12px;
-}
-
-hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
-
-@media (max-width: 992px) {
-    .checkout-wrapper { grid-template-columns: 1fr; gap: 10px; }
-    .checkout-right   { order: -1; }
+/* COMPONENT DEVIATION MOBILE FIXES */
+@media (max-width: 991.98px) {
+    .summary-checkout-card { position: static !important; margin-bottom: 25px; }
+    .checkout-header h2 { font-size: 26px; }
+    .checkout-header { border-radius: 24px !important; }
 }
 </style>
 
-{{-- ================= SCRIPT ================= --}}
+{{-- ================= CORE LOGIC JAVASCRIPT SCRIPT ================= --}}
 <script>
 (function () {
     'use strict';
@@ -485,7 +351,7 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
     }
 
     /* -------------------------------------------------- */
-    /* Search Destination                                 */
+    /* Search Destination Ajax Trigger                    */
     /* -------------------------------------------------- */
     let searchTimer;
 
@@ -501,27 +367,26 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
 
         searchTimer = setTimeout(async () => {
             try {
-                destinationList.innerHTML = '<div class="dest-item" style="color:#888;cursor:default">Mencari lokasi...</div>';
+                destinationList.innerHTML = '<div class="dest-item small text-muted text-center py-2"><i class="mdi mdi-loading mdi-spin me-1"></i> Mencari lokasi...</div>';
                 destinationList.style.display = 'block';
 
                 const res = await fetch(`/rajaongkir/destination?search=${encodeURIComponent(q)}`);
                 const contentType = res.headers.get('content-type');
                 
                 if (!contentType || !contentType.includes('application/json')) {
-                    destinationList.innerHTML = '<div class="dest-item" style="color:#c00;cursor:default">Gagal memuat format data.</div>';
+                    destinationList.innerHTML = '<div class="dest-item text-danger small py-2">Gagal memuat format data.</div>';
                     return;
                 }
 
                 const json = await res.json();
 
-                // FIX: Validasi dicocokkan dengan kembalian service baru (status: false)
                 if (!res.ok || json.status === false) {
-                    destinationList.innerHTML = `<div class="dest-item" style="color:#c00;cursor:default">${json?.message || 'Terjadi kesalahan sistem.'}</div>`;
+                    destinationList.innerHTML = `<div class="dest-item text-danger small py-2">${json?.message || 'Terjadi kesalahan sistem.'}</div>`;
                     return;
                 }
 
                 if (!json.data || json.data.length === 0) {
-                    destinationList.innerHTML = '<div class="dest-item" style="color:#888;cursor:default">Lokasi tidak ditemukan</div>';
+                    destinationList.innerHTML = '<div class="dest-item text-muted small py-2 text-center">Lokasi tidak ditemukan</div>';
                     return;
                 }
 
@@ -529,12 +394,12 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
                     <div class="dest-item"
                          data-id="${item.id}"
                          data-label="${item.label.replace(/"/g, '&quot;')}">
-                        ${item.label}
+                        <i class="mdi mdi-map-marker-radius text-gold me-1.5"></i>${item.label}
                     </div>
                 `).join('');
 
             } catch (err) {
-                destinationList.innerHTML = `<div class="dest-item" style="color:#c00;cursor:default">Error: ${err.message}</div>`;
+                destinationList.innerHTML = `<div class="dest-item text-danger small py-2">Error: ${err.message}</div>`;
             }
         }, 400);
     });
@@ -559,12 +424,12 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
     });
 
     /* -------------------------------------------------- */
-    /* Logika Ongkir & Perhitungan                       */
+    /* Logika Kalkulasi Grand Total                       */
     /* -------------------------------------------------- */
     function resetOngkir() {
         ongkirValue.value      = '-1';
-        ongkirText.textContent = '— (Belum dipilih)';
-        ongkirText.className   = 'text-placeholder';
+        ongkirText.textContent = '— Belum Dihitung';
+        ongkirText.className   = 'text-placeholder small';
         ongkirResult.innerHTML = '';
         hideOngkirError();
         updateGrandTotal(0, false);
@@ -587,7 +452,7 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
         hideOngkirError();
 
         if (!destination) {
-            showOngkirError('Pilih kota / kecamatan tujuan terlebih dahulu melalui pencarian.');
+            showOngkirError('Silakan pilih kota / kecamatan tujuan terlebih dahulu melalui kolom pencarian.');
             searchInput.focus();
             return;
         }
@@ -622,7 +487,7 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
             renderOngkirOptions(costs);
 
         } catch (err) {
-            showOngkirError(err.message || 'Gagal mengecek ongkir. Coba lagi.');
+            showOngkirError(err.message || 'Gagal mengecek tarif ongkir. Silakan coba kembali.');
             btnSubmit.disabled = true;
         } finally {
             setOngkirLoading(false);
@@ -632,15 +497,12 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
     function renderOngkirOptions(costs) {
         ongkirResult.innerHTML = '';
 
-        console.log("Data ongkir yang diterima:", costs);
-
         if (!Array.isArray(costs) || costs.length === 0) {
-            showOngkirError('Tidak ada layanan pengiriman yang tersedia.');
+            showOngkirError('Tidak ada opsi pengiriman yang valid.');
             return;
         }
 
         costs.forEach(service => {
-            // Support fleksibel untuk data multi-struktur (Komerce & Official)
             const cost = service.cost ?? service.value ?? (service.costs?.[0]?.value) ?? 0;
             const serviceName = service.service ?? service.name ?? 'Reguler';
             const description = service.description ?? '';
@@ -651,8 +513,8 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
             div.dataset.cost = cost;
             div.innerHTML    = `
                 <div>
-                    <div class="svc-name">${serviceName} ${description ? `- ${description}` : ''}</div>
-                    <div class="svc-etd">Estimasi sampai: ${etd} ${etd.toLowerCase().includes('hari') ? '' : 'Hari'}</div>
+                    <div class="svc-name">${serviceName} ${description ? `(${description})` : ''}</div>
+                    <div class="svc-etd"><i class="mdi mdi-clock-outline me-1"></i>Estimasi: ${etd} ${etd.toLowerCase().includes('hari') ? '' : 'Hari'}</div>
                 </div>
                 <div class="svc-cost">${formatRupiah(cost)}</div>
             `;
@@ -663,7 +525,7 @@ hr { border: none; border-top: 1px dashed #e5dfd5; margin: 15px 0; }
 
                 ongkirValue.value      = cost;
                 ongkirText.textContent = formatRupiah(cost);
-                ongkirText.className   = ''; 
+                ongkirText.className   = 'text-dark'; 
                 updateGrandTotal(cost, true);
                 btnSubmit.disabled     = false; 
             });

@@ -6,93 +6,57 @@
 
 <section class="chat-wrapper">
 
-    <!-- HEADER -->
     <div class="page-header">
-
-        <h2>
-            Chat Customer
-        </h2>
-
-        <p>
-            Kelola pesan customer dan balas pertanyaan mereka.
-        </p>
-
+        <h2>Chat Customer</h2>
+        <p>Kelola pesan customer dan balas pertanyaan mereka.</p>
     </div>
 
-    <!-- LIST CHAT -->
     <div class="chat-list-card">
 
-        @forelse($rooms as $room)
+        {{-- DISESUAIKAN: Looping menggunakan data grouping dari satu tabel chats --}}
+        @forelse($chatGrouped as $item)
+            @php
+                // Ambil pesan terakhir milik user ini untuk preview teks dan waktu chat
+                $lastChat = App\Models\Chat::where('user_id', $item->user_id)
+                    ->latest()
+                    ->first();
 
-            <a
-                href="{{ route('admin.chat.show', $room->id) }}"
-                class="chat-item"
-            >
+                // Hitung jumlah pesan dari user yang belum dibaca oleh admin
+                $unread = App\Models\Chat::where('user_id', $item->user_id)
+                    ->where('sender_type', 'user')
+                    ->where('is_read', false)
+                    ->count();
+            @endphp
 
-                <!-- FOTO -->
+            {{-- DISESUAIKAN: Route diarahkan ke chat.show dengan parameter user_id --}}
+            <a href="{{ route('admin.chat.show', $item->user_id) }}" class="chat-item">
+
                 <div class="avatar">
-
-                    @if($room->user?->profile?->foto)
-
-                        <img
-                            src="{{ asset('storage/' . $room->user->profile->foto) }}"
-                            alt="profile"
-                        >
-
+                    {{-- Cek langsung ke kolom avatar/foto di tabel users --}}
+                    @if($item->user?->avatar) 
+                        <img src="{{ asset('storage/' . $item->user->avatar) }}" alt="profile">
                     @else
-
-                        {{ strtoupper(substr($room->user->name ?? 'U', 0, 1)) }}
-
+                        {{ strtoupper(substr($item->user->name ?? 'U', 0, 1)) }}
                     @endif
-
                 </div>
 
-                <!-- CONTENT -->
                 <div class="chat-content">
-
                     <div class="chat-top">
-
-                        <h5>
-                            {{ $room->user->name ?? 'User' }}
-                        </h5>
-
+                        <h5>{{ $item->user->name ?? 'Customer' }}</h5>
                         <span>
-                            {{ $room->last_message_at
-                                ? $room->last_message_at->format('H:i')
-                                : '-' }}
+                            {{ $lastChat ? $lastChat->created_at->format('H:i') : '-' }}
                         </span>
-
                     </div>
 
                     <p>
-
-                        {{ Str::limit(
-                            $room->latestMessage?->message
-                            ?? 'Belum ada pesan',
-                            50
-                        ) }}
-
+                        {{ $lastChat ? Str::limit($lastChat->message, 50) : 'Belum ada pesan' }}
                     </p>
-
                 </div>
 
-                <!-- BADGE -->
-                @php
-                    $unread =
-                    $room->messages
-                        ->where('sender_type', 'user')
-                        ->where('is_read', false)
-                        ->count();
-                @endphp
-
-                @if($unread)
-
+                @if($unread > 0)
                     <div class="badge-chat">
-
                         {{ $unread }}
-
                     </div>
-
                 @endif
 
             </a>
@@ -100,17 +64,9 @@
         @empty
 
             <div class="empty-state">
-
                 <i class="fa-solid fa-comments"></i>
-
-                <h4>
-                    Belum ada chat
-                </h4>
-
-                <p>
-                    Pesan customer akan tampil di sini.
-                </p>
-
+                <h4>Belum ada chat</h4>
+                <p>Pesan customer akan tampil di sini.</p>
             </div>
 
         @endforelse
@@ -120,168 +76,158 @@
 </section>
 
 <style>
-
-/* PAGE */
-
-.chat-wrapper{
-    padding:30px;
+/* ================= PAGE CONTAINER ================= */
+.chat-wrapper {
+    padding: 30px;
+    font-family: 'Poppins', sans-serif;
 }
 
-.page-header{
-    margin-bottom:25px;
+.page-header {
+    margin-bottom: 25px;
 }
 
-.page-header h2{
-    font-size:34px;
-    font-weight:800;
-    color:#2d2d2d;
+.page-header h2 {
+    font-size: 34px;
+    font-weight: 800;
+    color: #2d2d2d;
 }
 
-.page-header p{
-    color:#777;
+.page-header p {
+    color: #777;
 }
 
-/* CARD */
-
-.chat-list-card{
-    background:#fff;
-    border-radius:30px;
-    overflow:hidden;
-    box-shadow:
-    0 10px 30px rgba(0,0,0,.06);
+/* ================= CARD BOX LIST ================= */
+.chat-list-card {
+    background: #fff;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
 }
 
-/* ITEM */
-
-.chat-item{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    padding:24px;
-    border-bottom:1px solid #f1f1f1;
-    text-decoration:none;
-    color:inherit;
-    transition:.3s;
-    position:relative;
+/* ================= CHAT ROW ITEM ================= */
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 24px;
+    border-bottom: 1px solid #f1f1f1;
+    text-decoration: none;
+    color: inherit;
+    transition: .3s;
+    position: relative;
 }
 
-.chat-item:hover{
-    background:#faf7ef;
+.chat-item:hover {
+    background: #faf7ef;
 }
 
-/* AVATAR */
-
-.avatar{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    overflow:hidden;
-    flex-shrink:0;
-
-    background:
-    linear-gradient(
-        135deg,
-        #8C6A2F,
-        #C9A227
-    );
-
-    color:white;
-    font-size:28px;
-    font-weight:800;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
+/* ================= AVATAR PROFILE ================= */
+.avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    font-size: 28px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* CONTENT */
-
-.chat-content{
-    flex:1;
+/* ================= TEXT BLOCK CONTENT ================= */
+.chat-content {
+    flex: 1;
 }
 
-.chat-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:8px;
+.chat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
-.chat-top h5{
-    font-weight:700;
-    margin:0;
+.chat-top h5 {
+    font-weight: 700;
+    margin: 0;
+    color: #2d2d2d;
 }
 
-.chat-top span{
-    color:#888;
-    font-size:13px;
+.chat-top span {
+    color: #888;
+    font-size: 13px;
 }
 
-.chat-content p{
-    margin:0;
-    color:#777;
+.chat-content p {
+    margin: 0;
+    color: #777;
+    font-size: 14px;
 }
 
-/* BADGE */
-
-.badge-chat{
-    width:34px;
-    height:34px;
-    border-radius:50%;
-    background:#C9A227;
-    color:white;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:14px;
-    font-weight:700;
+/* ================= COUNTER BADGE ================= */
+.badge-chat {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #C9A227;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(201, 162, 39, 0.3);
 }
 
-/* EMPTY */
-
-.empty-state{
-    padding:80px;
-    text-align:center;
+/* ================= EMPTY STATE ================= */
+.empty-state {
+    padding: 80px;
+    text-align: center;
 }
 
-.empty-state i{
-    font-size:60px;
-    color:#C9A227;
-    margin-bottom:20px;
+.empty-state i {
+    font-size: 60px;
+    color: #C9A227;
+    margin-bottom: 20px;
 }
 
-.empty-state h4{
-    font-weight:700;
+.empty-state h4 {
+    font-weight: 700;
+    color: #2d2d2d;
 }
 
-/* MOBILE */
+.empty-state p {
+    color: #777;
+}
 
-@media(max-width:768px){
-
-    .chat-wrapper{
-        padding:15px;
+/* ================= MEDIA RESPONSIVE ENGINE ================= */
+@media(max-width: 768px) {
+    .chat-wrapper {
+        padding: 15px;
     }
 
-    .chat-item{
-        padding:18px;
+    .chat-item {
+        padding: 18px;
     }
 
-    .avatar{
-        width:55px;
-        height:55px;
+    .avatar {
+        width: 55px;
+        height: 55px;
+        font-size: 22px;
     }
 
-    .page-header h2{
-        font-size:28px;
+    .page-header h2 {
+        font-size: 28px;
     }
 }
-
 </style>
 
 @endsection

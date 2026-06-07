@@ -1,8 +1,11 @@
 @extends('layouts.user')
 
-@section('title', 'Chat Admin')
+@section('title', 'Chat Users')
 
 @section('content')
+
+{{-- CDN MDI (Material Design Icons) cadangan jika di master layout belum terpasang --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
 
 <section class="chat-page-container">
 
@@ -26,7 +29,7 @@
                     <i class="mdi mdi-shield-check-outline"></i>
                     <div>
                         <h5>Respon Cepat</h5>
-                        <p>Rata-rata membalas < 10 menit</p>
+                        <p>Rata-rata membalas &lt; 10 menit</p>
                     </div>
                 </div>
             </div>
@@ -74,7 +77,8 @@
                 </div>
             </div>
 
-            <div class="chat-window-body">
+            {{-- UPDATE: Ditambahkan id="userChatBody" untuk tracking JavaScript Scroll --}}
+            <div class="chat-window-body" id="userChatBody">
                 @forelse($messages as $chat)
                     @if($chat->sender_type == 'user')
                         <div class="message-row row-user">
@@ -131,7 +135,6 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* Badge Berwarna Gradasi Premium */
 .chat-badge {
     display: inline-block;
     padding: 6px 14px;
@@ -230,7 +233,6 @@
     flex-direction: column;
 }
 
-/* HEADER AREA */
 .chat-window-header {
     padding: 20px 30px;
     border-bottom: 1px solid #f1f1f1;
@@ -313,12 +315,11 @@
     color: #8C6A2F;
 }
 
-/* CHAT MESSAGES PANEL SCROLLBODY */
 .chat-window-body {
     flex: 1;
     overflow-y: auto;
     padding: 30px;
-    background: #faf8f3; /* Warna dasar krem super soft */
+    background: #faf8f3;
 }
 
 .message-row {
@@ -330,7 +331,6 @@
 .message-row.row-user { justify-content: flex-end; }
 .message-row.row-admin { justify-content: flex-start; }
 
-/* BUBBLE SYSTEM */
 .msg-bubble {
     max-width: 65%;
     padding: 14px 20px;
@@ -369,7 +369,6 @@
     color: #999;
 }
 
-/* FIELD TEXT BOX CONTROLLER */
 .chat-window-form {
     display: flex;
     align-items: center;
@@ -404,7 +403,6 @@
     color: #333;
 }
 
-/* BUTTON ACTION MODES */
 .btn-send-message {
     border: none;
     outline: none;
@@ -427,7 +425,6 @@
     box-shadow: 0 6px 20px rgba(140, 106, 47, 0.3);
 }
 
-/* BLANK STATE DESIGN */
 .chat-blank-state {
     height: 100%;
     display: flex;
@@ -442,7 +439,7 @@
     width: 80px;
     height: 80px;
     background: rgba(140, 106, 47, 0.08);
-    border-radius: 50%25;
+    border-radius: 50%; /* FIXED: Diubah dari 50%25 menjadi 50% murni agar bulat sempurna */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -473,17 +470,17 @@
 /* ================= SCREEN MEDIA RESPONSIVE SYSTEM ================= */
 @media(max-width: 992px) {
     .chat-page-container {
-        grid-template-columns: 1fr; /* Di tablet/HP sidebar pindah ke atas */
+        grid-template-columns: 1fr;
         gap: 20px;
         margin: 20px auto;
     }
     
     .chat-window-card {
-        height: 550px; /* Ukuran tinggi dikompensasi sedikit */
+        height: 550px;
     }
     
     .sidebar-illustration {
-        display: none; /* Ilustrasi hilang di layar kecil */
+        display: none;
     }
 }
 
@@ -497,7 +494,7 @@
     }
     
     .msg-bubble {
-        max-width: 85%; /* Balon teks melebar di layar HP asli */
+        max-width: 85%;
     }
     
     .chat-window-form {
@@ -505,7 +502,7 @@
     }
     
     .btn-send-message span {
-        display: none; /* Di HP hanya tampil ikon kirim saja */
+        display: none;
     }
     
     .btn-send-message {
@@ -514,5 +511,15 @@
     }
 }
 </style>
+
+{{-- UPDATE: Script otomatis dorong scrollbar ke dasar chat history --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var chatBox = document.getElementById("userChatBody");
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    });
+</script>
 
 @endsection

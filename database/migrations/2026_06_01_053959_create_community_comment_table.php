@@ -7,55 +7,35 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run migrations.
+     * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('community_comment', function (Blueprint $table) {
-
             $table->id();
 
-            /*
-            |--------------------------------------------------------------------------
-            | RELASI POST
-            |--------------------------------------------------------------------------
-            */
+            // RELASI POST
             $table->foreignId('community_post_id')
                 ->constrained('community_post')
                 ->cascadeOnDelete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | USER KOMENTAR
-            |--------------------------------------------------------------------------
-            */
+            // USER YANG MEMBERIKAN KOMENTAR
             $table->foreignId('user_id')
                 ->constrained()
                 ->cascadeOnDelete();
 
-            /*
-            |--------------------------------------------------------------------------
-            | KOMENTAR
-            |--------------------------------------------------------------------------
-            */
+            // ISI KOMENTAR
             $table->text('comment');
 
-            /*
-            |--------------------------------------------------------------------------
-            | STATUS
-            |--------------------------------------------------------------------------
-            */
-            $table->enum('status', [
-                'show',
-                'hidden'
-            ])->default('show');
+            // STATUS KOMENTAR
+            $table->enum('status', ['show', 'hidden'])->default('show');
 
             $table->timestamps();
         });
     }
 
     /**
-     * Reverse migrations.
+     * Reverse the migrations.
      */
     public function down(): void
     {

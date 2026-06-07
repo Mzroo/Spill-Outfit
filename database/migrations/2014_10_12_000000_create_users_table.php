@@ -12,27 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-
             $table->id();
 
             // Kode User (US001, US002, dst)
             $table->string('user_code')->unique()->nullable();
 
-            // Data User
+            // Data User & Utama
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('phone')->nullable();
+            $table->string('phone')->nullable(); // Bertindak sebagai nomor HP checkout
+
+            // DATA PROFIL & ALAMAT PENGIRIMAN (Tambahan Baru di Sini)
+            // Di-set nullable agar tidak error saat user baru mendaftar pertama kali
+            $table->string('provinsi')->nullable();
+            $table->string('kota')->nullable();
+            $table->string('kode_pos')->nullable();
+            $table->text('alamat')->nullable(); 
 
             // Login Manual
             $table->string('password')->nullable();
 
-            // Login Google
+            // Login Google & Foto Profil
             $table->string('google_id')->nullable()->unique();
-            $table->string('avatar')->nullable();
+            $table->string('avatar')->nullable(); // Menampung foto profil lokal / link Google
 
             // Role
-            $table->enum('role', ['admin', 'user'])
-                ->default('user');
+            $table->enum('role', ['admin', 'user'])->default('user');
 
             // Status Akun
             $table->boolean('is_active')->default(true);
@@ -42,7 +47,6 @@ return new class extends Migration
 
             // Remember Me
             $table->rememberToken();
-
             $table->timestamps();
         });
     }

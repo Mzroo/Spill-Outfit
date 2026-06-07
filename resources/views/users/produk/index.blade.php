@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Produk')
+@section('title', 'Koleksi Produk')
 
 @section('content')
 
@@ -8,50 +8,41 @@
 use Illuminate\Support\Str;
 @endphp
 
-<section class="produk-section">
+<div class="produk-section">
 
-    <!-- HEADER -->
+    <!-- ================= PREMIUM CATALOG HEADER ================= -->
     <div class="produk-header">
-
-        <div>
+        <div class="header-inner">
             <span class="sub-title">SPILL OUTFIT COLLECTION</span>
-
-            <h2>
-                Temukan Outfit <br>
-                Favoritmu ✨
-            </h2>
-
-            <p>
-                Koleksi fashion aesthetic modern untuk tampil lebih stylish.
-            </p>
+            <h2>Temukan Outfit <br>Favoritmu ✨</h2>
+            <p>Koleksi fashion aesthetic modern pilihan dengan sentuhan premium earth-tone untuk menunjang penampilan harianmu agar tampil lebih percaya diri.</p>
         </div>
-
     </div>
 
-    <!-- GRID -->
-    <div class="row g-4">
+    <!-- ================= PURE CSS PRODUCT GRID ================= -->
+    <div class="product-pure-grid">
 
         @forelse($produk as $item)
 
-        @php
-            // ambil stok dari varian (WAJIB SISTEM BARU)
-            $totalStok = $item->varian->sum('stok') ?? 0;
-
-            // ambil harga termurah dari varian (opsional)
-            $hargaMin = $item->varian->min('harga') ?? $item->harga;
-        @endphp
-
-        <div class="col-xl-3 col-lg-4 col-md-6">
+            @php
+                // Ambil rekap total stok & harga termurah dari relasi varian
+                $totalStok = $item->varian->sum('stok') ?? 0;
+                $hargaMin = $item->varian->min('harga') ?? $item->harga;
+            @endphp
 
             <div class="produk-card">
 
-                <!-- IMAGE -->
+                <!-- IMAGE ARCHITECTURE -->
                 <div class="produk-image">
 
+                    @if($totalStok <= 0)
+                        <div class="out-of-stock-badge">Stok Habis</div>
+                    @endif
+
                     @if($item->gambar)
-                        <img src="{{ asset('storage/' . $item->gambar) }}">
+                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama }}">
                     @else
-                        <img src="https://via.placeholder.com/500x700?text=No+Image">
+                        <img src="https://via.placeholder.com/500x700?text=No+Image" alt="No Image">
                     @endif
 
                     <div class="overlay-produk">
@@ -60,13 +51,13 @@ use Illuminate\Support\Str;
                         </a>
                     </div>
 
-                    <div class="wishlist">
+                    <div class="wishlist-btn">
                         <i class="mdi mdi-heart-outline"></i>
                     </div>
 
                 </div>
 
-                <!-- BODY -->
+                <!-- BODY INFO -->
                 <div class="produk-body">
 
                     <small class="kategori">
@@ -81,28 +72,24 @@ use Illuminate\Support\Str;
                         {{ Str::limit($item->deskripsi, 65) }}
                     </p>
 
-                    <!-- FOOTER -->
+                    <!-- CARD FOOTER MATRIX -->
                     <div class="produk-footer">
 
-                        <div>
-
-                            <span class="price-label">Price</span>
-
-                            <h5>
-                                Rp {{ number_format($hargaMin,0,',','.') }}
+                        <div class="price-info-side">
+                            <span class="price-label">Harga Mulai</span>
+                            <h5 class="price-value">
+                                Rp {{ number_format($hargaMin, 0, ',', '.') }}
                             </h5>
-
-                            <small style="color:#888;">
-                                Stok: {{ $totalStok }}
-                            </small>
-
+                            
+                            @if($totalStok > 0)
+                                <small class="stock-text text-available">Stok: {{ $totalStok }} pcs</small>
+                            @else
+                                <small class="stock-text text-empty">Sold Out</small>
+                            @endif
                         </div>
 
-                        <a href="{{ route('produk.show', $item->id) }}"
-                           class="btn-detail">
-
+                        <a href="{{ route('produk.show', $item->id) }}" class="btn-detail-arrow">
                             <i class="mdi mdi-arrow-right"></i>
-
                         </a>
 
                     </div>
@@ -111,289 +98,347 @@ use Illuminate\Support\Str;
 
             </div>
 
-        </div>
-
         @empty
 
-        <div class="empty-state">
-
-            <i class="mdi mdi-shopping-outline"></i>
-
-            <h4>Produk Belum Tersedia</h4>
-            <p>Belum ada produk yang ditambahkan 😢</p>
-
-        </div>
+            <!-- FALLBACK EMPTY STATE -->
+            <div class="empty-catalog-state">
+                <div class="empty-icon-box">
+                    <i class="mdi mdi-shopping-outline"></i>
+                </div>
+                <h4>Koleksi Belum Tersedia</h4>
+                <p>Maaf, belum ada produk pilihan yang ditambahkan ke dalam katalog ini 😢</p>
+            </div>
 
         @endforelse
 
     </div>
 
-    <!-- PAGINATION -->
-    <div class="pagination-wrapper">
+    <!-- ================= PAGINATION NAVIGATION ================= -->
+    <div class="pagination-container-center">
         {{ $produk->links() }}
     </div>
 
-</section>
+</div>
 
 <style>
-    /* ================= SECTION ================= */
-
-.produk-section{
-    padding:30px 10px 60px;
-    background:#fefefe;
+/* ======================== DESIGN SYSTEM KATALOG PRODUK (PURE CSS) ======================== */
+.produk-section {
+    font-family: 'Poppins', sans-serif;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    box-sizing: border-box;
+}
+.produk-section *, .produk-section *::before, .produk-section *::after {
+    box-sizing: border-box;
 }
 
-/* ================= HEADER ================= */
-
-.produk-header{
-    margin-bottom:40px;
+/* ================= CATALOG HEADER ================= */
+.produk-header {
+    margin-bottom: 45px;
+}
+.sub-title {
+    display: inline-block;
+    padding: 6px 16px;
+    background: #8C6A2F;
+    color: #ffffff;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: 1.5px;
+    box-shadow: 0 4px 10px rgba(140, 106, 47, 0.15);
+}
+.produk-header h2 {
+    font-size: 42px;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.2;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
+}
+.produk-header p {
+    max-width: 580px;
+    color: #666666;
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0;
 }
 
-.sub-title{
-    display:inline-block;
-    padding:8px 18px;
-    background:#111;
-    color:#fff;
-    border-radius:30px;
-    font-size:12px;
-    font-weight:600;
-    margin-bottom:15px;
-    letter-spacing:1px;
+/* ================= PURE CSS GRID CONTROLLER ================= */
+.product-pure-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
 }
 
-.produk-header h2{
-    font-size:46px;
-    font-weight:800;
-    color:#111;
-    line-height:1.2;
+/* ================= PRODUCT LAYOUT CARD ================= */
+.produk-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #f6f0e5;
+    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.02);
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+}
+.produk-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(140, 106, 47, 0.08);
 }
 
-.produk-header p{
-    max-width:600px;
-    color:#777;
-    font-size:14px;
-    line-height:1.8;
+/* IMAGE GRAPHICS */
+.produk-image {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 350px;
+    background: #fafaf8;
+}
+.produk-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.produk-card:hover .produk-image img {
+    transform: scale(1.06);
 }
 
-/* ================= CARD ================= */
-
-.produk-card{
-    background:#fff;
-    border-radius:22px;
-    overflow:hidden;
-    box-shadow:0 10px 30px rgba(0,0,0,0.06);
-    transition:0.35s;
-    position:relative;
+/* SPECIAL BADGES & BUTTONS OVER IMAGE */
+.out-of-stock-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #e74c3c;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    z-index: 3;
+    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
+}
+.wishlist-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+    color: #444;
+    z-index: 2;
+}
+.wishlist-btn:hover {
+    background: #e74c3c;
+    color: #ffffff;
 }
 
-.produk-card:hover{
-    transform:translateY(-10px);
-    box-shadow:0 25px 60px rgba(0,0,0,0.12);
+/* FLUID MOUSE HOVER OVERLAY */
+.overlay-produk {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(140, 106, 47, 0.4), transparent);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 30px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+.produk-card:hover .overlay-produk {
+    opacity: 1;
+}
+.overlay-produk a {
+    background: #ffffff;
+    color: #8C6A2F;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+.overlay-produk a:hover {
+    background: #8C6A2F;
+    color: #ffffff;
 }
 
-/* ================= IMAGE ================= */
-
-.produk-image{
-    position:relative;
-    overflow:hidden;
+/* ================= INFO DETAILS BODY ================= */
+.produk-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.kategori {
+    font-size: 11px;
+    color: #8C6A2F;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.produk-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 6px 0 8px 0;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+.produk-deskripsi {
+    font-size: 12.5px;
+    color: #777777;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
 }
 
-.produk-image img{
-    width:100%;
-    height:340px;
-    object-fit:cover;
-    transition:0.5s;
+/* CARD INNER BOTTOM MATRIX */
+.produk-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px dashed #f6f0e5;
+}
+.price-info-side {
+    display: flex;
+    flex-direction: column;
+}
+.price-label {
+    font-size: 11px;
+    color: #aaa;
+}
+.price-value {
+    margin: 2px 0 4px 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: #8C6A2F;
+}
+.stock-text {
+    font-size: 11px;
+    font-weight: 600;
+}
+.text-available { color: #2ecc71; }
+.text-empty { color: #e74c3c; }
+
+/* ACTION REDIRECT BUTTON LINK */
+.btn-detail-arrow {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #faf7f2;
+    border: 1px solid #e3d5ba;
+    color: #8C6A2F;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+.btn-detail-arrow:hover {
+    transform: rotate(-45deg);
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: #ffffff;
+    border-color: transparent;
 }
 
-.produk-card:hover .produk-image img{
-    transform:scale(1.08);
+/* ================= EMPTY GLOBAL FALLBACK STATE ================= */
+.empty-catalog-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px dashed #e3d5ba;
+}
+.empty-icon-box {
+    width: 80px;
+    height: 80px;
+    background: #faf7f2;
+    color: #e3d5ba;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 20px;
+}
+.empty-catalog-state h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #222222;
+    margin: 0 0 8px 0;
+}
+.empty-catalog-state p {
+    color: #777777;
+    font-size: 14px;
+    margin: 0;
 }
 
-/* ================= OVERLAY ================= */
-
-.overlay-produk{
-    position:absolute;
-    inset:0;
-    background:linear-gradient(to top, rgba(0,0,0,0.65), transparent);
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
-    padding-bottom:25px;
-    opacity:0;
-    transition:0.3s;
+/* ================= LARAVEL PAGINATION ALIGNMENT ================= */
+.pagination-container-center {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
 }
 
-.produk-card:hover .overlay-produk{
-    opacity:1;
+/* Override Vendor Default Pagination System UI for Premium Looks */
+.pagination-container-center .pagination {
+    display: flex;
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.pagination-container-center .page-item .page-link {
+    border: 1px solid #e3d5ba !important;
+    background: #ffffff !important;
+    color: #8C6A2F !important;
+    font-weight: 600;
+    margin: 0;
+    border-radius: 12px !important;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(140, 106, 47, 0.02);
+    transition: all 0.2s ease;
+}
+.pagination-container-center .page-item.active .page-link,
+.pagination-container-center .page-item .page-link:hover {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba(140, 106, 47, 0.2);
 }
 
-.overlay-produk a{
-    background:#fff;
-    color:#111;
-    padding:10px 18px;
-    border-radius:30px;
-    font-weight:600;
-    text-decoration:none;
-    transition:0.3s;
+/* ================= MEDIA RESPONSIVE GRAPHICS BREAKPOINTS ================= */
+@media (max-width: 1200px) {
+    .product-pure-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .produk-header h2 { font-size: 36px; }
 }
-
-.overlay-produk a:hover{
-    background:#111;
-    color:#fff;
+@media (max-width: 991px) {
+    .product-pure-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .produk-image { height: 300px; }
 }
-
-/* ================= WISHLIST ================= */
-
-.wishlist{
-    position:absolute;
-    top:15px;
-    right:15px;
-    width:42px;
-    height:42px;
-    background:#fff;
-    border-radius:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
-    transition:0.3s;
-}
-
-.wishlist:hover{
-    background:#ff3b5c;
-    color:#fff;
-}
-
-/* ================= BODY ================= */
-
-.produk-body{
-    padding:18px;
-}
-
-.kategori{
-    font-size:12px;
-    color:#888;
-    font-weight:500;
-}
-
-.produk-title{
-    font-size:20px;
-    font-weight:700;
-    margin:8px 0 10px;
-    color:#111;
-}
-
-.produk-deskripsi{
-    font-size:13px;
-    color:#777;
-    line-height:1.7;
-}
-
-/* ================= FOOTER ================= */
-
-.produk-footer{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-top:15px;
-}
-
-.price-label{
-    font-size:11px;
-    color:#999;
-}
-
-.produk-footer h5{
-    margin:3px 0 0;
-    font-size:18px;
-    font-weight:800;
-    color:#111;
-}
-
-/* ================= BUTTON ================= */
-
-.btn-detail{
-    width:45px;
-    height:45px;
-    border-radius:50%;
-    background:#111;
-    color:#fff;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-decoration:none;
-    font-size:18px;
-    transition:0.3s;
-}
-
-.btn-detail:hover{
-    transform:rotate(-45deg);
-    background:#333;
-}
-
-/* ================= EMPTY STATE ================= */
-
-.empty-state{
-    width:100%;
-    text-align:center;
-    padding:80px 20px;
-}
-
-.empty-state i{
-    font-size:70px;
-    color:#ccc;
-}
-
-.empty-state h4{
-    margin-top:15px;
-    font-size:24px;
-    font-weight:700;
-}
-
-.empty-state p{
-    color:#888;
-}
-
-/* ================= PAGINATION ================= */
-
-.pagination-wrapper{
-    margin-top:50px;
-    display:flex;
-    justify-content:center;
-}
-
-/* bootstrap pagination override */
-.page-link{
-    border:none !important;
-    margin:0 5px;
-    border-radius:10px !important;
-    width:40px;
-    height:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#111;
-    box-shadow:0 5px 15px rgba(0,0,0,0.05);
-}
-
-.page-item.active .page-link{
-    background:#111 !important;
-    color:#fff !important;
-}
-
-/* ================= RESPONSIVE ================= */
-
-@media (max-width:768px){
-
-    .produk-header h2{
-        font-size:34px;
-    }
-
-    .produk-image img{
-        height:260px;
-    }
-
+@media (max-width: 576px) {
+    .product-pure-grid { grid-template-columns: 1fr; gap: 20px; }
+    .produk-header h2 { font-size: 30px; }
+    .produk-image { height: 340px; }
 }
 </style>
+
 @endsection

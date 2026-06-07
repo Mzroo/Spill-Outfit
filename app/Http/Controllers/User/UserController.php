@@ -4,93 +4,143 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\CommunityPost;
+use App\Models\Produk; 
 use Illuminate\Http\Request;
-use App\Models\Profile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INDEX (DASHBOARD USER)
+    |--------------------------------------------------------------------------
+    | Menampilkan halaman depan dashboard user beserta 3 postingan terbaru
+    | dari komunitas yang statusnya sudah 'published'.
+    |
+    */
     public function index()
     {
-        // 2. Ambil 3 postingan terbaru untuk dipajang di halaman depan
-        $posts = CommunityPost::with(['user.profile'])
+        // Mengambil 3 data postingan terbaru.
+        // Eager loading diarahkan langsung ke 'user' (tanpa .profile) karena tabel profile sudah dihapus.
+        $posts = CommunityPost::with(['user'])
                     ->where('status', 'published')
                     ->latest()
                     ->take(3) // Batasi hanya 3 data agar pas dengan grid col-lg-4
                     ->get();
 
-        // 3. Kirim variabel $posts ke file blade utama Anda
+        // Kirim variabel $posts ke file blade utama Anda
         return view('users.dashboard', compact('posts'));
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | ABOUT
+    |--------------------------------------------------------------------------
+    | Menampilkan halaman informasi/tentang aplikasi toko bunga.
+    |
+    */
     public function about()
     {
         return view('users.about.index');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | SETTINGS (HALAMAN EDIT PROFILE)
+    |--------------------------------------------------------------------------
+    | Menampilkan form pengaturan akun dan alamat pengiriman user.
+    |
+    */
     public function settings()
     {
         return view('users.settings.index');
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE SETTINGS (PROSES SIMPAN DATA PROFIL & ALAMAT)
+    |--------------------------------------------------------------------------
+    | Memperbarui data pribadi user (nama, hp, alamat lengkap) dan foto profil.
+    | Data disimpan langsung ke tabel 'users' menggunakan mass assignment.
+    |
+    */
     public function updateSettings(Request $request)
     {
+        // Validasi data input yang dikirim dari form blade settings
         $request->validate([
-            'nama_penerima' => 'required|string|max:255',
-            'no_hp'         => 'nullable|string|max:20',
-            'provinsi'      => 'nullable|string|max:100',
-            'kota'          => 'nullable|string|max:100',
-            'kode_pos'      => 'nullable|string|max:10',
-            'alamat'        => 'nullable|string',
-            'foto'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'name'     => 'required|string|max:255',
+            'phone'    => 'nullable|string|max:20',
+            'provinsi' => 'nullable|string|max:100',
+            'kota'     => 'nullable|string|max:100',
+            'kode_pos' => 'nullable|string|max:10',
+            'alamat'   => 'nullable|string',
+            'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Batas maksimal 2MB
         ]);
 
         $user = auth()->user();
 
-        // ambil profile user
-        $profile = $user->profile;
+        // Ambil nama file avatar yang saat ini tersimpan di database (default)
+        $avatar = $user->avatar;
 
-        // kalau profile belum ada
-        if (!$profile) {
-
-            $profile = Profile::create([
-                'user_id' => $user->id,
-            ]);
-        }
-
-        // default foto lama
-        $foto = $profile->foto;
-
-        // upload foto baru
+        // Cek jika user mengunggah file foto profil baru
         if ($request->hasFile('foto')) {
 
-            // hapus foto lama
-            if ($profile->foto) {
-
-                Storage::disk('public')
-                    ->delete($profile->foto);
+            // Hapus foto lama dari lokal storage jika ada, dan pastikan foto lama tersebut
+            // bukan merupakan tautan eksternal (bukan link gambar profil dari Google Login)
+            if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
+                Storage::disk('public')->delete($user->avatar);
             }
 
-            // simpan foto baru
-            $foto = $request
-                ->file('foto')
-                ->store('profile', 'public');
+            // Simpan file foto baru ke folder 'profile' di dalam disk public (storage/app/public/profile)
+            $avatar = $request->file('foto')->store('profile', 'public');
         }
 
-        // update data profile
-        $profile->update([
-            'nama_penerima' => $request->nama_penerima,
-            'no_hp'         => $request->no_hp,
-            'provinsi'      => $request->provinsi,
-            'kota'          => $request->kota,
-            'kode_pos'      => $request->kode_pos,
-            'alamat'        => $request->alamat,
-            'foto'          => $foto,
+        // Jalankan perintah update data ke model User (sudah aman karena fillable sudah didaftarkan)
+        $user->update([
+            'name'     => $request->name,
+            'phone'    => $request->phone,
+            'provinsi' => $request->provinsi,
+            'kota'     => $request->kota,
+            'kode_pos' => $request->kode_pos,
+            'alamat'   => $request->alamat,
+            'avatar'   => $avatar,
         ]);
 
-        return back()->with(
-            'success',
-            'Profile berhasil diperbarui'
-        );
+        // Kembalikan ke halaman sebelumnya dengan membawa session sukses
+        return back()->with('success', 'Profile berhasil diperbarui');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEARCH PRODUK
+    |--------------------------------------------------------------------------
+    | Fitur pencarian produk katalog toko bunga berdasarkan keyword tertentu.
+    |
+    */
+    public function search(Request $request)
+    {
+        // 1. Ambil keyword dari form pencarian dan bersihkan spasi liar di awal/akhir
+        $keyword = trim($request->input('search'));
+        
+        // Jika kolom search kosong, langsung alihkan ke halaman utama katalog produk user
+        if (empty($keyword)) {
+            return redirect()->route('user.produk.index');
+        }
+
+        // 2. Jalankan Query Pencarian Produk yang sinkron dengan struktur database terbarumu
+        $produk = Produk::with(['kategori', 'varian'])
+                    ->where('status', 'public') // Memastikan produk yang dicari berstatus 'public'
+                    ->where(function($q) use ($keyword) {
+                        // Mencari kecocokan berdasarkan nama produk (menggunakan LOWER agar case-insensitive)
+                        $q->where(DB::raw('LOWER(nama)'), 'LIKE', '%' . strtolower($keyword) . '%')
+                        // Atau mencari kecocokan berdasarkan isi deskripsi produk
+                          ->orWhere(DB::raw('LOWER(deskripsi)'), 'LIKE', '%' . strtolower($keyword) . '%');
+                    })
+                    ->latest()
+                    ->paginate(12); // Membagi hasil pencarian menjadi 12 produk per halaman
+
+        // Kirim hasil pencarian dan keyword asal ke view hasil pencarian
+        return view('users.partials.search-results', compact('produk', 'keyword'));
     }
 }

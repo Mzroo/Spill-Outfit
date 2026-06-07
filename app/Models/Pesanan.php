@@ -11,103 +11,58 @@ class Pesanan extends Model
 
     protected $table = 'pesanan';
 
+    /**
+     * Field yang diizinkan untuk diisi secara massal.
+     * Kita hapus kolom alamat penerima karena sekarang diambil dari relasi user.
+     */
     protected $fillable = [
-
-        /*
-        |--------------------------------------------------------------------------
-        | USER
-        |--------------------------------------------------------------------------
-        */
         'user_id',
-
         'kode_pesanan',
-
-        /*
-        |--------------------------------------------------------------------------
-        | PENERIMA
-        |--------------------------------------------------------------------------
-        */
-        'nama_penerima',
-
-        'no_hp',
-
-        'provinsi',
-
-        'kota',
-
-        'alamat',
-
-        'kode_pos',
-
         'catatan',
-
-        /*
-        |--------------------------------------------------------------------------
-        | RAJA ONGKIR
-        |--------------------------------------------------------------------------
-        */
         'destination_id',
-
         'courier',
-
-        /*
-        |--------------------------------------------------------------------------
-        | TOTAL
-        |--------------------------------------------------------------------------
-        */
         'subtotal',
-
         'ongkir',
-
         'total_harga',
-
-        /*
-        |--------------------------------------------------------------------------
-        | PEMBAYARAN
-        |--------------------------------------------------------------------------
-        */
         'metode_pembayaran',
-
-        /*
-        |--------------------------------------------------------------------------
-        | MIDTRANS
-        |--------------------------------------------------------------------------
-        */
         'midtrans_order_id',
-
         'snap_token',
-
         'transaction_id',
-
-        /*
-        |--------------------------------------------------------------------------
-        | STATUS
-        |--------------------------------------------------------------------------
-        */
         'status',
+    ];
 
+    /**
+     * Casting tipe data agar Laravel menangani angka dengan benar.
+     * Penting untuk menjaga presisi uang pada cetak struk/invoice.
+     */
+    protected $casts = [
+        'subtotal'    => 'decimal:2',
+        'ongkir'      => 'decimal:2',
+        'total_harga' => 'decimal:2',
+        'status'      => 'string',
     ];
 
     /*
     |--------------------------------------------------------------------------
-    | RELASI USER
+    | RELASI DATABASE
     |--------------------------------------------------------------------------
     */
+
+    /**
+     * Relasi ke User.
+     * Sekarang kamu bisa mengakses alamat user dengan $pesanan->user->alamat
+     */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELASI ITEM PESANAN
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Relasi ke PesananItem.
+     * Mengambil daftar produk yang dibeli.
+     */
     public function items()
     {
-        return $this->hasMany(
-            PesananItem::class,
-            'pesanan_id'
-        );
+        return $this->hasMany(PesananItem::class, 'pesanan_id');
     }
 }

@@ -6,7 +6,6 @@
 
 <section class="community-show-section">
 
-    <!-- ================= BUTTON BACK ================= -->
     <div class="back-navigation">
         <a href="{{ route('community.index') }}" class="back-btn">
             <i class="fa-solid fa-arrow-left-long"></i>
@@ -14,7 +13,6 @@
         </a>
     </div>
 
-    <!-- ================= ALERT SUCCESS ================= -->
     @if(session('success'))
     <div class="success-alert">
         <i class="fa-solid fa-circle-check"></i>
@@ -22,14 +20,13 @@
     </div>
     @endif
 
-    <!-- ================= MAIN DETAIL CARD ================= -->
     <div class="post-detail-card">
         
-        <!-- USER PROFILE HEADER -->
         <div class="post-user-header">
             <div class="user-avatar-wrapper">
-                @if($post->user?->profile?->foto)
-                    <img src="{{ asset('storage/' . $post->user->profile->foto) }}" alt="Profile User">
+                {{-- DISESUAIKAN: Membaca avatar langsung dari tabel users --}}
+                @if($post->user?->avatar)
+                    <img src="{{ str_starts_with($post->user->avatar, 'http') ? $post->user->avatar : asset('storage/' . $post->user->avatar) }}" alt="Profile User">
                 @else
                     <div class="avatar-initials">
                         {{ strtoupper(substr($post->user?->name ?? 'U', 0, 1)) }}
@@ -43,7 +40,6 @@
             </div>
         </div>
 
-        <!-- POST TEXT CONTENT -->
         <div class="post-main-content">
             @if($post->judul)
                 <h2 class="post-title">{{ $post->judul }}</h2>
@@ -51,34 +47,35 @@
             <p class="post-caption">{{ $post->caption }}</p>
         </div>
 
-        <!-- POST IMAGE MAIN DISPLAY -->
         @if($post->gambar)
         <div class="post-image-container">
             <img src="{{ asset('storage/' . $post->gambar) }}" class="post-image-src" alt="Spill Outfit Picture">
         </div>
         @endif
 
-        <!-- ACTION FOOTER BAR -->
         <div class="post-actions-bar">
-            <!-- LIKE INTERACTION -->
             <form action="{{ route('community.like', $post->id) }}" method="POST" class="like-form-wrapper">
                 @csrf
-                <button type="submit" class="interaction-btn btn-like-action" title="Suka Postingan">
-                    <i class="fa-solid fa-heart"></i>
+                
+                {{-- DISESUAIKAN: Cek status tombol berdasarkan Array JSON liked_by_users --}}
+                @php
+                    $isLiked = auth()->check() && in_array(auth()->id(), $post->liked_by_users ?? []);
+                @endphp
+
+                <button type="submit" class="interaction-btn btn-like-action {{ $isLiked ? 'has-liked' : '' }}" title="{{ $isLiked ? 'Batal Suka' : 'Suka Postingan' }}">
+                    <i class="{{ $isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
                     <span>{{ $post->total_like }} Likes</span>
                 </button>
             </form>
 
-            <!-- COMMENT COUNTER COUNTER -->
             <div class="interaction-btn btn-comment-static">
-                <i class="fa-solid fa-comment"></i>
+                <i class="fa-regular fa-comment"></i>
                 <span>{{ $post->total_comment }} Komentar</span>
             </div>
         </div>
 
     </div>
 
-    <!-- ================= COMMENTARY DISCUSSION THREAD ================= -->
     <div class="comment-card-panel">
         
         <div class="panel-header">
@@ -86,7 +83,6 @@
             <span class="comment-count-badge">{{ $post->total_comment }}</span>
         </div>
 
-        <!-- REACTION / WRITING FORM -->
         <form action="{{ route('community.comment', $post->id) }}" method="POST" class="comment-write-form">
             @csrf
             <div class="textarea-wrapper">
@@ -100,7 +96,6 @@
             </div>
         </form>
 
-        <!-- COMMENT TIMELINE LIST -->
         <div class="comments-timeline">
 
             @forelse($post->comments as $comment)
@@ -108,8 +103,9 @@
                 
                 <div class="comment-user-node">
                     <div class="comment-avatar">
-                        @if($comment->user?->profile?->foto)
-                            <img src="{{ asset('storage/' . $comment->user->profile->foto) }}" alt="Comment User Avatar">
+                        {{-- DISESUAIKAN: Avatar komentator langsung dari tabel users --}}
+                        @if($comment->user?->avatar)
+                            <img src="{{ str_starts_with($comment->user->avatar, 'http') ? $comment->user->avatar : asset('storage/' . $comment->user->avatar) }}" alt="Comment User Avatar">
                         @else
                             <div class="avatar-initials-small">
                                 {{ strtoupper(substr($comment->user?->name ?? 'U', 0, 1)) }}
@@ -129,7 +125,6 @@
 
             </div>
             @empty
-            <!-- EMPTY FEEDBACK STATE -->
             <div class="empty-comment-placeholder">
                 <div class="placeholder-icon">
                     <i class="fa-solid fa-comments"></i>
@@ -328,7 +323,8 @@
     padding: 14px 28px;
 }
 
-.btn-like-action:hover {
+/* MODIFIKASI: Aksen hover dan status tombol ketika sudah disukai */
+.btn-like-action:hover, .btn-like-action.has-liked {
     background: #fff5f5;
     border-color: #ffccd5;
     color: #e74c3c;

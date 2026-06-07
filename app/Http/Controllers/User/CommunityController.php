@@ -5,10 +5,9 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\CommunityPost;
-use App\Models\CommunityLike;
 use App\Models\CommunityComment;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB; // Ditambahkan untuk proteksi database transaction
+use Illuminate\Support\Facades\DB;
 
 class CommunityController extends Controller
 {
@@ -19,17 +18,15 @@ class CommunityController extends Controller
     */
     public function index()
     {
-        // 1. Ambil data dari database
+        // Hubungan ke .profile dihapus karena data user & avatar langsung di tabel users
         $posts = CommunityPost::with([
-            'user.profile',
+            'user',
         ])
         ->where('status', 'published')
         ->latest()
         ->get();
 
-        // 2. Kirim variabel $posts ke file view blade Anda
         return view('users.community.index', compact('posts')); 
-        // Pastikan 'users.community.index' sesuai dengan folder letak blade index Anda
     }
 
     /*
@@ -49,12 +46,13 @@ class CommunityController extends Controller
     */
     public function show($id)
     {
+        // Membersihkan eager loading .profile pada user maupun komentar
         $post = CommunityPost::with([
-            'user.profile',
+            'user',
             'comments' => function($query) {
-                $query->where('status', 'show')->latest(); // Memastikan komentar diurutkan dari yang terbaru
+                $query->where('status', 'show')->latest();
             },
-            'comments.user.profile'
+            'comments.user'
         ])
         ->where('status', 'published')
         ->findOrFail($id);
@@ -72,7 +70,6 @@ class CommunityController extends Controller
         $request->validate([
             'judul'   => 'nullable|string|max:255',
             'caption' => 'required|string|max:2000',
-            // Gambar diubah menjadi 'required' agar layout grid komunitas tetap estetik dan penuh visual
             'gambar'  => 'required|image|mimes:jpg,jpeg,png,webp|max:3072' 
         ]);
 
@@ -83,11 +80,12 @@ class CommunityController extends Controller
         }
 
         CommunityPost::create([
-            'user_id' => auth()->id(),
-            'judul'   => $request->judul,
-            'caption' => $request->caption,
-            'gambar'  => $gambar,
-            'status'  => 'published'
+            'user_id'          => auth()->id(),
+            'judul'            => $request->judul,
+            'caption'          => $request->caption,
+            'gambar'           => $gambar,
+            'liked_by_users'   => [], // Set default berupa array kosong saat pertama buat post
+            'status'           => 'published'
         ]);
 
         return redirect()
@@ -97,7 +95,7 @@ class CommunityController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | LIKE / UNLIKE (Database Transaction Protected)
+    | LIKE / UNLIKE (Sistem Array JSON Baru)
     |--------------------------------------------------------------------------
     */
     public function like($id)
@@ -105,34 +103,42 @@ class CommunityController extends Controller
         $post = CommunityPost::findOrFail($id);
         $userId = auth()->id();
 
-        // Menggunakan Database Transaction mencegah angka total_like tidak akurat saat diakses banyak user sekaligus
-        DB::transaction(function () use ($post, $userId) {
-            $like = CommunityLike::where('community_post_id', $post->id)
-                ->where('user_id', $userId)
-                ->first();
+        // Ambil data array user yang sudah nge-like, jika kosong set jadi array kosong []
+        $likedUsers = $post->liked_by_users ?? [];
 
-            if ($like) {
-                // UNLIKE ACTION
-                $like->delete();
-                if ($post->total_like > 0) {
-                    $post->decrement('total_like');
-                }
-            } else {
-                // LIKE ACTION
-                CommunityLike::create([
-                    'community_post_id' => $post->id,
-                    'user_id'           => $userId
-                ]);
-                $post->increment('total_like');
-            }
-        });
+        // Cek apakah ID user saat ini sudah ada di dalam array tersebut
+        if (in_array($userId, $likedUsers)) {
+            
+            // ACTION: UNLIKE (Buang ID user dari array)
+            $likedUsers = array_diff($likedUsers, [$userId]);
+            
+            // Atur ulang index array agar berurutan kembali setelah dihapus
+            $likedUsers = array_values($likedUsers);
+
+            // Update data post (Decrement total_like & simpan array baru)
+            $post->update([
+                'liked_by_users' => $likedUsers,
+                'total_like'     => max(0, $post->total_like - 1) // Memastikan tidak minus
+            ]);
+
+        } else {
+            
+            // ACTION: LIKE (Tambahkan ID user ke dalam array)
+            $likedUsers[] = $userId;
+
+            // Update data post (Increment total_like & simpan array baru)
+            $post->update([
+                'liked_by_users' => $likedUsers,
+                'total_like'     => $post->total_like + 1
+            ]);
+        }
 
         return back();
     }
 
     /*
     |--------------------------------------------------------------------------
-    | KOMENTAR (Database Transaction Protected)
+    | KOMENTAR
     |--------------------------------------------------------------------------
     */
     public function comment(Request $request, $id)
@@ -171,7 +177,7 @@ class CommunityController extends Controller
             abort(403, 'Anda tidak memiliki hak akses untuk menghapus postingan ini.');
         }
 
-        // Hapus file fisik gambar dari storage lokal/cloud
+        // Hapus file fisik gambar dari storage lokal
         if ($post->gambar && Storage::disk('public')->exists($post->gambar)) {
             Storage::disk('public')->delete($post->gambar);
         }

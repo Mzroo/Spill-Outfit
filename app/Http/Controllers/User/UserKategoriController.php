@@ -8,34 +8,37 @@ use App\Models\Produk;
 
 class UserKategoriController extends Controller
 {
-    // =========================
-    // SEMUA KATEGORI
-    // =========================
-
+    // ========================================================
+    // DISPLAY SEMUA KATEGORI (HALAMAN INDEKS)
+    // ========================================================
     public function index()
     {
-        $kategori = Kategori::latest()->get();
+        // Eager loading relasi 'produk' untuk menghitung jumlah item di halaman utama kategori
+        $kategori = Kategori::with('produk')
+                            ->where('status', 'aktif')
+                            ->latest()
+                            ->get();
 
         return view('users.kategori.index', compact('kategori'));
     }
 
-    // =========================
-    // DETAIL KATEGORI
-    // =========================
-
+    // ========================================================
+    // DETAIL KATEGORI (MENAMPILKAN DAFTAR PRODUK PER KATEGORI)
+    // ========================================================
     public function show($id)
     {
-        $kategori = Kategori::findOrFail($id);
+        // PENGAMAN: Mencari SATU data kategori tunggal berdasarkan ID atau Slug.
+        // findOrFail menjamin output berbentuk Single Object, bukan Collection instance.
+        $kategori = Kategori::where('id', $id)->orWhere('slug', $id)->firstOrFail();
 
-        $produk = Produk::with('kategori')
-                    ->where('kategori_id', $id)
-                    ->where('status', 'public')
+        // Ambil produk yang terikat dengan kategori ini
+        // Eager loading 'kategori' & 'varian' agar info stok dan harga termurah aman tanpa lag
+        $produk = Produk::with(['kategori', 'varian'])
+                    ->where('kategori_id', $kategori->id)
+                    ->where('status', 'aktif')
                     ->latest()
                     ->paginate(8);
 
-        return view('users.kategori.show', compact(
-            'kategori',
-            'produk'
-        ));
+        return view('users.kategori.show', compact('kategori', 'produk'));
     }
 }

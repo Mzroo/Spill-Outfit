@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('pesanan', function (Blueprint $table) {
-
             $table->id();
 
             /*
             |--------------------------------------------------------------------------
-            | USER
+            | USER RELATION (Kunci Utama Alamat & Data Penerima)
             |--------------------------------------------------------------------------
+            | Karena alamat murni mengambil dari user, kita cukup mencatat ID user saja.
+            | Nama, No HP, Alamat, Kota, Provinsi akan ditarik langsung dari tabel users.
             */
             $table->foreignId('user_id')
                 ->constrained('users')
@@ -26,32 +27,13 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | KODE PESANAN
+            | KODE PESANAN & CATATAN TAMBAHAN
             |--------------------------------------------------------------------------
             */
             $table->string('kode_pesanan')
                 ->unique();
 
-            /*
-            |--------------------------------------------------------------------------
-            | DATA PENERIMA
-            |--------------------------------------------------------------------------
-            */
-            $table->string('nama_penerima');
-
-            $table->string('no_hp');
-
-            $table->string('provinsi')
-                ->nullable();
-
-            $table->string('kota')
-                ->nullable();
-
-            $table->text('alamat');
-
-            $table->string('kode_pos')
-                ->nullable();
-
+            // Catatan tetap diperlukan jika user ingin menulis pesan tambahan (misal: "titip tetangga")
             $table->text('catatan')
                 ->nullable();
 
@@ -82,17 +64,12 @@ return new class extends Migration
 
             /*
             |--------------------------------------------------------------------------
-            | PEMBAYARAN
+            | PEMBAYARAN & MIDTRANS
             |--------------------------------------------------------------------------
             */
             $table->string('metode_pembayaran')
                 ->nullable();
 
-            /*
-            |--------------------------------------------------------------------------
-            | MIDTRANS
-            |--------------------------------------------------------------------------
-            */
             $table->string('midtrans_order_id')
                 ->nullable();
 
@@ -108,19 +85,12 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
             $table->enum('status', [
-
                 'unpaid',
-
                 'paid',
-
                 'diproses',
-
                 'dikirim',
-
                 'selesai',
-
                 'dibatalkan'
-
             ])->default('unpaid');
 
             $table->timestamps();
