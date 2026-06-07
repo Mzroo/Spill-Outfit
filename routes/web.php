@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 // Controller Auth & Umum
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\RajaOngkirController;
 
 // Controller User
 use App\Http\Controllers\User\UserController;
@@ -73,12 +72,6 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/auth/google/callback', 'handleGoogleCallback')->name('google.callback');
 });
 
-// RajaOngkir API
-Route::controller(RajaOngkirController::class)->prefix('rajaongkir')->group(function () {
-    Route::get('/destination', 'getDestination');
-    Route::post('/cost', 'calculateCost');
-});
-
 
 /*
 |--------------------------------------------------------------------------
@@ -105,13 +98,22 @@ Route::middleware('auth')->group(function () {
     });
 
     // Pesanan & Checkout
-    Route::controller(PesananController::class)->group(function () {
-        Route::get('/pesanan', 'index')->name('pesanan.index');
-        Route::get('/checkout', 'checkout')->name('pesanan.checkout');
-        Route::post('/checkout', 'store')->name('pesanan.store');
-        Route::get('/pesanan/{id}', 'show')->name('pesanan.show');
-    });
-
+Route::controller(PesananController::class)->group(function () {
+// Rute untuk menampilkan halaman Checkout
+    Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
+    
+    // Rute untuk memproses pembuatan pesanan saat tombol "Buat Pesanan" diklik
+    Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanan.store');
+    
+    // Rute untuk melihat Daftar Riwayat Pesanan (index.blade.php)
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
+    
+    // Rute untuk melihat Detail Transaksi / Invoice (detail.blade.php)
+    Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
+    
+    // Rute API Internal AJAX untuk pencarian kota otomatis di halaman checkout
+    Route::get('/api/search-city', [PesananController::class, 'searchCity'])->name('api.search-city');
+});
     // Pembayaran
     Route::controller(PembayaranController::class)->prefix('pembayaran')->name('pembayaran.')->group(function () {
         Route::get('/{pesanan_id}', 'create')->name('create');

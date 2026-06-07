@@ -98,7 +98,7 @@
             <!-- Anggota 1 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('images/team/member1.jpg') }}" alt="M. Adriansyah">
+                    <img src="{{ asset('assets/images/anngota/m.adriansyah.jpeg') }}" alt="M. Adriansyah">
                 </div>
                 <div class="team-info">
                     <h4>M. Adriansyah</h4>

@@ -9,7 +9,7 @@
     <div class="page-header mb-4">
         <div>
             <h1 class="page-title">Ubah Detail Ukuran</h1>
-            <p class="page-subtitle">Perbarui parameter dimensi, hak urutan prioritas display, atau status ketersediaan ukuran produk.</p>
+            <p class="page-subtitle">Perbarui parameter dimensi atau status ketersediaan ukuran produk.</p>
         </div>
         <a href="{{ route('admin.ukuran.index') }}" class="btn-back">
             <i class="fa-solid fa-arrow-left-long me-2"></i>Kembali ke Daftar
@@ -62,19 +62,6 @@
                                   rows="3"
                                   placeholder="Contoh: Cocok untuk lingkar dada 88-92 cm atau panjang badan 70 cm...">{{ old('keterangan', $ukuran->keterangan) }}</textarea>
                         @error('keterangan')
-                            <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="custom-form-label mb-2">Urutan Tampil <span class="text-danger">*</span></label>
-                        <input type="number"
-                               name="urutan"
-                               class="form-control custom-input @error('urutan') is-invalid @enderror"
-                               value="{{ old('urutan', $ukuran->urutan) }}"
-                               min="1"
-                               required>
-                        @error('urutan')
                             <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
                         @enderror
                     </div>

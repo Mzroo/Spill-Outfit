@@ -22,37 +22,31 @@ class UkuranSeeder extends Seeder
                 'nama' => 'Small',
                 'kode' => 'S',
                 'keterangan' => 'Lingkar Dada: 90-95 cm, Panjang: 65 cm',
-                'urutan' => 1,
             ],
             [
                 'nama' => 'Medium',
                 'kode' => 'M',
                 'keterangan' => 'Lingkar Dada: 96-100 cm, Panjang: 68 cm',
-                'urutan' => 2,
             ],
             [
                 'nama' => 'Large',
                 'kode' => 'L',
                 'keterangan' => 'Lingkar Dada: 101-105 cm, Panjang: 71 cm',
-                'urutan' => 3,
             ],
             [
                 'nama' => 'Extra Large',
                 'kode' => 'XL',
                 'keterangan' => 'Lingkar Dada: 106-110 cm, Panjang: 74 cm',
-                'urutan' => 4,
             ],
             [
                 'nama' => 'Double Extra Large',
                 'kode' => 'XXL',
                 'keterangan' => 'Lingkar Dada: 111-115 cm, Panjang: 76 cm',
-                'urutan' => 5,
             ],
             [
                 'nama' => 'All Size',
                 'kode' => 'Fit to L',
                 'keterangan' => 'Ukuran fleksibel menggunakan karet/bahan melar, muat hingga size L harian',
-                'urutan' => 6,
             ],
         ];
 
@@ -61,7 +55,6 @@ class UkuranSeeder extends Seeder
                 'nama'       => $size['nama'],
                 'kode'       => $size['kode'],
                 'keterangan' => $size['keterangan'],
-                'urutan'     => $size['urutan'],
                 'status'     => 'aktif',
             ]);
         }

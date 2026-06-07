@@ -16,8 +16,8 @@ class UkuranController extends Controller
         // Tangkap kata kunci pencarian dari input text name="search"
         $keyword = $request->get('search');
 
-        // Query dasar diurutkan berdasarkan kolom 'urutan' agar S, M, L, XL berurutan rapi
-        $query = Ukuran::orderBy('urutan', 'asc');
+        // Mengganti 'urutan' menjadi 'id' agar S, M, L, XL diurutkan berdasarkan waktu input terkecil
+        $query = Ukuran::orderBy('id', 'asc');
 
         // Eksekusi filter jika admin melakukan pencarian
         if (!empty($keyword)) {
@@ -47,18 +47,18 @@ class UkuranController extends Controller
      */
     public function store(Request $request)
     {
+        // Aturan validasi kolom 'urutan' telah dihapus
         $request->validate([
             'nama'    => 'required|string|max:255',
             'kode'    => 'required|string|max:50|unique:ukuran,kode',
-            'urutan'  => 'required|integer|min:1',
             'status'  => 'required|in:aktif,nonaktif',
         ]);
 
+        // Proses simpan data tanpa menyertakan field 'urutan'
         Ukuran::create([
             'nama'       => $request->nama,
             'kode'       => strtoupper($request->kode), // Otomatis kapital (ex: XL, XXL)
             'keterangan' => $request->keterangan,
-            'urutan'     => $request->urutan,
             'status'     => $request->status,
         ]);
 
@@ -87,15 +87,14 @@ class UkuranController extends Controller
         $request->validate([
             'nama'    => 'required|string|max:255',
             'kode'    => 'required|string|max:50|unique:ukuran,kode,' . $id,
-            'urutan'  => 'required|integer|min:1',
             'status'  => 'required|in:aktif,nonaktif',
         ]);
 
+        // Dipastikan aman tanpa field 'urutan'
         $ukuran->update([
             'nama'       => $request->nama,
             'kode'       => strtoupper($request->kode),
             'keterangan' => $request->keterangan,
-            'urutan'     => $request->urutan,
             'status'     => $request->status,
         ]);
 

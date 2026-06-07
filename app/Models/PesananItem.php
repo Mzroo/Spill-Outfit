@@ -9,7 +9,6 @@ class PesananItem extends Model
 {
     use HasFactory;
 
-    // Paksa nama tabel ke bentuk tunggal sesuai nama di file migration-mu
     protected $table = 'pesanan_item';
 
     protected $fillable = [
@@ -44,5 +43,15 @@ class PesananItem extends Model
     public function produk()
     {
         return $this->belongsTo(Produk::class, 'produk_id');
+    }
+
+    /**
+     * TAMBAHKAN INI: Relasi ke Tabel Varian
+     * Asumsi: Nama model varian kamu adalah ProdukVarian
+     */
+    public function varian()
+    {
+        // Sesuaikan 'ProdukVarian' dengan nama class model varianmu
+        return $this->belongsTo(ProdukVarian::class, 'produk_varian_id');
     }
 }

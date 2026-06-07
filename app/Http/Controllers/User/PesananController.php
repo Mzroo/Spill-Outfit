@@ -4,14 +4,46 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\TarifPengiriman;
 use App\Models\Pesanan;
 use App\Models\PesananItem;
 use App\Models\Keranjang;
+use App\Services\MidtransService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PesananController extends Controller
 {
+    /*
+    |--------------------------------------------------------------------------
+    | INTERNAL AJAX API FOR CITY SEARCH
+    |--------------------------------------------------------------------------
+    */
+    public function searchCity(Request $request)
+    {
+        $keyword = $request->search;
+
+        $tarifPengiriman = TarifPengiriman::where('kota', 'LIKE', "%{$keyword}%")
+                                        ->orWhere('provinsi', 'LIKE', "%{$keyword}%")
+                                        ->limit(10)
+                                        ->get();
+
+        $data = $tarifPengiriman->map(function($item) {
+            return [
+                'id'        => $item->id,
+                'label'     => $item->kota . ', ' . $item->provinsi,
+                'base_cost' => $item->base_cost
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data'   => $data
+        ]);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | CHECKOUT PAGE
@@ -27,19 +59,12 @@ class PesananController extends Controller
         ->get();
 
         if ($keranjang->isEmpty()) {
-
             return redirect()
                 ->route('keranjang.index')
-                ->with(
-                    'error',
-                    'Keranjang kosong'
-                );
+                ->with('error', 'Keranjang kosong');
         }
 
-        return view(
-            'users.pesanan.checkout',
-            compact('keranjang')
-        );
+        return view('users.pesanan.checkout', compact('keranjang'));
     }
 
     /*
@@ -50,231 +75,121 @@ class PesananController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-
-            'nama_penerima' => 'required',
-
-            'no_hp' => 'required',
-
-            'alamat' => 'required',
-
-            'provinsi' => 'nullable',
-
-            'kota' => 'nullable',
-
-            'kode_pos' => 'nullable',
-
-            'courier' => 'nullable',
-
-            'metode_pembayaran' => 'required',
-
+            'courier' => 'required',
+            'ongkir'  => 'required|numeric|min:0',
         ]);
 
-        $keranjang = Keranjang::with([
-            'produk',
-            'varian'
-        ])
-        ->where('user_id', Auth::id())
-        ->get();
+        $user = Auth::user();
+
+        $keranjang = Keranjang::with(['produk', 'varian'])
+            ->where('user_id', $user->id)
+            ->get();
 
         if ($keranjang->isEmpty()) {
-
-            return back()->with(
-                'error',
-                'Keranjang kosong'
-            );
+            return back()->with('error', 'Keranjang kosong');
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | HITUNG SUBTOTAL
-        |--------------------------------------------------------------------------
-        */
+        DB::beginTransaction();
+        try {
+            // Hitung Subtotal
+            $subtotal = 0;
+            foreach ($keranjang as $item) {
+                $harga = $item->varian->harga ?? $item->produk->harga;
+                $subtotal += $harga * $item->qty;
+            }
 
-        $subtotal = 0;
+            $ongkir     = $request->ongkir;
+            $totalHarga = $subtotal + $ongkir;
 
-        foreach ($keranjang as $item) {
-
-            $harga =
-                $item->varian->harga
-                ?? $item->produk->harga;
-
-            $subtotal +=
-                $harga * $item->qty;
-        }
-
-        /*
-        |--------------------------------------------------------------------------
-        | ONGKIR
-        |--------------------------------------------------------------------------
-        */
-
-        $ongkir =
-            $request->ongkir ?? 0;
-
-        $totalHarga =
-            $subtotal + $ongkir;
-
-        /*
-        |--------------------------------------------------------------------------
-        | BUAT PESANAN
-        |--------------------------------------------------------------------------
-        */
-
-        $pesanan = Pesanan::create([
-
-            'user_id' =>
-                Auth::id(),
-
-            'kode_pesanan' =>
-                'INV-' . strtoupper(
-                    Str::random(10)
-                ),
-
-            'nama_penerima' =>
-                $request->nama_penerima,
-
-            'no_hp' =>
-                $request->no_hp,
-
-            'provinsi' =>
-                $request->provinsi,
-
-            'kota' =>
-                $request->kota,
-
-            'alamat' =>
-                $request->alamat,
-
-            'kode_pos' =>
-                $request->kode_pos,
-
-            'catatan' =>
-                $request->catatan,
-
-            'destination_id' =>
-                $request->destination_id,
-
-            'courier' =>
-                $request->courier,
-
-            'subtotal' =>
-                $subtotal,
-
-            'ongkir' =>
-                $ongkir,
-
-            'total_harga' =>
-                $totalHarga,
-
-            'metode_pembayaran' =>
-                $request->metode_pembayaran,
-
-            'status' =>
-                'unpaid',
-
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | PINDAHKAN KE PESANAN ITEM
-        |--------------------------------------------------------------------------
-        */
-
-        foreach ($keranjang as $item) {
-
-            $harga =
-                $item->varian->harga
-                ?? $item->produk->harga;
-
-            $subtotalItem =
-                $harga * $item->qty;
-
-            PesananItem::create([
-
-                'pesanan_id' =>
-                    $pesanan->id,
-
-                'produk_id' =>
-                    $item->produk_id,
-
-                'produk_varian_id' =>
-                    $item->produk_varian_id,
-
-                'nama_produk' =>
-                    $item->produk->nama,
-
-                'nama_varian' =>
-                    $item->varian?->nama,
-
-                'gambar' =>
-                    $item->produk->gambar,
-
-                'harga' =>
-                    $harga,
-
-                'qty' =>
-                    $item->qty,
-
-                'subtotal' =>
-                    $subtotalItem,
-
+            // Buat Master Pesanan
+            $pesanan = Pesanan::create([
+                'user_id'           => $user->id,
+                'kode_pesanan'      => 'INV-' . strtoupper(Str::random(10)),
+                'catatan'           => $request->catatan,
+                'subtotal'          => $subtotal,
+                'ongkir'            => $ongkir,
+                'total_harga'       => $totalHarga,
+                'metode_pembayaran' => $request->metode_pembayaran ?? 'midtrans',
+                'status'            => 'unpaid',
             ]);
+
+            // Pindahkan Item ke Pesanan Item
+            foreach ($keranjang as $item) {
+                $harga = $item->varian->harga ?? $item->produk->harga;
+                $subtotalItem = $harga * $item->qty;
+
+                $namaVarian = null;
+                if ($item->varian) {
+                    $kodeUkuran = $item->varian->ukuran->nama ?? ''; 
+                    $namaWarna  = $item->varian->warna->nama ?? '';
+                    $namaVarian = trim($kodeUkuran . ' - ' . $namaWarna, ' - ');
+                }
+
+                PesananItem::create([
+                    'pesanan_id'       => $pesanan->id,
+                    'produk_id'        => $item->produk_id,
+                    'produk_varian_id' => $item->produk_varian_id,
+                    'nama_produk'      => $item->produk->nama,
+                    'nama_varian'      => $namaVarian,
+                    'gambar'           => $item->produk->gambar,
+                    'harga'            => $harga,
+                    'qty'              => $item->qty,
+                    'subtotal'         => $subtotalItem,
+                ]);
+            }
+
+            // AMBIL SNAP TOKEN SEKALIGUS UNTUK DISIMPAN DI DATABASE (REKOMENDASI)
+            try {
+                $midtrans = new MidtransService();
+                $snapToken = $midtrans->createSnapToken($pesanan, $pesanan->items, $pesanan->ongkir, $user);
+                $pesanan->update(['snap_token' => $snapToken]);
+            } catch (\Exception $me) {
+                // Jika Midtrans gagal/down, transaksi lokal database tetap berhasil dibuat
+                Log::error('Midtrans Token Creation Failed: ' . $me->getMessage());
+            }
+
+            // Kosongkan Keranjang
+            Keranjang::where('user_id', $user->id)->delete();
+
+            DB::commit();
+
+            return redirect()
+                ->route('pesanan.show', $pesanan->id)
+                ->with('success', 'Pesanan berhasil dibuat');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memproses pesanan: ' . $e->getMessage());
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | KOSONGKAN KERANJANG
-        |--------------------------------------------------------------------------
-        */
-
-        Keranjang::where(
-            'user_id',
-            Auth::id()
-        )->delete();
-
-        /*
-        |--------------------------------------------------------------------------
-        | REDIRECT
-        |--------------------------------------------------------------------------
-        */
-
-        return redirect()
-            ->route(
-                'pesanan.show',
-                $pesanan->id
-            )
-            ->with(
-                'success',
-                'Pesanan berhasil dibuat'
-            );
     }
 
     /*
     |--------------------------------------------------------------------------
-    | DETAIL PESANAN
+    | DETAIL PESANAN & PEMICU PEMBAYARAN
     |--------------------------------------------------------------------------
     */
     public function show($id)
     {
-        $pesanan = Pesanan::with([
+        $user = Auth::user();
+        
+        $pesanan = Pesanan::with(['items']) // Cukup load items snapshot saja
+            ->where('user_id', $user->id)
+            ->findOrFail($id);
 
-            'items',
+        $snapToken = $pesanan->snap_token;
 
-            'items.produk',
+        // Backup plan: Jika saat store() gagal mendapat token, kita generate ulang di sini
+        if ($pesanan->status === 'unpaid' && !$snapToken) {
+            try {
+                $midtrans = new MidtransService();
+                $snapToken = $midtrans->createSnapToken($pesanan, $pesanan->items, $pesanan->ongkir, $user);
+                $pesanan->update(['snap_token' => $snapToken]);
+            } catch (\Exception $e) {
+                Log::error('Midtrans Show Generate Failed: ' . $e->getMessage());
+            }
+        }
 
-            'items.varian'
-
-        ])
-        ->where(
-            'user_id',
-            Auth::id()
-        )
-        ->findOrFail($id);
-
-        return view(
-            'users.pesanan.detail',
-            compact('pesanan')
-        );
+        return view('users.pesanan.detail', compact('pesanan', 'snapToken'));
     }
 
     /*
@@ -284,16 +199,12 @@ class PesananController extends Controller
     */
     public function index()
     {
-        $pesanan = Pesanan::where(
-            'user_id',
-            Auth::id()
-        )
-        ->latest()
-        ->get();
+        // Menambahkan with('items') untuk mencegah N+1 Query bug pada index blade
+        $pesanan = Pesanan::with('items')
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
 
-        return view(
-            'users.pesanan.index',
-            compact('pesanan')
-        );
+        return view('users.pesanan.index', compact('pesanan'));
     }
 }

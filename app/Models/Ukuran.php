@@ -15,7 +15,6 @@ class Ukuran extends Model
         'nama',
         'kode',
         'keterangan',
-        'urutan',
         'status'
     ];
 

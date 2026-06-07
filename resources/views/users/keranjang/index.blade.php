@@ -152,7 +152,7 @@
                     </div>
 
                     @if($keranjang->count() > 0)
-                        <a href="{{ route('pesanan.checkout') }}" class="btn-checkout-premium w-100 d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill text-decoration-none fw-bold shadow transition-base">
+                        <a href="{{ route('checkout') }}" class="btn-checkout-premium w-100 d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill text-decoration-none fw-bold shadow transition-base">
                             <i class="mdi mdi-lock-outline fs-5"></i> Lanjut ke Checkout
                         </a>
                     @else

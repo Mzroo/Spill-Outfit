@@ -533,6 +533,9 @@
                     <a href="{{ route('settings') }}">
                         <i class="mdi mdi-cog-outline"></i> Settings
                     </a>
+                    <a href="{{ route('pesanan.index') }}">
+                        <i class="di mdi-clock-check-outline"></i> Riwayat Pesanan
+                    </a>
                     <form action="{{ route('logout') }}" method="POST" class="m-0">
                         @csrf
                         <button type="submit">

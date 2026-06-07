@@ -12,26 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('ukuran', function (Blueprint $table) {
-
             $table->id();
 
-            // Nama ukuran
+            // Nama ukuran (Small, Medium, Large)
             $table->string('nama');
-            // contoh: Small, Medium, Large
 
-            // Kode ukuran
+            // Kode ukuran (S, M, L, XL)
             $table->string('kode')->unique();
-            // contoh: S, M, L, XL
 
-            // Keterangan ukuran
+            // Keterangan ukuran (Lingkar dada 90-95 cm)
             $table->string('keterangan')
                 ->nullable();
-            // contoh: Lingkar dada 90-95 cm
-
-            // Urutan tampil
-            $table->integer('urutan')
-                ->default(0);
-
+            
             // Status ukuran
             $table->enum('status', [
                 'aktif',

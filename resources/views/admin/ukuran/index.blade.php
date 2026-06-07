@@ -9,7 +9,7 @@
     <div class="page-header mb-4">
         <div>
             <h1 class="page-title">Manajemen Ukuran</h1>
-            <p class="page-subtitle">Kelola daftar variasi ukuran standar produk outfit, kontrol urutan display, dan status aktifnya.</p>
+            <p class="page-subtitle">Kelola daftar variasi ukuran standar produk outfit beserta status aktifnya.</p>
         </div>
 
         <a href="{{ route('admin.ukuran.create') }}" class="btn-add">
@@ -48,7 +48,6 @@
                         <th width="140">Kode</th>
                         <th>Nama Ukuran</th>
                         <th>Keterangan</th>
-                        <th width="120" class="text-center">Urutan</th>
                         <th width="120" class="text-center">Status</th>
                         <th width="150" class="text-end">Aksi</th>
                     </tr>
@@ -72,12 +71,6 @@
 
                         <td class="text-muted">
                             {{ $item->keterangan ?? '-' }}
-                        </td>
-
-                        <td class="text-center">
-                            <span class="order-badge">
-                                {{ $item->urutan }}
-                            </span>
                         </td>
 
                         <td class="text-center">
@@ -110,7 +103,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7">
+                        <td colspan="6">
                             <div class="empty-state">
                                 <div class="empty-icon-wrapper">
                                     <i class="fa-solid fa-box-open"></i>
@@ -314,14 +307,12 @@
     border-radius: 10px;
     font-size: 12.5px;
     font-weight: 700;
-    font-family: 'Poppins', sans-serif; /* Diubah dari mono ke Poppins agar teks panjang lebih ramping */
+    font-family: 'Poppins', sans-serif;
     border: 1px solid #f4ebd6;
-    
-    /* Solusi agar background mengikuti text & flexbox aman: */
     display: inline-flex;
     align-items: center;
-    white-space: nowrap; /* Mencegah teks patah jadi 2 baris */
-    width: max-content;  /* Background otomatis melar selebar teksnya */
+    white-space: nowrap;
+    width: max-content;
     max-width: 100%;
 }
 
@@ -331,15 +322,7 @@
     font-size: 15px;
 }
 
-.order-badge {
-    background: #f5f4f8;
-    color: #555;
-    padding: 4px 12px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    font-weight: 600;
-    border: 1px solid #e5e4e9;
-}
+/* Style .order-badge dihapus dari CSS karena komponennya sudah tidak digunakan */
 
 /* STATUS CHIPS */
 .status-badge {

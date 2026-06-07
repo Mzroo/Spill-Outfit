@@ -9,7 +9,7 @@
     <div class="page-header mb-4">
         <div>
             <h1 class="page-title">Tambah Ukuran Baru</h1>
-            <p class="page-subtitle">Buat variasi dimensi atau size charts baru untuk standar manajemen inventori inventaris outfit.</p>
+            <p class="page-subtitle">Buat variasi dimensi atau size charts baru untuk standar manajemen inventaris outfit.</p>
         </div>
         <a href="{{ route('admin.ukuran.index') }}" class="btn-back">
             <i class="fa-solid fa-arrow-left-long me-2"></i>Kembali ke Daftar
@@ -61,20 +61,6 @@
                                   rows="3"
                                   placeholder="Contoh: Cocok untuk lingkar dada 88-92 cm atau panjang badan 70 cm...">{{ old('keterangan') }}</textarea>
                         @error('keterangan')
-                            <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="custom-form-label mb-2">Urutan Tampil <span class="text-danger">*</span></label>
-                        <input type="number"
-                               name="urutan"
-                               class="form-control custom-input @error('urutan') is-invalid @enderror"
-                               value="{{ old('urutan', 1) }}"
-                               min="1"
-                               required>
-                        <small class="text-muted d-block mt-1">Gunakan angka urut (1, 2, 3) untuk mengatur prioritas display di halaman katalog user.</small>
-                        @error('urutan')
                             <div class="invalid-feedback fw-semibold mt-2">{{ $message }}</div>
                         @enderror
                     </div>
