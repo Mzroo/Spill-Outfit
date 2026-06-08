@@ -81,7 +81,7 @@ return new class extends Migration
                 'selesai',
                 'dibatalkan'
             ])->default('unpaid');
-
+            
             $table->timestamps();
         });
     }

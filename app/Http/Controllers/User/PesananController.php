@@ -18,22 +18,30 @@ class PesananController extends Controller
 {
     /*
     |--------------------------------------------------------------------------
-    | INTERNAL AJAX API FOR CITY SEARCH
+    | INTERNAL AJAX API FOR CITY/ZIP SEARCH
     |--------------------------------------------------------------------------
     */
     public function searchCity(Request $request)
     {
         $keyword = $request->search;
 
+        // DIUBAH: Sekarang pencarian juga mendukung pencarian via nomor kode pos di tabel tarif_pengiriman
         $tarifPengiriman = TarifPengiriman::where('kota', 'LIKE', "%{$keyword}%")
                                         ->orWhere('provinsi', 'LIKE', "%{$keyword}%")
+                                        ->orWhere('kode_pos', 'LIKE', "%{$keyword}%")
                                         ->limit(10)
                                         ->get();
 
         $data = $tarifPengiriman->map(function($item) {
+            // Gabungkan kode pos ke dalam label jika tersedia di database tarif
+            $labelOpsi = $item->kota . ', ' . $item->provinsi;
+            if ($item->kode_pos) {
+                $labelOpsi .= ' (' . $item->kode_pos . ')';
+            }
+
             return [
                 'id'        => $item->id,
-                'label'     => $item->kota . ', ' . $item->provinsi,
+                'label'     => $labelOpsi,
                 'base_cost' => $item->base_cost
             ];
         });

@@ -49,7 +49,6 @@
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Nama Penerima</label>
-                                    {{-- Diambil langsung dari auth()->user()->name --}}
                                     <input type="text" name="nama_penerima" class="form-control-luxury" placeholder="Masukkan nama penerima" value="{{ old('nama_penerima', auth()->user()->name) }}" required>
                                 </div>
                             </div>
@@ -57,46 +56,45 @@
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Nomor Handphone</label>
-                                    {{-- Diambil langsung dari auth()->user()->phone --}}
                                     <input type="text" name="no_hp" class="form-control-luxury" placeholder="Contoh: 0812XXXXXXXX" value="{{ old('no_hp', auth()->user()->phone) }}" required>
                                 </div>
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating-custom dropdown-container">
-                                    <label class="small text-muted fw-bold mb-1.5 d-block">Kota / Kecamatan Tujuan</label>
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Kota / Kecamatan / Kode Pos Tujuan</label>
                                     <div class="position-relative">
                                         @php
-                                            // Menyusun string default "Kota, Provinsi" jika data di profil user sudah ada
+                                            // Menyusun string default lokasi jika data di profil user sudah ada beserta kode posnya
                                             $defaultLocation = '';
                                             if(auth()->user()->kota && auth()->user()->provinsi) {
                                                 $defaultLocation = auth()->user()->kota . ', ' . auth()->user()->provinsi;
+                                                if (auth()->user()->kode_pos) {
+                                                    $defaultLocation .= ' (' . auth()->user()->kode_pos . ')';
+                                                }
                                             }
                                         @endphp
-                                        <input type="text" id="search-destination" class="form-control-luxury ps-5" placeholder="Ketik minimal 3 huruf lokasi Anda..." autocomplete="off" value="{{ old('search_destination', $defaultLocation) }}" required>
+                                        <input type="text" id="search-destination" class="form-control-luxury ps-5" placeholder="Ketik nama kota atau kode pos Anda (MIn. 3 huruf)..." autocomplete="off" value="{{ old('search_destination', $defaultLocation) }}" required>
                                         <i class="mdi mdi-magnify position-absolute start-0 top-50 translate-middle-y ms-3 fs-5 text-muted"></i>
                                     </div>
                                     <div id="destination-list" class="destination-dropdown shadow" style="display: none;"></div>
                                 </div>
-                                {{-- Hidden input 'destination' diisi dengan lokasi default dari profil user --}}
                                 <input type="hidden" name="destination" id="destination-id" value="{{ old('destination', $defaultLocation) }}">
-                                {{-- Hidden input internal untuk menyimpan base_cost wilayah --}}
                                 <input type="hidden" id="base-ongkir-value">
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Alamat Lengkap</label>
-                                    {{-- Diambil langsung dari auth()->user()->alamat --}}
                                     <textarea name="alamat" class="form-control-luxury py-3" placeholder="Nama jalan, nomor rumah, RT/RW, nomor cluster, atau patokan terdekat." rows="3" required>{{ old('alamat', auth()->user()->alamat) }}</textarea>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
-                                    <label class="small text-muted fw-bold mb-1.5 d-block">Kode Pos (Opsional)</label>
-                                    {{-- Diambil langsung dari auth()->user()->kode_pos --}}
-                                    <input type="text" name="kode_pos" class="form-control-luxury" placeholder="Contoh: 17121" value="{{ old('kode_pos', auth()->user()->kode_pos) }}">
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Kode Pos</label>
+                                    {{-- DISESUAIKAN: Name input dipastikan 'kode_pos' agar dibaca oleh request controller --}}
+                                    <input type="text" id="kode-pos-field" name="kode_pos" class="form-control-luxury" placeholder="Contoh: 17121" value="{{ old('kode_pos', auth()->user()->kode_pos) }}" required>
                                 </div>
                             </div>
 
@@ -198,7 +196,7 @@
                         <input type="hidden" name="weight"  id="weight-value" value="{{ $weight }}">
                         <input type="hidden" id="subtotal-value" value="{{ $subtotal }}">
                         
-                        {{-- Mengirim 'midtrans' sebagai default isi metode_pembayaran sesuai rules controller --}}
+                        {{-- Mengirim 'midtrans' sebagai default isi metode_pembayaran --}}
                         <input type="hidden" name="metode_pembayaran" value="midtrans">
 
                         <button type="submit" class="btn-checkout-premium w-100 d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill text-decoration-none fw-bold shadow transition-base" id="btn-submit" disabled>
@@ -336,6 +334,7 @@
     .checkout-header { border-radius: 24px !important; }
 }
 </style>
+
 <script>
 (function () {
     'use strict';
@@ -344,6 +343,7 @@
     const destinationList = document.getElementById('destination-list');
     const destinationId   = document.getElementById('destination-id');
     const baseOngkirInput = document.getElementById('base-ongkir-value');
+    const kodePosField    = document.getElementById('kode-pos-field');
     
     const courierSelect   = document.getElementById('courier');
     const btnCekOngkir    = document.getElementById('btn-cek-ongkir');
@@ -385,8 +385,8 @@
         const currentLoc = searchInput.value.trim();
         if (currentLoc.length >= 3) {
             try {
+                // Ekstrak nama kota utama (menghilangkan bagian dalam kurung jika ada)
                 const cityName = currentLoc.split(',')[0].trim();
-                // SUDAH DIPERBAIKI: Mengarah ke rute /api/search-city
                 const res = await fetch(`/api/search-city?search=${encodeURIComponent(cityName)}`);
                 const json = await res.json();
                 if (res.ok && json.status && json.data.length > 0) {
@@ -419,7 +419,6 @@
                 destinationList.innerHTML = '<div class="dest-item small text-muted text-center py-2"><i class="mdi mdi-loading mdi-spin me-1"></i> Mencari lokasi dari database...</div>';
                 destinationList.style.display = 'block';
 
-                // SUDAH DIPERBAIKI: Mengarah ke rute /api/search-city
                 const res = await fetch(`/api/search-city?search=${encodeURIComponent(q)}`);
                 const json = await res.json();
 
@@ -429,15 +428,15 @@
                 }
 
                 if (!json.data || json.data.length === 0) {
-                    destinationList.innerHTML = '<div class="dest-item text-muted small py-2 text-center">Lokasi tidak ditemukan di database</div>';
+                    destinationList.innerHTML = '<div class="dest-item text-muted small py-2 text-center">Lokasi atau kode pos tidak ditemukan</div>';
                     return;
                 }
 
-                // SUDAH DIPERBAIKI: Penggunaan data-base_cost agar sinkron dengan model
                 destinationList.innerHTML = json.data.map(item => `
                     <div class="dest-item"
                          data-id="${item.id}"
                          data-base_cost="${item.base_cost}"
+                         data-postal_code="${item.label.includes('(') ? item.label.split('(')[1].replace(')', '').trim() : ''}"
                          data-label="${item.label.replace(/"/g, '&quot;')}">
                         <i class="mdi mdi-map-marker-radius text-gold me-1.5"></i>${item.label}
                     </div>
@@ -455,7 +454,12 @@
 
         destinationId.value           = item.dataset.label;
         searchInput.value             = item.dataset.label;
-        baseOngkirInput.value         = item.dataset.base_cost; // SUDAH DIPERBAIKI
+        baseOngkirInput.value         = item.dataset.base_cost; 
+
+        // DISESUAIKAN: Jika hasil dropdown mengandung kode pos, otomatis isi input kode pos mandiri
+        if(item.dataset.postal_code) {
+            kodePosField.value = item.dataset.postal_code;
+        }
 
         destinationList.innerHTML     = '';
         destinationList.style.display = 'none';
@@ -499,7 +503,7 @@
         hideOngkirError();
 
         if (!destination || isNaN(baseCost)) {
-            showOngkirError('Silakan pilih kota / kecamatan tujuan terlebih dahulu melalui kolom pencarian.');
+            showOngkirError('Silakan pilih kota / kecamatan / kode pos tujuan terlebih dahulu melalui kolom pencarian.');
             searchInput.focus();
             return;
         }

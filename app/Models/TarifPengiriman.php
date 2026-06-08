@@ -15,6 +15,7 @@ class TarifPengiriman extends Model
     protected $fillable = [
         'provinsi',
         'kota',
+        'kode_pos',
         'base_cost'
     ];
 }
