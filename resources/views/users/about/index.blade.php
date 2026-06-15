@@ -18,7 +18,7 @@
         </div>
         <div class="about-right">
             <div class="hero-img-wrapper">
-                <img src="{{ asset('images/hero/gambar1.jpg') }}" alt="Hero Image">
+                <img src="{{ asset('assets/images/banner/about.jpeg') }}" alt="Hero Image">
             </div>
         </div>
     </div>
@@ -53,7 +53,7 @@
     <!-- ================= WHY CHOOSE US ================= -->
     <div class="why-section">
         <div class="why-left">
-            <img src="{{ asset('images/hero/gambar3.jpg') }}" alt="Why Choose Us">
+            <img src="{{ asset('assets/images/banner/Philippos.jpeg') }}" alt="Why Choose Us">
         </div>
 
         <div class="why-right">
@@ -98,7 +98,7 @@
             <!-- Anggota 1 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('assets/images/anngota/m.adriansyah.jpeg') }}" alt="M. Adriansyah">
+                    <img src="{{ asset('assets/images/anngota/sponchbob.jpeg') }}" alt="M. Adriansyah">
                 </div>
                 <div class="team-info">
                     <h4>M. Adriansyah</h4>
@@ -115,10 +115,10 @@
             <!-- Anggota 2 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('images/team/member2.jpg') }}" alt="Anggota 2">
+                    <img src="{{ asset('assets/images/anngota/sponchbob.jpeg') }}" alt="Anggota 2">
                 </div>
                 <div class="team-info">
-                    <h4>Nama Anggota 2</h4>
+                    <h4>Felisa Kirana Agata</h4>
                     <span class="role">Project Manager</span>
                     <p>Sistem Informasi - Universitas BSI</p>
                     <div class="team-social">
@@ -132,10 +132,10 @@
             <!-- Anggota 3 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('images/team/member3.jpg') }}" alt="Anggota 3">
+                    <img src="{{ asset('assets/images/anngota/sponchbob.jpeg') }}" alt="Anggota 3">
                 </div>
                 <div class="team-info">
-                    <h4>Nama Anggota 3</h4>
+                    <h4>Nicko Syahputra</h4>
                     <span class="role">Frontend Developer</span>
                     <p>Sistem Informasi - Universitas BSI</p>
                     <div class="team-social">
@@ -149,7 +149,7 @@
             <!-- Anggota 4 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('assets/images/anngota/julia.jpeg') }}" alt="Anggota 4">
+                    <img src="{{ asset('assets/images/anngota/sponchbob.jpeg') }}" alt="Anggota 4">
                 </div>
                 <div class="team-info">
                     <h4>Julia Amelia</h4>
@@ -166,10 +166,10 @@
             <!-- Anggota 5 -->
             <div class="team-card">
                 <div class="team-img-container">
-                    <img src="{{ asset('images/team/member5.jpg') }}" alt="Anggota 5">
+                    <img src="{{ asset('assets/images/anngota/sponchbob.jpeg') }}" alt="Anggota 5">
                 </div>
                 <div class="team-info">
-                    <h4>Nama Anggota 5</h4>
+                    <h4>Tika Herlina</h4>
                     <span class="role">System Analyst</span>
                     <p>Sistem Informasi - Universitas BSI</p>
                     <div class="team-social">

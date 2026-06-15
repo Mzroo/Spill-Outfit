@@ -1,496 +1,483 @@
+<section class="trending-section container">
 
-<!-- ================= TRENDING OUTFIT ================= -->
+    <div class="section-header text-center">
+        <span class="section-badge">
+            🔥 Trending Fashion
+        </span>
+        <h2>
+            Outfit Pilihan Minggu Ini
+        </h2>
+        <p>
+            Temukan outfit terbaik pilihan yang sedang populer dan cocok untuk menunjang berbagai aktivitas harianmu.
+        </p>
+    </div>
 
-<section class="trending-section">
-
-    <div class="container">
-
-        <!-- HEADER -->
-        <div class="section-header text-center">
-
-            <span class="section-badge">
-                🔥 Trending Fashion
-            </span>
-
-            <h2>
-                Outfit Pilihan Minggu Ini
-            </h2>
-
-            <p>
-                Temukan outfit terbaik yang sedang populer dan
-                cocok untuk berbagai aktivitas harianmu.
-            </p>
-
-        </div>
-
-        <!-- FILTER -->
-        <div class="filter-wrapper">
-
-            <button class="filter-btn active">
-                All
+    <div class="filter-wrapper">
+        <button class="filter-btn active" data-target="all">All</button>
+        
+        @foreach($kategori as $cat)
+            <button class="filter-btn" data-target="{{ Str::lower(Str::slug($cat->nama)) }}">
+                {{ $cat->nama }}
             </button>
+        @endforeach
+    </div>
 
-            <button class="filter-btn">
-                Casual
-            </button>
+    <div class="product-pure-grid">
 
-            <button class="filter-btn">
-                Campus
-            </button>
+        {{-- Looping data produk trending asli dari database lewat compact controller --}}
+        @forelse($produk_trending as $item)
+            @php
+                // Menangkap nama kategori database untuk dijadikan penanda filter (contoh: "minimalist-aesthetic")
+                $slugKategori = $item->kategori ? Str::lower(Str::slug($item->kategori->nama)) : 'uncategorized';
+            @endphp
 
-            <button class="filter-btn">
-                Formal
-            </button>
+            <div class="produk-card item-tren-card" data-category="{{ $slugKategori }}">
 
-            <button class="filter-btn">
-                Streetwear
-            </button>
+                <div class="produk-image">
+                    @if($item->gambar)
+                        <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama }}" loading="lazy">
+                    @else
+                        <img src="https://via.placeholder.com/500x700?text=No+Image" alt="No Image">
+                    @endif
 
-        </div>
+                    <span class="trending-label-popular">
+                        Popular
+                    </span>
 
-        <!-- PRODUCT GRID -->
-        <div class="row g-4">
-
-            <!-- ITEM -->
-            <div class="col-lg-3 col-md-6">
-
-                <div class="product-card">
-
-                    <div class="product-image">
-
-                        <img src="{{ asset('images/products/hoodie.jpg') }}">
-
-                        <span class="product-badge">
-                            Casual
-                        </span>
-
+                    <div class="overlay-produk">
+                        @auth
+                            <a href="{{ route('produk.show', $item->id) }}">
+                                View Detail
+                            </a>
+                        @else
+                            <a href="javascript:void(0)" onclick="pemicuLoginAlert()">
+                                View Detail
+                            </a>
+                        @endauth
                     </div>
 
-                    <div class="product-content">
+                    <div class="wishlist-btn">
+                        <i class="mdi mdi-heart-outline"></i>
+                    </div>
+                </div>
 
-                        <h5>
-                            Campus Hoodie Oversize
-                        </h5>
+                <div class="produk-body">
+                    
+                    <small class="kategori">
+                        {{ $item->kategori ? $item->kategori->nama : 'Casual Style' }}
+                    </small>
 
-                        <div class="rating">
+                    <h4 class="produk-title">
+                        {{ $item->nama }}
+                    </h4>
 
-                            ⭐ 4.9
-                            <span>(120 Review)</span>
+                    <p class="produk-deskripsi">
+                        {{ Str::limit($item->deskripsi, 80, '...') }}
+                    </p>
 
+                    <div class="produk-footer" style="align-items: center;">
+                        
+                        <div class="trending-info-lokal" style="margin-left: 0; margin-right: auto;">
+                            <span>
+                                <i class="mdi mdi-heart-outline"></i>
+                                {{ rand(1, 5) }},{{ rand(1,9) }}k
+                            </span>
+                            <span>
+                                <i class="mdi mdi-eye-outline"></i>
+                                {{ rand(5, 12) }},{{ rand(1,9) }}k
+                            </span>
                         </div>
 
-                        <div class="price-row">
-
-                            <h4>
-                                Rp149.000
-                            </h4>
-
-                            <a href=""
-                               class="btn-detail">
-
-                                Detail
-
+                        @auth
+                            <a href="{{ route('produk.show', $item->id) }}" class="btn-detail-arrow">
+                                <i class="mdi mdi-arrow-right"></i>
                             </a>
-
-                        </div>
+                        @else
+                            <a href="javascript:void(0)" onclick="pemicuLoginAlert()" class="btn-detail-arrow">
+                                <i class="mdi mdi-arrow-right"></i>
+                            </a>
+                        @endauth
 
                     </div>
 
                 </div>
 
             </div>
-
-            <!-- ITEM -->
-            <div class="col-lg-3 col-md-6">
-
-                <div class="product-card">
-
-                    <div class="product-image">
-
-                        <img src="{{ asset('images/products/jacket.jpg') }}">
-
-                        <span class="product-badge">
-                            Streetwear
-                        </span>
-
-                    </div>
-
-                    <div class="product-content">
-
-                        <h5>
-                            Varsity Jacket Style
-                        </h5>
-
-                        <div class="rating">
-
-                            ⭐ 4.8
-                            <span>(90 Review)</span>
-
-                        </div>
-
-                        <div class="price-row">
-
-                            <h4>
-                                Rp210.000
-                            </h4>
-
-                            <a href=""
-                               class="btn-detail">
-
-                                Detail
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
+        @empty
+            <div class="empty-catalog-state">
+                <div class="empty-icon-box">
+                    <i class="mdi mdi-shopping-outline"></i>
                 </div>
-
+                <h4>Koleksi Belum Tersedia</h4>
+                <p>Belum ada produk pilihan trending yang terdaftar di dalam database katalog saat ini.</p>
             </div>
+        @endforelse
 
-            <!-- ITEM -->
-            <div class="col-lg-3 col-md-6">
-
-                <div class="product-card">
-
-                    <div class="product-image">
-
-                        <img src="{{ asset('images/products/formal.jpg') }}">
-
-                        <span class="product-badge">
-                            Formal
-                        </span>
-
-                    </div>
-
-                    <div class="product-content">
-
-                        <h5>
-                            Formal Office Shirt
-                        </h5>
-
-                        <div class="rating">
-
-                            ⭐ 4.7
-                            <span>(70 Review)</span>
-
-                        </div>
-
-                        <div class="price-row">
-
-                            <h4>
-                                Rp175.000
-                            </h4>
-
-                            <a href=""
-                               class="btn-detail">
-
-                                Detail
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
+        <div id="filter-empty-alert" class="empty-catalog-state d-none" style="grid-column: 1 / -1;">
+            <div class="empty-icon-box">
+                <i class="mdi mdi-shopping-outline"></i>
             </div>
-
-            <!-- ITEM -->
-            <div class="col-lg-3 col-md-6">
-
-                <div class="product-card">
-
-                    <div class="product-image">
-
-                        <img src="{{ asset('images/products/casual.jpg') }}">
-
-                        <span class="product-badge">
-                            Campus
-                        </span>
-
-                    </div>
-
-                    <div class="product-content">
-
-                        <h5>
-                            Daily Campus Outfit
-                        </h5>
-
-                        <div class="rating">
-
-                            ⭐ 5.0
-                            <span>(200 Review)</span>
-
-                        </div>
-
-                        <div class="price-row">
-
-                            <h4>
-                                Rp199.000
-                            </h4>
-
-                            <a href=""
-                               class="btn-detail">
-
-                                Detail
-
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
+            <h4>Outfit Tidak Ditemukan</h4>
+            <p>Maaf, belum ada produk dengan gaya pakaian ini untuk minggu ini 😢</p>
         </div>
 
     </div>
 
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tombolFilter = document.querySelectorAll(".filter-btn");
+        const kartuProduk = document.querySelectorAll(".item-tren-card");
+        const alertKosong = document.getElementById("filter-empty-alert");
+
+        tombolFilter.forEach(button => {
+            button.addEventListener("click", function () {
+                // 1. Pindahkan status class .active ke tombol yang baru di-klik
+                tombolFilter.forEach(btn => btn.classList.remove("active"));
+                this.classList.add("active");
+
+                // 2. Ambil kata kunci target kategori
+                const targetKategori = this.getAttribute("data-target");
+                let produkDitemukan = false;
+
+                // 3. Looping semua kartu produk untuk disembunyikan / ditampilkan
+                kartuProduk.forEach(card => {
+                    const kategoriCard = card.getAttribute("data-category");
+
+                    if (targetKategori === "all" || kategoriCard === targetKategori) {
+                        card.style.display = "flex"; // Tampilkan kotak
+                        produkDitemukan = true;
+                    } else {
+                        card.style.display = "none"; // Sembunyikan kotak
+                    }
+                });
+
+                // 4. Jika kategori yang diklik tidak punya produk minggu ini, munculkan alert kosong
+                if (!produkDitemukan) {
+                    alertKosong.classList.remove("d-none");
+                } else {
+                    alertKosong.classList.add("d-none");
+                }
+            });
+        });
+    });
+
+    function pemicuLoginAlert() {
+        Swal.fire({
+            title: 'Akses Terbatas! ✨',
+            text: 'Kamu harus login terlebih dahulu untuk melihat spesifikasi detail outfit premium ini.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#8C6A2F',
+            cancelButtonColor: '#777777',
+            confirmButtonText: '<i class="mdi mdi-login me-1"></i> Login Sekarang',
+            cancelButtonText: 'Nanti Saja',
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-5 border shadow-sm'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('login') }}";
+            }
+        });
+    }
+</script>
+
 <style>
-
-/* ================= SECTION ================= */
-
-.trending-section{
-    padding:90px 0;
-    background:#fff;
+/* Helper CSS jika template belum menyediakan utilities d-none global */
+.d-none {
+    display: none !important;
 }
 
-/* HEADER */
-
-.section-header{
-    max-width:700px;
-    margin:auto;
-    margin-bottom:35px;
+/* ======================== INTEGRASI PENYAMAAAN UKURAN CARD & LAYOUT ======================== */
+.trending-section {
+    font-family: 'Poppins', sans-serif;
+    margin-top: 50px;
+    margin-bottom: 60px;
+}
+.trending-section *, .trending-section *::before, .trending-section *::after {
+    box-sizing: border-box;
 }
 
-.section-badge{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    padding:10px 20px;
-
-    border-radius:50px;
-
-    background:#f8f4e7;
-
-    color:#8C6A2F;
-
-    font-size:14px;
-    font-weight:600;
-
-    margin-bottom:20px;
+/* HEADER STYLE */
+.section-header {
+    max-width: 700px;
+    margin: auto;
+    margin-bottom: 35px;
+}
+.section-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    border-radius: 30px;
+    background: #f8f4e7;
+    color: #8C6A2F;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    letter-spacing: 1.5px;
+}
+.section-header h2 {
+    font-size: 44px;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: -0.5px;
+}
+.section-header p {
+    color: #666;
+    line-height: 1.7;
+    font-size: 14.5px;
+    margin-top: 12px;
 }
 
-.section-header h2{
-
-    font-size:44px;
-    font-weight:700;
-
-    color:#222;
+/* FILTER WRAPPER CHIPS */
+.filter-wrapper {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 45px;
+}
+.filter-btn {
+    border: none;
+    background: #f5f5f5;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #444;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+.filter-btn.active, .filter-btn:hover {
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: white;
+    box-shadow: 0 4px 12px rgba(140, 106, 47, 0.15);
 }
 
-.section-header p{
-
-    color:#666;
-
-    line-height:1.9;
+/* GRID LAYOUT UTAMA */
+.product-pure-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
 }
 
-/* FILTER */
-
-.filter-wrapper{
-
-    display:flex;
-    justify-content:center;
-    flex-wrap:wrap;
-    gap:12px;
-
-    margin-bottom:45px;
+/* KOTAK CASING CARD (IDENTIK DENGAN HALAMAN PRODUK) */
+.produk-card {
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid #f6f0e5;
+    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.02);
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+}
+.produk-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(140, 106, 47, 0.08);
 }
 
-.filter-btn{
-
-    border:none;
-
-    background:#f5f5f5;
-
-    padding:12px 22px;
-
-    border-radius:50px;
-
-    font-weight:600;
-
-    transition:.3s;
+/* FRAME DAN UKURAN TINGGI GAMBAR */
+.produk-image {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 350px;
+    background: #fafaf8;
+}
+.produk-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.produk-card:hover .produk-image img {
+    transform: scale(1.06);
 }
 
-.filter-btn.active,
-.filter-btn:hover{
-
-    background:#B68D40;
-    color:white;
+/* BADGES DAN TOMBOL DI ATAS FOTO */
+.trending-label-popular {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: white;
+    color: #8C6A2F;
+    padding: 5px 14px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 3;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* PRODUCT CARD */
-
-.product-card{
-
-    background:white;
-
-    border-radius:32px;
-
-    overflow:hidden;
-
-    box-shadow:
-    0 10px 35px rgba(0,0,0,.05);
-
-    transition:.4s;
+/* WISHLIST BUTTON DENGAN AKSI HOVER MERAH MERONA ACCURATE */
+.wishlist-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    color: #444;
+    z-index: 2;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.wishlist-btn:hover {
+    background: #fff0f0 !important;
+    color: #e74c3c !important;
+    transform: scale(1.12);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.2);
 }
 
-.product-card:hover{
-
-    transform:translateY(-8px);
+/* HOVER OVERLAY CAPTURE LINK */
+.overlay-produk {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(140, 106, 47, 0.4), transparent);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 30px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+.produk-card:hover .overlay-produk { opacity: 1; }
+.overlay-produk a {
+    background: #ffffff;
+    color: #8C6A2F;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* IMAGE */
-
-.product-image{
-
-    position:relative;
-
-    overflow:hidden;
+/* TEXT AREA PADDING BLOCK */
+.produk-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+.kategori {
+    font-size: 11px;
+    color: #8C6A2F;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.produk-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 6px 0 8px 0;
+    color: #1a1a1a;
+    line-height: 1.4;
+}
+.produk-deskripsi {
+    font-size: 12.5px;
+    color: #777777;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
 }
 
-.product-image img{
+/* FOOTER MANAGEMENT CONTAINER */
+.produk-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px dashed #f6f0e5;
+}
+.trending-info-lokal {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #777;
+}
+.trending-info-lokal span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.trending-info-lokal i { color: #B68D40; }
 
-    width:100%;
-    height:320px;
-
-    object-fit:cover;
-
-    transition:.5s;
+/* REDIRECT PREMIUM ARROW BUTTON LINK */
+.btn-detail-arrow {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #faf7f2;
+    border: 1px solid #e3d5ba;
+    color: #8C6A2F;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+.btn-detail-arrow:hover {
+    transform: rotate(-45deg);
+    background: linear-gradient(135deg, #8C6A2F, #C9A227);
+    color: #ffffff;
+    border-color: transparent;
 }
 
-.product-card:hover img{
-    transform:scale(1.06);
+/* FALLBACK EMPTY PANEL STATE */
+.empty-catalog-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px dashed #e3d5ba;
+}
+.empty-icon-box {
+    width: 70px;
+    height: 70px;
+    background: #faf7f2;
+    color: #e3d5ba;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 16px;
 }
 
-/* BADGE */
-
-.product-badge{
-
-    position:absolute;
-
-    top:20px;
-    left:20px;
-
-    background:#B68D40;
-
-    color:white;
-
-    padding:8px 16px;
-
-    border-radius:50px;
-
-    font-size:13px;
-    font-weight:600;
+/* CSS MODIFIKASI KELAS POP-UP SWEETALERT AGAR MEMBAL OVAL SEMPURNA */
+.rounded-5 {
+    border-radius: 28px !important;
 }
 
-/* CONTENT */
-
-.product-content{
-    padding:25px;
+/* DYNAMIC RESPONSIVE BREAKPOINTS DESIGN ENGINE */
+@media (max-width: 1200px) {
+    .product-pure-grid { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .section-header h2 { font-size: 36px; }
 }
-
-.product-content h5{
-
-    font-size:20px;
-
-    font-weight:600;
-
-    color:#222;
+@media (max-width: 991px) {
+    .product-pure-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .produk-image { height: 300px; }
 }
-
-/* RATING */
-
-.rating{
-
-    margin:14px 0;
-
-    color:#777;
+@media (max-width: 768px) {
+    .filter-wrapper { gap: 8px; }
+    .section-header h2 { font-size: 32px; }
 }
-
-.rating span{
-    font-size:14px;
-}
-
-/* PRICE */
-
-.price-row{
-
-    display:flex;
-
-    justify-content:space-between;
-    align-items:center;
-}
-
-.price-row h4{
-
-    margin:0;
-
-    color:#B68D40;
-
-    font-size:22px;
-    font-weight:700;
-}
-
-/* BUTTON */
-
-.btn-detail{
-
-    background:#f8f4e7;
-
-    color:#8C6A2F;
-
-    padding:12px 22px;
-
-    border-radius:50px;
-
-    font-weight:600;
-
-    transition:.3s;
-}
-
-.btn-detail:hover{
-
-    background:#B68D40;
-
-    color:white;
-}
-
-/* RESPONSIVE */
-
-@media(max-width:768px){
-
-    .trending-section{
-        padding:70px 0;
-    }
-
-    .section-header h2{
-        font-size:32px;
-    }
-
-    .product-image img{
-        height:260px;
-    }
-
+@media (max-width: 576px) {
+    .product-pure-grid { grid-template-columns: 1fr; gap: 20px; }
+    .produk-image { height: 340px; }
 }
 </style>
