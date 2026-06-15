@@ -8,6 +8,8 @@ use App\Models\TarifPengiriman;
 use App\Models\Pesanan;
 use App\Models\PesananItem;
 use App\Models\Keranjang;
+use App\Models\ProdukVarian; // Ditambahkan untuk memotong stok varian
+use App\Models\Produk;       // Ditambahkan untuk memotong stok produk master
 use App\Services\MidtransService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +27,6 @@ class PesananController extends Controller
     {
         $keyword = $request->search;
 
-        // DIUBAH: Sekarang pencarian juga mendukung pencarian via nomor kode pos di tabel tarif_pengiriman
         $tarifPengiriman = TarifPengiriman::where('kota', 'LIKE', "%{$keyword}%")
                                         ->orWhere('provinsi', 'LIKE', "%{$keyword}%")
                                         ->orWhere('kode_pos', 'LIKE', "%{$keyword}%")
@@ -33,7 +34,6 @@ class PesananController extends Controller
                                         ->get();
 
         $data = $tarifPengiriman->map(function($item) {
-            // Gabungkan kode pos ke dalam label jika tersedia di database tarif
             $labelOpsi = $item->kota . ', ' . $item->provinsi;
             if ($item->kode_pos) {
                 $labelOpsi .= ' (' . $item->kode_pos . ')';
@@ -146,13 +146,12 @@ class PesananController extends Controller
                 ]);
             }
 
-            // AMBIL SNAP TOKEN SEKALIGUS UNTUK DISIMPAN DI DATABASE (REKOMENDASI)
+            // AMBIL SNAP TOKEN SEKALIGUS UNTUK DISIMPAN DI DATABASE
             try {
                 $midtrans = new MidtransService();
                 $snapToken = $midtrans->createSnapToken($pesanan, $pesanan->items, $pesanan->ongkir, $user);
                 $pesanan->update(['snap_token' => $snapToken]);
             } catch (\Exception $me) {
-                // Jika Midtrans gagal/down, transaksi lokal database tetap berhasil dibuat
                 Log::error('Midtrans Token Creation Failed: ' . $me->getMessage());
             }
 
@@ -180,13 +179,12 @@ class PesananController extends Controller
     {
         $user = Auth::user();
         
-        $pesanan = Pesanan::with(['items']) // Cukup load items snapshot saja
+        $pesanan = Pesanan::with(['items'])
             ->where('user_id', $user->id)
             ->findOrFail($id);
 
         $snapToken = $pesanan->snap_token;
 
-        // Backup plan: Jika saat store() gagal mendapat token, kita generate ulang di sini
         if ($pesanan->status === 'unpaid' && !$snapToken) {
             try {
                 $midtrans = new MidtransService();
@@ -207,12 +205,57 @@ class PesananController extends Controller
     */
     public function index()
     {
-        // Menambahkan with('items') untuk mencegah N+1 Query bug pada index blade
         $pesanan = Pesanan::with('items')
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
 
         return view('users.pesanan.index', compact('pesanan'));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FIX SINKRONISASI: JEMBATAN SUKSES PEMBAYARAN CLIENT-SIDE + POTONG STOK
+    |--------------------------------------------------------------------------
+    */
+    public function pembayaranSukses(Request $request, $id)
+    {
+        $user = Auth::user();
+        
+        // Ambil data pesanan beserta relasi 'items' sesuai struktur aslimu
+        $pesanan = Pesanan::with(['items'])->where('user_id', $user->id)->findOrFail($id);
+
+        // Kunci Pengaman: Hanya kurangi stok jika status database lokal masih 'unpaid'
+        // Ini mencegah stok berkurang terus-terusan kalau user tidak sengaja me-refresh halaman sukses
+        if ($pesanan->status === 'unpaid' && $request->query('status') !== 'pending') {
+            
+            DB::transaction(function () use ($pesanan) {
+                
+                // Looping item belanjaan menggunakan relasi 'items' aslimu
+                foreach ($pesanan->items as $item) {
+                    
+                    // Kondisi A: Jika produk yang dibeli memiliki varian (ukuran/warna)
+                    if ($item->produk_varian_id) {
+                        $varian = ProdukVarian::find($item->produk_varian_id);
+                        if ($varian) {
+                            $varian->decrement('stok', $item->qty);
+                        }
+                    } else {
+                        // Kondisi B: Jika tidak memiliki varian, potong stok di tabel produk master
+                        $produkMaster = Produk::find($item->produk_id);
+                        if ($produkMaster) {
+                            $produkMaster->decrement('stok', $item->qty);
+                        }
+                    }
+                }
+
+                // Ubah status database menjadi 'dibayar' sesuai isi ENUM Indonesia kamu
+                $pesanan->update([
+                    'status' => 'dibayar'
+                ]);
+            });
+        }
+
+        return view('users.pesanan.sukses', compact('pesanan'));
     }
 }

@@ -8,10 +8,8 @@
 
 <div class="product-detail-container">
     
-    <!-- ================= MAIN SPLIT LAYOUT ================= -->
     <div class="main-detail-layout">
         
-        <!-- LEFT SIDE: IMAGE GALLERY -->
         <div class="gallery-card">
             <div class="image-wrapper">
                 <img id="mainImage"
@@ -35,7 +33,6 @@
             </div>
         </div>
 
-        <!-- RIGHT SIDE: PRODUCT SPECIFICATION INFO -->
         <div class="product-info-card">
             <small class="category-tag">
                 {{ optional($produk->kategori)->nama }}
@@ -60,7 +57,6 @@
 
             <hr class="divider">
 
-            <!-- COLOR SELECTOR OPTION -->
             <div class="option-group">
                 <label class="option-label">Pilih Warna Outfit</label>
                 <div class="options-flex">
@@ -74,7 +70,6 @@
                 </div>
             </div>
 
-            <!-- SIZE SELECTOR OPTION -->
             <div class="option-group">
                 <label class="option-label">Pilih Ukuran</label>
                 <div class="options-flex">
@@ -88,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- QUANTITY SELECTOR -->
             <div class="option-group quantity-section">
                 <label class="option-label">Jumlah Atur</label>
                 <div class="qty-counter-box">
@@ -98,7 +92,6 @@
                 </div>
             </div>
 
-            <!-- ACTION BUTTON FORM -->
             <div class="action-form-wrapper">
                 @auth
                     <form action="{{ route('keranjang.store', $produk->id) }}" method="POST" id="cartForm">
@@ -121,13 +114,12 @@
 
     </div>
 
-    <!-- ================= RELATED PRODUCTS AREA ================= -->
     <div class="related-section">
         <h3 class="section-title">Produk Serupa Untukmu ✨</h3>
         
         <div class="related-products-grid">
             @foreach($rekomendasi as $item)
-                <a href="{{ route('produk.detail', $item->id) }}" class="card-related">
+                <a href="{{ route('produk.show', $item->id) }}" class="card-related">
                     <div class="related-img-wrapper">
                         <img src="{{ $item->gambar ? asset('storage/'.$item->gambar) : 'https://via.placeholder.com/300' }}" alt="{{ $item->nama }}">
                     </div>
@@ -145,293 +137,55 @@
 
 <style>
 /* ======================== DESIGN SYSTEM DETAIL PRODUK (PURE CSS) ======================== */
-.product-detail-container {
-    font-family: 'Poppins', sans-serif;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    box-sizing: border-box;
-}
-.product-detail-container *, .product-detail-container *::before, .product-detail-container *::after {
-    box-sizing: border-box;
-}
-
-/* MAIN LAYOUT SPLIT */
-.main-detail-layout {
-    display: grid;
-    grid-template-columns: 1.1fr 1.3fr;
-    gap: 40px;
-    align-items: start;
-    margin-bottom: 60px;
-}
-
-/* GALLERY CARDS */
-.gallery-card {
-    background: #ffffff;
-    padding: 20px;
-    border-radius: 24px;
-    border: 1px solid #f6f0e5;
-    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03);
-}
-.image-wrapper {
-    width: 100%;
-    height: 480px;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #fafaf8;
-}
-.main-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-.thumb-wrapper {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-}
-.thumb {
-    width: 76px;
-    height: 76px;
-    border-radius: 12px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s ease;
-}
-.thumb.active, .thumb:hover {
-    border-color: #8C6A2F;
-    transform: translateY(-2px);
-}
-
-/* PRODUCT INFO BLOCK */
-.product-info-card {
-    background: #ffffff;
-    padding: 35px;
-    border-radius: 24px;
-    border: 1px solid #f6f0e5;
-    box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03);
-}
-.category-tag {
-    color: #8C6A2F;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    display: inline-block;
-    margin-bottom: 8px;
-}
-.product-title {
-    font-size: 28px;
-    font-weight: 800;
-    color: #1a1a1a;
-    margin: 0 0 12px 0;
-    line-height: 1.3;
-}
-.rating-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+.product-detail-container { font-family: 'Poppins', sans-serif; max-width: 1300px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box; }
+.product-detail-container *, .product-detail-container *::before, .product-detail-container *::after { box-sizing: border-box; }
+.main-detail-layout { display: grid; grid-template-columns: 1.1fr 1.3fr; gap: 40px; align-items: start; margin-bottom: 60px; }
+.gallery-card { background: #ffffff; padding: 20px; border-radius: 24px; border: 1px solid #f6f0e5; box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03); }
+.image-wrapper { width: 100%; height: 480px; border-radius: 16px; overflow: hidden; background: #fafaf8; }
+.main-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+.thumb-wrapper { display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 4px; }
+.thumb { width: 76px; height: 76px; border-radius: 12px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; }
+.thumb.active, .thumb:hover { border-color: #8C6A2F; transform: translateY(-2px); }
+.product-info-card { background: #ffffff; padding: 35px; border-radius: 24px; border: 1px solid #f6f0e5; box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03); }
+.category-tag { color: #8C6A2F; text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 1px; display: inline-block; margin-bottom: 8px; }
+.product-title { font-size: 28px; font-weight: 800; color: #1a1a1a; margin: 0 0 12px 0; line-height: 1.3; }
+.rating-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
 .stars { color: #C9A227; font-size: 16px; }
 .review-count { color: #888; font-size: 13px; }
-.product-price {
-    font-size: 30px;
-    font-weight: 800;
-    color: #8C6A2F;
-    margin: 0 0 16px 0;
-}
-.stock-status {
-    font-size: 14px;
-    color: #555;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.stock-highlight {
-    font-weight: 700;
-    color: #222;
-}
-.divider {
-    border: 0;
-    border-top: 1px solid #f6f0e5;
-    margin: 24px 0;
-}
-
-/* SELECTION OPTIONS CONTROL */
-.option-group {
-    margin-bottom: 20px;
-}
-.option-label {
-    display: block;
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #444;
-    margin-bottom: 10px;
-}
-.options-flex {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-.opt-btn {
-    padding: 10px 18px;
-    border: 1px solid #e3d5ba;
-    border-radius: 12px;
-    background: #ffffff;
-    color: #444;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-.opt-btn:hover:not(:disabled) {
-    border-color: #8C6A2F;
-    color: #8C6A2F;
-    background: #fdfbf7;
-}
-.opt-btn.active {
-    background: linear-gradient(135deg, #8C6A2F, #C9A227);
-    color: #ffffff;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(140, 106, 47, 0.2);
-}
-.opt-btn:disabled {
-    background: #f5f5f5;
-    border-color: #e0e0e0;
-    color: #bbbbbb;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-/* QUANTITY SETTER COMPONENTS */
-.qty-counter-box {
-    display: flex;
-    align-items: center;
-    background: #faf7f2;
-    border: 1px solid #e3d5ba;
-    border-radius: 12px;
-    width: max-content;
-    overflow: hidden;
-}
-.qty-btn {
-    width: 44px;
-    height: 44px;
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    font-weight: 600;
-    color: #8C6A2F;
-    cursor: pointer;
-    transition: background 0.2s;
-}
+.product-price { font-size: 30px; font-weight: 800; color: #8C6A2F; margin: 0 0 16px 0; }
+.stock-status { font-size: 14px; color: #555; display: flex; align-items: center; gap: 8px; }
+.stock-highlight { font-weight: 700; color: #222; }
+.divider { border: 0; border-top: 1px solid #f6f0e5; margin: 24px 0; }
+.option-group { margin-bottom: 20px; }
+.option-label { display: block; font-size: 13.5px; font-weight: 700; color: #444; margin-bottom: 10px; }
+.options-flex { display: flex; gap: 10px; flex-wrap: wrap; }
+.opt-btn { padding: 10px 18px; border: 1px solid #e3d5ba; border-radius: 12px; background: #ffffff; color: #444; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+.opt-btn:hover:not(:disabled) { border-color: #8C6A2F; color: #8C6A2F; background: #fdfbf7; }
+.opt-btn.active { background: linear-gradient(135deg, #8C6A2F, #C9A227); color: #ffffff; border-color: transparent; box-shadow: 0 4px 12px rgba(140, 106, 47, 0.2); }
+.opt-btn:disabled { background: #f5f5f5; border-color: #e0e0e0; color: #bbbbbb; cursor: not-allowed; opacity: 0.6; }
+.qty-counter-box { display: flex; align-items: center; background: #faf7f2; border: 1px solid #e3d5ba; border-radius: 12px; width: max-content; overflow: hidden; }
+.qty-btn { width: 44px; height: 44px; border: none; background: transparent; font-size: 18px; font-weight: 600; color: #8C6A2F; cursor: pointer; transition: background 0.2s; }
 .qty-btn:hover:not(:disabled) { background: #f0e6d2; }
 .qty-btn:disabled { color: #ccc; cursor: not-allowed; }
-#qty {
-    width: 60px;
-    height: 44px;
-    text-align: center;
-    border: none;
-    background: transparent;
-    font-size: 15px;
-    font-weight: 700;
-    color: #222;
-}
-
-/* PURCHASE BUTTON STYLINGS */
-.action-form-wrapper {
-    margin-top: 30px;
-}
-.btn-submit-cart {
-    width: 100%;
-    background: linear-gradient(135deg, #8C6A2F, #C9A227);
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-}
-.btn-submit-cart:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(140, 106, 47, 0.25);
-}
-.btn-submit-cart:disabled {
-    background: #e0e0e0;
-    color: #999;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-.btn-login-redirect {
-    width: 100%;
-    background: #222222;
-    color: white;
-    text-decoration: none;
-    padding: 16px;
-    border-radius: 14px;
-    font-size: 16px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: background 0.2s;
-}
+#qty { width: 60px; height: 44px; text-align: center; border: none; background: transparent; font-size: 15px; font-weight: 700; color: #222; }
+.action-form-wrapper { mt: 30px; }
+.btn-submit-cart { width: 100%; background: linear-gradient(135deg, #8C6A2F, #C9A227); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
+.btn-submit-cart:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(140, 106, 47, 0.25); }
+.btn-submit-cart:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-login-redirect { width: 100%; background: #222222; color: white; text-decoration: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
 .btn-login-redirect:hover { background: #444444; }
-
-/* ================= RELATED GRID LIST ================= */
-.related-section {
-    margin-top: 50px;
-}
-.section-title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #1a1a1a;
-    margin-bottom: 24px;
-}
-.related-products-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
-}
-.card-related {
-    background: #ffffff;
-    border-radius: 18px;
-    overflow: hidden;
-    text-decoration: none;
-    border: 1px solid #f6f0e5;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.02);
-    transition: all 0.3s ease;
-}
-.card-related:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(140, 106, 47, 0.08);
-}
-.related-img-wrapper {
-    width: 100%;
-    height: 240px;
-    overflow: hidden;
-    background: #fbfbf9;
-}
+.related-section { margin-top: 50px; }
+.section-title { font-size: 20px; font-weight: 800; color: #1a1a1a; margin-bottom: 24px; }
+.related-products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.card-related { background: #ffffff; border-radius: 18px; overflow: hidden; text-decoration: none; border: 1px solid #f6f0e5; box-shadow: 0 6px 20px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+.card-related:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(140, 106, 47, 0.08); }
+.related-img-wrapper { width: 100%; height: 240px; overflow: hidden; background: #fbfbf9; }
 .related-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
 .related-body { padding: 16px; }
 .related-cat { color: #8C6A2F; font-size: 11px; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px; }
 .related-title { font-size: 14px; font-weight: 600; color: #222; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .related-price { font-size: 15px; font-weight: 700; color: #222; display: block; }
 
-/* ================= RESPONSIVE GRAPHICS BREAKPOINTS ================= */
 @media (max-width: 991px) {
     .main-detail-layout { grid-template-columns: 1fr; gap: 30px; }
     .image-wrapper { height: 400px; }
@@ -445,8 +199,9 @@
 </style>
 
 <script>
-// AMBIL REKAPAN LENGKAP VARIAN DARI LARAVEL BACKEND
+// AMBIL REKAPAN LENGKAP VARIAN & HARGA UTAMA DARI LARAVEL BACKEND
 const listVarian = @json($produk->varian);
+const hargaProdukUtama = {{ $produk->harga }}; // Amankan data harga master produk
 
 let warnaTerpilih = null;
 let ukuranTerpilih = null;
@@ -490,9 +245,7 @@ document.querySelectorAll('.ukuran-btn').forEach(btn => {
     };
 });
 
-// MEMBATASI DAN MENGUNCI TOMBOL YANG KOMBINASI VARIANNYA TIDAK TERSEDIA / STOK HABIS
 function validasiKetersediaanOpsi() {
-    // 1. Validasi Tombol Ukuran berdasarkan Warna yang sedang diklik
     document.querySelectorAll('.ukuran-btn').forEach(btnUkuran => {
         const idUkuran = btnUkuran.dataset.ukuran;
         if (warnaTerpilih) {
@@ -507,7 +260,6 @@ function validasiKetersediaanOpsi() {
         }
     });
 
-    // 2. Validasi Tombol Warna berdasarkan Ukuran yang sedang diklik
     document.querySelectorAll('.warna-btn').forEach(btnWarna => {
         const idWarna = btnWarna.dataset.warna;
         if (ukuranTerpilih) {
@@ -529,7 +281,8 @@ function sinkronisasiDataVarian() {
     const btnCart = document.getElementById('btnCart');
 
     if (!warnaTerpilih || !ukuranTerpilih || !match) {
-        // State jika pilihan belum lengkap
+        // Kembali ke harga produk utama saat varian di-unclick / belum lengkap
+        document.getElementById('priceBox').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaProdukUtama);
         document.getElementById('stockBox').innerHTML = `<span style="color:#e67e22;">Pilih warna & ukuran dahulu</span>`;
         document.getElementById('produkVarianInput').value = '';
         
@@ -542,9 +295,11 @@ function sinkronisasiDataVarian() {
         return;
     }
 
-    // Set Max Stock & Update Text Tampilan UI
+    // FIX LOGIKA HARGA FALLBACK: Jika harga varian null, undefined, atau 0, pakai harga produk utama
+    const hargaFinal = (match.harga && parseInt(match.harga) > 0) ? match.harga : hargaProdukUtama;
+    document.getElementById('priceBox').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaFinal);
+
     maxStokTersedia = match.stok;
-    document.getElementById('priceBox').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(match.harga);
     
     if(maxStokTersedia > 0) {
         document.getElementById('stockBox').innerHTML = `<span style="color:#2ecc71; font-weight:700;">Tersedia (${maxStokTersedia} pcs)</span>`;
@@ -565,7 +320,6 @@ function sinkronisasiDataVarian() {
     }
 }
 
-// MENGATUR LOCK/UNLOCK PLUS MINUS QTY
 function kontrolAksesQty(stok) {
     const inputQty = document.getElementById('qty');
     const btnPlus = document.getElementById('plus');
@@ -577,13 +331,12 @@ function kontrolAksesQty(stok) {
         btnMinus.disabled = true;
     } else {
         inputQty.value = 1;
-        btnMinus.disabled = true; // Angka awal 1, minus mati
-        btnPlus.disabled = (stok <= 1); // Jika stok cuma 1, plus mati
+        btnMinus.disabled = true;
+        btnPlus.disabled = (stok <= 1);
     }
     document.getElementById('qtyInput').value = inputQty.value;
 }
 
-// LOGIKA EVENT TOMBOL QUANTITY INPUT
 const elemenQty = document.getElementById('qty');
 
 document.getElementById('plus').onclick = function() {

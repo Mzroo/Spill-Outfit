@@ -8,6 +8,17 @@ use Illuminate\Http\Request;
 
 class UkuranController extends Controller
 {
+
+    // =========================================================================
+    // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
+    // =========================================================================
+    public function __construct()
+    {
+        // Memaksa SELURUH fungsi/method di dalam controller ini wajib lolos 
+        // satpam login ('auth') DAN wajib memiliki role admin ('admin')
+        $this->middleware(['auth', 'admin']);
+    }
+
     /**
      * Display a listing of the sizes with search and pagination.
      */

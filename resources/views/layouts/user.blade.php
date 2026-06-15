@@ -509,8 +509,8 @@
                 @endauth
             </a>
 
-            <div class="nav-btn d-none d-sm-flex">
-                <i class="mdi mdi-bell-outline"></i>
+            <div class=" d-none d-sm-flex">
+                {{-- <i class="mdi mdi-bell-outline"></i> --}}
             </div>
 
             <div class="profile-dropdown">

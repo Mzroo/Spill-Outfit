@@ -23,7 +23,7 @@ class KategoriSeeder extends Seeder
         // 3. Aktifkan kembali foreign key check
         Schema::enableForeignKeyConstraints();
 
-        // 4. Data mentah kategori khusus Fashion Spill Outfit
+        // 4. Data mentah 8 kategori khusus Fashion Spill Outfit (Premium Looks)
         $categories = [
             [
                 'nama' => 'Campus Style',
@@ -45,14 +45,26 @@ class KategoriSeeder extends Seeder
                 'nama' => 'Daily Outfit',
                 'deskripsi' => 'Inspirasi kombinasi pakaian sederhana, minimalis, dan fungsional yang cocok dipakai beraktivitas di rumah atau lingkungan sekitar.',
             ],
+            [
+                'nama' => 'Minimalist Aesthetic',
+                'deskripsi' => 'Paduan pakaian dengan warna-warna netral atau earth-tone murni, potongan bersih, tanpa motif berlebihan untuk kesan berkelas.',
+            ],
+            [
+                'nama' => 'Korean OOTD',
+                'deskripsi' => 'Inspirasi tren fashion ala Korea Selatan (K-Style) yang imut, estetik, dan sangat populer di kalangan Gen-Z saat ini.',
+            ],
+            [
+                'nama' => 'Sporty Casual',
+                'deskripsi' => 'Kombinasi pakaian olahraga yang fleksibel seperti jersey, jagger pants, atau polo shirt yang tetap trendi dibawa jalan.',
+            ],
         ];
 
         // 5. Lakukan perulangan untuk menyimpan data ke database
         foreach ($categories as $cat) {
             Kategori::create([
                 'nama'      => $cat['nama'],
-                'slug'      => Str::slug($cat['nama']), // Otomatis membuat URL aman (ex: campus-style)
-                'gambar'    => null, // Default kosong, nanti bisa di-upload lewat dashboard admin
+                'slug'      => Str::slug($cat['nama']), // Otomatis membuat URL aman (ex: minimalist-aesthetic)
+                'gambar'    => null, // Default kosong, bisa diganti lewat menu upload admin
                 'deskripsi' => $cat['deskripsi'],
                 'status'    => 'aktif',
             ]);

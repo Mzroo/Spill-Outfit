@@ -38,9 +38,18 @@
                                 <span class="divider-dot"></span>
                                 <span class="order-invoice">#{{ $order->kode_pesanan }}</span>
                             </div>
+                            
                             <div class="status-badge-modern status-{{ strtolower($order->status) }}">
                                 <span class="status-dot"></span>
-                                <span class="status-text">{{ strtoupper($order->status) }}</span>
+                                <span class="status-text">
+                                    @if($order->status == 'unpaid')
+                                        BELUM BAYAR
+                                    @elseif($order->status == 'dibayar')
+                                        LUNAS / PAID
+                                    @else
+                                        {{ strtoupper($order->status) }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
 
@@ -53,7 +62,7 @@
                                     </div>
                                     <div class="product-info-wrapper">
                                         <h5>{{ $itemPertama->nama_produk }}</h5>
-                                        <p class="text-muted small mb-1">Varian: {{ $itemPertama->nama_varian ?? 'Default' }}</p>
+                                        <p class="text-muted small mb-1">Varian: <strong>{{ $itemPertama->nama_varian ?? 'Default Varian' }}</strong></p>
                                         <span class="qty-text-indicator">{{ $itemPertama->qty }} barang x Rp {{ number_format($itemPertama->harga, 0, ',', '.') }}</span>
                                     </div>
                                 </div>
@@ -239,7 +248,7 @@
     border-color: #8C6A2F;
 }
 
-/* Status Badges Dynamic Matrix Control */
+/* Status Badges Dynamic Matrix Control (FIXED SINKRONISASI DATABASENYA) */
 .status-badge-modern {
     display: inline-flex;
     align-items: center;
@@ -252,8 +261,9 @@
 }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-.status-paid, .status-selesai { background: #e6fffa; color: #047481; border: 1px solid #b2f5ea; }
-.status-paid .status-dot, .status-selesai .status-dot { background: #319795; }
+/* Status Colors Matrix */
+.status-paid, .status-selesai, .status-dibayar { background: #e6fffa; color: #047481; border: 1px solid #b2f5ea; }
+.status-paid .status-dot, .status-selesai .status-dot, .status-dibayar .status-dot { background: #319795; }
 
 .status-unpaid { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
 .status-unpaid .status-dot { background: #e53e3e; }

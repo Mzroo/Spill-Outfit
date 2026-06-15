@@ -6,8 +6,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 
-// Controller User
-use App\Http\Controllers\User\UserController;
+// Controller User (Sisi Pelanggan)
+use App\Http\Controllers\User\UserController as ClientUserController; 
 use App\Http\Controllers\User\UserProdukController;
 use App\Http\Controllers\User\UserKategoriController;
 use App\Http\Controllers\User\KeranjangController;
@@ -19,6 +19,9 @@ use App\Http\Controllers\User\CommunityController;
 // Controller Admin
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\AdminChatController;
+use App\Http\Controllers\Admin\AdminKeranjangController;
+use App\Http\Controllers\Admin\AdminLaporanController;
+use App\Http\Controllers\Admin\AdminPengaturanController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\ProdukController;
 use App\Http\Controllers\Admin\ProdukGambarController;
@@ -26,6 +29,8 @@ use App\Http\Controllers\Admin\ProdukVarianController;
 use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\UkuranController;
 use App\Http\Controllers\Admin\WarnaController;
+use App\Http\Controllers\Admin\UserController as AdminUserController; 
+use App\Http\Controllers\Admin\AdminPesananController; 
 
 /*
 |--------------------------------------------------------------------------
@@ -39,17 +44,13 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/guest/community', 'community')->name('guest.community');
 });
 
-// Produk & Kategori (Bisa diakses tanpa login)
 Route::controller(UserProdukController::class)->group(function () {
     Route::get('/produk', 'index')->name('produk.index');
     Route::get('/produk/{id}', 'show')->name('produk.show');
 });
 
 Route::controller(UserKategoriController::class)->group(function () {
-    // Halaman Utama Semua Kategori
     Route::get('/kategori', 'index')->name('user.kategori.index');
-    
-    // Halaman Detail Kategori (Diberi prefix /detail/ agar aman dari bentrok URL)
     Route::get('/kategori/detail/{id}', 'show')->name('user.kategori.show');
 });
 
@@ -60,7 +61,6 @@ Route::controller(UserKategoriController::class)->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::controller(AuthController::class)->group(function () {
-    // Auth Native
     Route::get('/login', 'showLogin')->name('login');
     Route::post('/login', 'login')->name('login.post');
     Route::get('/register', 'showRegister')->name('register');
@@ -80,16 +80,14 @@ Route::controller(AuthController::class)->group(function () {
 */
 Route::middleware('auth')->group(function () {
     
-    // Dashboard & Profile
-    Route::controller(UserController::class)->group(function () {
+    Route::controller(ClientUserController::class)->group(function () {
         Route::get('/dashboard', 'index')->name('user.dashboard');
         Route::get('/about', 'about')->name('about');
         Route::get('/settings', 'settings')->name('settings');
-        Route::get('/search', [UserController::class, 'search'])->name('user.search');
+        Route::get('/search', 'search')->name('user.search');
         Route::post('/settings/update', 'updateSettings')->name('settings.update');
     });
 
-    // Keranjang Belanja
     Route::controller(KeranjangController::class)->prefix('keranjang')->name('keranjang.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/{id}', 'store')->name('store');
@@ -97,42 +95,33 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', 'destroy')->name('destroy');
     });
 
-    // Pesanan & Checkout
-Route::controller(PesananController::class)->group(function () {
-// Rute untuk menampilkan halaman Checkout
-    Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
-    
-    // Rute untuk memproses pembuatan pesanan saat tombol "Buat Pesanan" diklik
-    Route::post('/pesanan/store', [PesananController::class, 'store'])->name('pesanan.store');
-    
-    // Rute untuk melihat Daftar Riwayat Pesanan (index.blade.php)
-    Route::get('/pesanan', [PesananController::class, 'index'])->name('pesanan.index');
-    
-    // Rute untuk melihat Detail Transaksi / Invoice (detail.blade.php)
-    Route::get('/pesanan/{id}', [PesananController::class, 'show'])->name('pesanan.show');
-    
-    // Rute API Internal AJAX untuk pencarian kota otomatis di halaman checkout
-    Route::get('/api/search-city', [PesananController::class, 'searchCity'])->name('api.search-city');
-});
-    // Pembayaran
+    Route::controller(PesananController::class)->group(function () {
+        Route::get('/checkout', 'checkout')->name('checkout');
+        Route::post('/pesanan/store', 'store')->name('pesanan.store');
+        Route::get('/pesanan', 'index')->name('pesanan.index');
+        Route::get('/pesanan/{id}', 'show')->name('pesanan.show');
+        
+        // SINKRONISASI JALUR: Diubah dari '/api/search-city' menjadi '/search-city' agar klop dengan JavaScript Checkout
+        Route::get('/search-city', 'searchCity')->name('search.city');
+
+        // TAMBAHAN FIX: Rute penampung jembatan sukses bayar Midtrans untuk mengubah status database lokal
+        Route::get('/pesanan/sukses/{id}', 'pembayaranSukses')->name('pesanan.sukses');
+    });
+
     Route::controller(PembayaranController::class)->prefix('pembayaran')->name('pembayaran.')->group(function () {
         Route::get('/{pesanan_id}', 'create')->name('create');
         Route::post('/{pesanan_id}', 'store')->name('store');
     });
 
-    // Chat User
     Route::controller(ChatController::class)->prefix('chat')->name('chat.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/send', 'send')->name('send');
     });
 
-    // Forum Komunitas
     Route::controller(CommunityController::class)->prefix('community')->name('community.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/store', 'store')->name('store');
-        
-        // Mengubah {id} menjadi {post} untuk memanfaatkan Route Model Binding
         Route::get('/{post}', 'show')->name('show');
         Route::post('/{post}/like', 'like')->name('like');
         Route::post('/{post}/comment', 'comment')->name('comment');
@@ -148,7 +137,6 @@ Route::controller(PesananController::class)->group(function () {
 */
 Route::prefix('admin')->name('admin.')->group(function () {
 
-    // Auth Admin
     Route::controller(AdminController::class)->group(function () {
         Route::get('/login', 'login')->name('login');
         Route::post('/login', 'loginPost')->name('login.post');
@@ -156,7 +144,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', 'logout')->name('logout');
     });
 
-    // Semua Manajemen Admin (Bisa ditambahkan middleware admin jika ada nanti)
+    // Semua Manajemen Admin (Wajib Login)
     Route::middleware('auth')->group(function () {
 
         // Manajemen Kategori
@@ -173,10 +161,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::controller(ProdukController::class)->prefix('produk')->name('produk.')->group(function () {
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
-            Route::post('/', 'store')->name('store'); // Diubah dari /store menjadi / agar RESTful
+            Route::post('/', 'store')->name('store');
             Route::get('/{id}/edit', 'edit')->name('edit');
-            Route::put('/{id}', 'update')->name('update'); // Diubah dari /update/{id}
-            Route::delete('/{id}', 'destroy')->name('destroy'); // Diubah dari /delete/{id}
+            Route::put('/{id}', 'update')->name('update');
+            Route::delete('/{id}', 'destroy')->name('destroy');
         });
 
         // Gambar Produk
@@ -224,12 +212,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}', 'destroy')->name('destroy');
         });
         
+        // Chat Admin
         Route::controller(AdminChatController::class)->prefix('chat')->name('chat.')->group(function () {
             Route::get('/', 'index')->name('index');
-            
-            // DISESUAIKAN: Mengubah {id} menjadi {user_id} agar pas dengan parameter Controller
             Route::get('/{user_id}', 'show')->name('show');
             Route::post('/{user_id}/send', 'send')->name('send');
         });
+
+        // Kelola Data Customer / Users Otoritas
+        Route::controller(AdminUserController::class)->prefix('users')->name('users.')->group(function () {
+            Route::patch('/{user}/toggle-status', 'toggleStatus')->name('toggle-status');
+        });
+        Route::resource('users', AdminUserController::class)->except(['show']);
+
+        // Manajemen Transaksi Masuk Sisi Admin
+        Route::controller(AdminPesananController::class)->prefix('pesanan')->name('pesanan.')->group(function () {
+            Route::get('/', 'index')->name('index');                    
+            Route::get('/{id}', 'show')->name('show');                  
+            Route::patch('/{id}/kirim', 'kirimPesanan')->name('kirim'); 
+        });
+
+        // Manajemen Laporan Keuangan
+        Route::controller(AdminLaporanController::class)->prefix('laporan')->name('laporan.')->group(function () {
+            Route::get('/', 'index')->name('index'); 
+        });
+
+        // Rute Pengaturan Akun & Kontak Toko
+        Route::get('/pengaturan', [AdminPengaturanController::class, 'index'])->name('pengaturan.index');
+        Route::put('/pengaturan', [AdminPengaturanController::class, 'update'])->name('pengaturan.update');
     });
 });

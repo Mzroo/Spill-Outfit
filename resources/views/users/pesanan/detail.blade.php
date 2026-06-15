@@ -15,7 +15,15 @@
             </div>
             <div class="status-box-modern status-{{ strtolower($pesanan->status) }}">
                 <span class="status-dot"></span>
-                <span class="status-text">{{ strtoupper($pesanan->status) }}</span>
+                <span class="status-text">
+                    @if($pesanan->status == 'unpaid')
+                        MENUNGGU PEMBAYARAN
+                    @elseif($pesanan->status == 'dibayar')
+                        LUNAS (PERLU DIKEMAS)
+                    @else
+                        {{ strtoupper($pesanan->status) }}
+                    @endif
+                </span>
             </div>
         </div>
 
@@ -86,7 +94,15 @@
                         </div>
                         <div class="summary-item-modern">
                             <span class="text-secondary">Status Sistem</span>
-                            <span class="fw-semibold badge-inline-status status-{{ strtolower($pesanan->status) }}">{{ strtoupper($pesanan->status) }}</span>
+                            <span class="fw-semibold badge-inline-status status-{{ strtolower($pesanan->status) }}">
+                                @if($pesanan->status == 'unpaid')
+                                    BELUM BAYAR
+                                @elseif($pesanan->status == 'dibayar')
+                                    LUNAS
+                                @else
+                                    {{ strtoupper($pesanan->status) }}
+                                @endif
+                            </span>
                         </div>
                         
                         <div class="divider-dashedMy my-3"></div>
@@ -113,6 +129,14 @@
                         <button id="pay-button" class="btn-pay-modern w-100 py-3 rounded-3 shadow-sm">
                             <i class="mdi mdi-credit-card-chip-outline me-2"></i> Bayar Sekarang
                         </button>
+                    @endif
+
+                    {{-- JIKA SUDAH DIKIRIM, TAMPILKAN NOMOR RESI --}}
+                    @if($pesanan->nomor_resi)
+                        <div class="mt-3 p-3 rounded-3 text-center" style="background: #faf6ed; border: 1px solid #f4ebd6;">
+                            <label class="d-block text-muted small mb-1" style="font-weight: 600;">NOMOR RESI PENGIRIMAN</label>
+                            <span class="font-monospace fw-bold" style="color: #8C6A2F; font-size: 16px;"><i class="mdi mdi-barcode-scan me-1"></i>{{ $pesanan->nomor_resi }}</span>
+                        </div>
                     @endif
 
                     @if(isset($pesanan->bukti_pembayaran) && $pesanan->bukti_pembayaran)
@@ -312,8 +336,8 @@
 }
 
 /* Status Colors Matrix */
-.status-paid, .status-selesai { background: #e6fffa; color: #047481; border: 1px solid #b2f5ea; }
-.status-paid .status-dot, .status-selesai .status-dot { background: #319795; }
+.status-paid, .status-selesai, .status-dibayar { background: #e6fffa; color: #047481; border: 1px solid #b2f5ea; }
+.status-paid .status-dot, .status-selesai .status-dot, .status-dibayar .status-dot { background: #319795; }
 
 .status-unpaid { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
 .status-unpaid .status-dot { background: #e53e3e; }
@@ -394,15 +418,27 @@
 }
 </style>
 
-{{-- SCRIPT MIDTRANS SANBOX --}}
+{{-- SCRIPT MIDTRANS SANDBOX (SUDAH DISINKRONKAN KE HALAMAN SUKSES) --}}
 @if($pesanan->status == 'unpaid' && $snapToken)
     <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
     <script>
         document.getElementById('pay-button').onclick = function () {
             window.snap.pay('{{ $snapToken }}', {
-                onSuccess: function(result){ window.location.reload(); },
-                onPending: function(result){ alert("Menunggu konfirmasi pembayaran Anda!"); },
-                onError: function(result){ alert("Waktu pembayaran habis atau gagal!"); }
+                onSuccess: function(result){
+                    // SINKRON: Alihkan langsung ke halaman terima kasih / sukses setelah lunas
+                    window.location.href = "{{ route('pesanan.sukses', $pesanan->id) }}";
+                },
+                onPending: function(result){
+                    // SINKRON: Jika statusnya masih pending (misal belum bayar di Alfamart/ATM)
+                    window.location.href = "{{ route('pesanan.sukses', $pesanan->id) }}?status=pending";
+                },
+                onError: function(result){
+                    alert("Waktu sesi pembayaran habis atau transaksi gagal!");
+                    window.location.reload();
+                },
+                onClose: function(){
+                    alert('Kamu menutup jendela pembayaran sebelum transaksi selesai.');
+                }
             });
         };
     </script>

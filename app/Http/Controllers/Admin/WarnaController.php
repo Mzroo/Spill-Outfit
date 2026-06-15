@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class WarnaController extends Controller
 {
+        // =========================================================================
+    // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
+    // =========================================================================
+    public function __construct()
+    {
+        // Memaksa SELURUH fungsi/method di dalam controller ini wajib lolos 
+        // satpam login ('auth') DAN wajib memiliki role admin ('admin')
+        $this->middleware(['auth', 'admin']);
+    }
+
     /**
      * INDEX (Display with search & pagination)
      */

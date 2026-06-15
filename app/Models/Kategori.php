@@ -43,7 +43,7 @@ class Kategori extends Model
             }
 
             // Gabungkan menjadi string berformat: KTG-2026-0001
-            $kategori->kode_kategori = 'KTG-' . $tahunSaatIni . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+            $kategori->kode_kategori = 'KSO' . $tahunSaatIni . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
         });
     }
 

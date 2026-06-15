@@ -13,17 +13,21 @@ use Illuminate\Support\Facades\DB;
 class ProdukController extends Controller
 {
     // =========================================================================
+    // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
+    // =========================================================================
+    public function __construct()
+    {
+        $this->middleware(['auth', 'admin']);
+    }
+
+    // =========================================================================
     // 1. INDEX (Menampilkan List Produk Utama + Fitur Search & Pagination)
     // =========================================================================
     public function index(Request $request)
     {
-        // Mengambil keyword pencarian dari input nama="search" di form blade
         $keyword = $request->get('search');
-
-        // Eager loading relasi kategori, brand, dan varian (untuk hitung total_stok via accessor)
         $query = Produk::with(['kategori', 'brand', 'varian']);
 
-        // Logika Kondisional jika user melakukan pencarian
         if (!empty($keyword)) {
             $query->where(function($q) use ($keyword) {
                 $q->where('nama', 'LIKE', "%{$keyword}%")
@@ -31,8 +35,6 @@ class ProdukController extends Controller
             });
         }
 
-        // Urutkan dari yang terbaru, batasi 10 data per halaman
-        // withQueryString() berguna agar parameter ?search=... tidak hilang saat klik tombol next page
         $produk = $query->latest()->paginate(10)->withQueryString();
 
         return view('admin.produk.index', compact('produk'));
@@ -54,7 +56,6 @@ class ProdukController extends Controller
     // =========================================================================
     public function store(Request $request)
     {
-        // Validasi ketat data produk utama (tanpa input stok karena dilempar ke varian)
         $request->validate([
             'nama'        => 'required|string|max:255',
             'kategori_id' => 'required|exists:kategori,id',
@@ -65,12 +66,10 @@ class ProdukController extends Controller
             'deskripsi'   => 'nullable|string'
         ]);
 
-        // Gunakan DB Transaction untuk memastikan keamanan data
         $produk = DB::transaction(function () use ($request) {
-            // Generate kode otomatis berdasarkan kategori dan brand
+            // Pemanggilan generate kode PSO tetap berjalan otomatis di sini
             $kodeOtomatis = $this->generateKodeOtomatis($request->kategori_id, $request->brand_id);
 
-            // Upload berkas gambar ke folder storage/app/public/produk
             $gambar = null;
             if ($request->hasFile('gambar')) {
                 $gambar = $request->file('gambar')->store('produk', 'public');
@@ -88,7 +87,6 @@ class ProdukController extends Controller
             ]);
         });
 
-        // Alihkan langsung ke halaman manajemen varian bawaan produk tersebut
         return redirect()->route('admin.produk-varian.index', ['produk_id' => $produk->id])
             ->with('success', 'Produk utama berhasil dibuat! Silakan tentukan kombinasi varian warna, ukuran, dan stoknya di sini.');
     }
@@ -125,9 +123,7 @@ class ProdukController extends Controller
         DB::transaction(function () use ($request, $produk) {
             $gambar = $produk->gambar;
             
-            // Jika ada file gambar baru yang diunggah
             if ($request->hasFile('gambar')) {
-                // Hapus gambar lama dari berkas storage jika eksis
                 if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
                     Storage::disk('public')->delete($produk->gambar);
                 }
@@ -157,14 +153,10 @@ class ProdukController extends Controller
         DB::transaction(function () use ($id) {
             $produk = Produk::findOrFail($id);
             
-            // Hapus gambar fisik
             if ($produk->gambar && Storage::disk('public')->exists($produk->gambar)) {
                 Storage::disk('public')->delete($produk->gambar);
             }
 
-            // Hapus baris data produk utama
-            // Catatan: Karena di migration kamu memakai ->cascadeOnDelete() pada foreign key produk_id,
-            // semua data varian yang terikat di tabel 'produk_varian' otomatis terhapus bersih oleh database.
             $produk->delete();
         });
 
@@ -173,23 +165,22 @@ class ProdukController extends Controller
     }
 
     // =========================================================================
-    // 7. PRIVATE HELPER (Membentuk Kode Produk Otomatis)
+    // 7. PRIVATE HELPER (Membentuk Kode Produk Otomatis: PSO-0001)
     // =========================================================================
     private function generateKodeOtomatis($kategoriId, $brandId)
     {
-        $kategori = Kategori::find($kategoriId);
-        $hurufKategori = $kategori ? strtoupper(substr($kategori->nama, 0, 1)) : 'X';
-
-        $brand = Brand::find($brandId);
-        $hurufBrand = $brand ? strtoupper(substr($brand->nama, 0, 1)) : 'G';
-
-        $prefix = $hurufKategori . $hurufBrand;
+        $prefix = 'PSO';
 
         $produkTerakhir = Produk::where('kode', 'LIKE', $prefix . '-%')
                             ->latest('id')
                             ->first();
 
-        $nomorUrut = $produkTerakhir ? (int) substr($produkTerakhir->kode, strpos($produkTerakhir->kode, '-') + 1) + 1 : 1;
+        if ($produkTerakhir) {
+            $nomorTerakhir = (int) substr($produkTerakhir->kode, 4);
+            $nomorUrut = $nomorTerakhir + 1;
+        } else {
+            $nomorUrut = 1;
+        }
 
         return $prefix . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
     }

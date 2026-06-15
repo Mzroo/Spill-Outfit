@@ -74,14 +74,14 @@ return new class extends Migration
             |--------------------------------------------------------------------------
             */
             $table->enum('status', [
-                'unpaid',
-                'paid',
+                'unpaid',      // Tetap unpaid tidak apa-apa karena bawaan dari sistem store() awal kamu
+                'dibayar',     // DIUBAH: Dari 'paid' menjadi 'dibayar' agar singkron dengan Controller & Admin
                 'diproses',
                 'dikirim',
                 'selesai',
                 'dibatalkan'
             ])->default('unpaid');
-            
+
             $table->timestamps();
         });
     }

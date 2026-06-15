@@ -49,14 +49,15 @@
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Nama Penerima</label>
-                                    <input type="text" name="nama_penerima" class="form-control-luxury" placeholder="Masukkan nama penerima" value="{{ old('nama_penerima', auth()->user()->name) }}" required>
+                                    <input type="text" class="form-control-luxury" value="{{ auth()->user()->name }}" disabled>
+                                    <small class="text-muted" style="font-size: 11px;">* Sesuai nama akun profil Anda</small>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Nomor Handphone</label>
-                                    <input type="text" name="no_hp" class="form-control-luxury" placeholder="Contoh: 0812XXXXXXXX" value="{{ old('no_hp', auth()->user()->phone) }}" required>
+                                    <input type="text" class="form-control-luxury" value="{{ auth()->user()->phone ?? '-' }}" disabled>
                                 </div>
                             </div>
 
@@ -65,7 +66,6 @@
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Kota / Kecamatan / Kode Pos Tujuan</label>
                                     <div class="position-relative">
                                         @php
-                                            // Menyusun string default lokasi jika data di profil user sudah ada beserta kode posnya
                                             $defaultLocation = '';
                                             if(auth()->user()->kota && auth()->user()->provinsi) {
                                                 $defaultLocation = auth()->user()->kota . ', ' . auth()->user()->provinsi;
@@ -74,33 +74,32 @@
                                                 }
                                             }
                                         @endphp
-                                        <input type="text" id="search-destination" class="form-control-luxury ps-5" placeholder="Ketik nama kota atau kode pos Anda (MIn. 3 huruf)..." autocomplete="off" value="{{ old('search_destination', $defaultLocation) }}" required>
+                                        <input type="text" id="search-destination" class="form-control-luxury ps-5" placeholder="Ketik nama kota atau kode pos Anda (Min. 3 huruf)..." autocomplete="off" value="{{ old('search_destination', $defaultLocation) }}" required>
                                         <i class="mdi mdi-magnify position-absolute start-0 top-50 translate-middle-y ms-3 fs-5 text-muted"></i>
                                     </div>
                                     <div id="destination-list" class="destination-dropdown shadow" style="display: none;"></div>
                                 </div>
-                                <input type="hidden" name="destination" id="destination-id" value="{{ old('destination', $defaultLocation) }}">
+                                <input type="hidden" name="destination_id" id="destination-id" value="{{ old('destination_id') }}">
                                 <input type="hidden" id="base-ongkir-value">
                             </div>
 
                             <div class="col-12">
                                 <div class="form-floating-custom">
-                                    <label class="small text-muted fw-bold mb-1.5 d-block">Alamat Lengkap</label>
-                                    <textarea name="alamat" class="form-control-luxury py-3" placeholder="Nama jalan, nomor rumah, RT/RW, nomor cluster, atau patokan terdekat." rows="3" required>{{ old('alamat', auth()->user()->alamat) }}</textarea>
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Alamat Lengkap Pengiriman</label>
+                                    <textarea class="form-control-luxury py-3" rows="3" disabled>{{ auth()->user()->alamat ?? 'Alamat belum diisi di profil.' }}</textarea>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
                                     <label class="small text-muted fw-bold mb-1.5 d-block">Kode Pos</label>
-                                    {{-- DISESUAIKAN: Name input dipastikan 'kode_pos' agar dibaca oleh request controller --}}
-                                    <input type="text" id="kode-pos-field" name="kode_pos" class="form-control-luxury" placeholder="Contoh: 17121" value="{{ old('kode_pos', auth()->user()->kode_pos) }}" required>
+                                    <input type="text" id="kode-pos-field" class="form-control-luxury" value="{{ auth()->user()->kode_pos }}" disabled>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-floating-custom">
-                                    <label class="small text-muted fw-bold mb-1.5 d-block">Catatan Pesanan (Opsional)</label>
+                                    <label class="small text-muted fw-bold mb-1.5 d-block">Catatan Tambahan Kurir (Opsional)</label>
                                     <input type="text" name="catatan" class="form-control-luxury" placeholder="Contoh: Titip di satpam / warna cadangan" value="{{ old('catatan') }}">
                                 </div>
                             </div>
@@ -191,12 +190,10 @@
                             </div>
                         </div>
 
-                        {{-- Input Hidden Kunci --}}
+                        {{-- Hidden Input data operasional form store --}}
                         <input type="hidden" name="ongkir"  id="ongkir-value" value="-1">
                         <input type="hidden" name="weight"  id="weight-value" value="{{ $weight }}">
                         <input type="hidden" id="subtotal-value" value="{{ $subtotal }}">
-                        
-                        {{-- Mengirim 'midtrans' sebagai default isi metode_pembayaran --}}
                         <input type="hidden" name="metode_pembayaran" value="midtrans">
 
                         <button type="submit" class="btn-checkout-premium w-100 d-flex align-items-center justify-content-center gap-2 py-3 rounded-pill text-decoration-none fw-bold shadow transition-base" id="btn-submit" disabled>
@@ -219,17 +216,13 @@
 /* UTILITIES & BRANDING VARIABLES */
 .checkout-section { font-family: 'Poppins', sans-serif; letter-spacing: -0.1px; }
 .bg-smooth-light { background-color: #fcfbfa; }
-.bg-smooth-gray { background-color: #f5f2eb; }
 .fw-extrabold { font-weight: 800; }
 .text-gold { color: #8C6A2F; }
 .bg-gold-light { background-color: #faf6ed; }
 .tracking-wider { letter-spacing: 1.2px; }
 .tracking-tight { letter-spacing: -0.5px; }
 .z-index-2 { z-index: 2; }
-.fs-7 { font-size: 0.82rem; }
 .border-bottom-dashed { border-bottom: 1px dashed #efe7d3 !important; }
-
-/* TRANSITION LOOPS */
 .transition-base { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
 
 /* HEADER BRANDING BANNER */
@@ -240,34 +233,20 @@
     background-image: radial-gradient(#8C6A2F 1.5px, transparent 0); background-size: 20px 20px; 
 }
 
-/* CARDS STRUCTURING */
 .checkout-premium-card, .summary-checkout-card { border-color: #f2ebd9 !important; }
 .summary-checkout-card { top: 100px; }
 
 /* RE-ENGINEERING FORM INPUT CONTROL */
 .form-control-luxury, .form-select-luxury {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 12px;
-    border: 1px solid #dcd6cc;
-    font-size: 14px;
-    background-color: #fdfcfb;
-    color: #2d2a24;
-    transition: all 0.25s;
-    outline: none !important;
+    width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid #dcd6cc;
+    font-size: 14px; background-color: #fdfcfb; color: #2d2a24; transition: all 0.25s; outline: none !important;
 }
-.form-control-luxury:focus, .form-select-luxury:focus {
-    border-color: #8C6A2F;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(140, 106, 47, 0.08);
-}
+.form-control-luxury:focus, .form-select-luxury:focus { border-color: #8C6A2F; background-color: #ffffff; box-shadow: 0 0 0 4px rgba(140, 106, 47, 0.08); }
+.form-control-luxury:disabled { background-color: #f4f1eb; color: #7a756b; opacity: 0.85; cursor: not-allowed; border-color: #ebdcb9; }
+
 .form-select-luxury {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238C6A2F' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3csvg%3e");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
-    background-size: 12px 12px;
-    padding-right: 40px;
+    appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238C6A2F' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3csvg%3e");
+    background-repeat: no-repeat; background-position: right 16px center; background-size: 12px 12px; padding-right: 40px;
 }
 
 /* REAL-TIME DROPDOWN RESULTS AREA */
@@ -277,61 +256,37 @@
     background: #ffffff; border: 1px solid #ebdcb9; border-radius: 14px;
     z-index: 1050; max-height: 220px; overflow-y: auto; padding: 6px;
 }
-.destination-dropdown .dest-item {
-    padding: 10px 14px; font-size: 13.5px; border-radius: 10px;
-    cursor: pointer; color: #4a453c; transition: all 0.15s;
-}
+.destination-dropdown .dest-item { padding: 10px 14px; font-size: 13.5px; border-radius: 10px; cursor: pointer; color: #4a453c; transition: all 0.15s; }
 .destination-dropdown .dest-item:hover { background: #faf6ed; color: #8C6A2F; font-weight: 600; }
 
-/* CALCULATION BUTTON INTERACTIVE */
-.btn-check-fare {
-    background-color: #ffffff; color: #8C6A2F; border: 1px solid #8C6A2F; height: 47px;
-}
+.btn-check-fare { background-color: #ffffff; color: #8C6A2F; border: 1px solid #8C6A2F; height: 47px; }
 .btn-check-fare:hover:not(:disabled) { background-color: #faf6ed; color: #705423; border-color: #705423; }
-.btn-check-fare:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* EXPEDITION SHIPPING CONTAINER OPTION CARD */
 .ongkir-result .service-option {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 14px 18px; border: 1px solid #ebdcb9; border-radius: 12px;
+    display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border: 1px solid #ebdcb9; border-radius: 12px;
     margin-bottom: 10px; cursor: pointer; transition: all 0.25s ease; background-color: #fff;
 }
 .ongkir-result .service-option:hover { border-color: #8C6A2F; background: #faf8f5; }
-.ongkir-result .service-option.selected {
-    border-color: #8C6A2F; background: #faf6ed; box-shadow: 0 0 0 1px #8C6A2F;
-}
+.ongkir-result .service-option.selected { border-color: #8C6A2F; background: #faf6ed; box-shadow: 0 0 0 1px #8C6A2F; }
 .service-option .svc-name { font-weight: 700; color: #2d2a24; font-size: 14px; }
 .service-option .svc-etd  { font-size: 11.5px; color: #867d6c; margin-top: 3px; }
 .service-option .svc-cost { font-weight: 800; color: #8C6A2F; font-size: 16px; }
 
-/* ERROR LOGS FALLBACKS */
-.ongkir-error {
-    padding: 12px 16px; background: #fdf2f2; border: 1px solid #f5c6cb;
-    border-radius: 12px; font-size: 13px; color: #b71c1c;
-}
-
-/* SIDEBAR SUMMARY SCROLL ELEMENTS */
+.ongkir-error { padding: 12px 16px; background: #fdf2f2; border: 1px solid #f5c6cb; border-radius: 12px; font-size: 13px; color: #b71c1c; }
 .summary-list-scroll { max-height: 165px; overflow-y: auto; }
 .badge-qty { background-color: #faf6ed; border: 1px solid #f2e6cb; font-size: 10px; }
 .text-placeholder { color: #b2ab9c; font-style: italic; font-weight: 400; }
 
-/* MAIN PRIMARY CTA ACTION BUTTON */
-.btn-checkout-premium {
-    background: linear-gradient(135deg, #8C6A2F, #705423); color: white; font-size: 15px; border: none;
-}
+.btn-checkout-premium { background: linear-gradient(135deg, #8C6A2F, #705423); color: white; font-size: 15px; border: none; }
 .btn-checkout-premium:hover:not(:disabled) { color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(140, 106, 47, 0.25) !important; }
 .btn-checkout-premium:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: none !important; cursor: not-allowed; }
 
-/* CUSTOM SCROLLBAR BAR DESIGN MODULE */
 .summary-list-scroll::-webkit-scrollbar, .destination-dropdown::-webkit-scrollbar { width: 5px; }
-.summary-list-scroll::-webkit-scrollbar-track, .destination-dropdown::-webkit-scrollbar-track { background: transparent; }
 .summary-list-scroll::-webkit-scrollbar-thumb, .destination-dropdown::-webkit-scrollbar-thumb { background: #ebdcb9; border-radius: 10px; }
 
-/* COMPONENT DEVIATION MOBILE FIXES */
 @media (max-width: 991.98px) {
     .summary-checkout-card { position: static !important; margin-bottom: 25px; }
     .checkout-header h2 { font-size: 26px; }
-    .checkout-header { border-radius: 24px !important; }
 }
 </style>
 
@@ -343,7 +298,6 @@
     const destinationList = document.getElementById('destination-list');
     const destinationId   = document.getElementById('destination-id');
     const baseOngkirInput = document.getElementById('base-ongkir-value');
-    const kodePosField    = document.getElementById('kode-pos-field');
     
     const courierSelect   = document.getElementById('courier');
     const btnCekOngkir    = document.getElementById('btn-cek-ongkir');
@@ -375,23 +329,20 @@
 
     function hideOngkirError() {
         ongkirError.style.display = 'none';
-        ongkirError.textContent   = '';
     }
 
-    /* -------------------------------------------------- */
-    /* Logika Inisialisasi Otomatis Jika Lokasi Ada      */
-    /* -------------------------------------------------- */
+    // FIX ROUTE JALUR: Menghilangkan prefiks /api/ karena rute terdaftar di web controller biasa
     window.addEventListener('DOMContentLoaded', async () => {
         const currentLoc = searchInput.value.trim();
         if (currentLoc.length >= 3) {
             try {
-                // Ekstrak nama kota utama (menghilangkan bagian dalam kurung jika ada)
                 const cityName = currentLoc.split(',')[0].trim();
-                const res = await fetch(`/api/search-city?search=${encodeURIComponent(cityName)}`);
+                const res = await fetch(`/search-city?search=${encodeURIComponent(cityName)}`);
                 const json = await res.json();
                 if (res.ok && json.status && json.data.length > 0) {
                     const exactMatch = json.data.find(item => item.label.toLowerCase() === currentLoc.toLowerCase()) || json.data[0];
                     baseOngkirInput.value = exactMatch.base_cost;
+                    destinationId.value = exactMatch.id; // Isi ID aslinya untuk keamanan
                 }
             } catch (err) {
                 console.error("Gagal memuat otomatis base cost rute: ", err);
@@ -399,11 +350,7 @@
         }
     });
 
-    /* -------------------------------------------------- */
-    /* Search Destination via Internal AJAX (Database)    */
-    /* -------------------------------------------------- */
     let searchTimer;
-
     searchInput.addEventListener('input', function () {
         clearTimeout(searchTimer);
         const q = this.value.trim();
@@ -416,10 +363,11 @@
 
         searchTimer = setTimeout(async () => {
             try {
-                destinationList.innerHTML = '<div class="dest-item small text-muted text-center py-2"><i class="mdi mdi-loading mdi-spin me-1"></i> Mencari lokasi dari database...</div>';
+                destinationList.innerHTML = '<div class="dest-item small text-muted text-center py-2"><i class="mdi mdi-loading mdi-spin me-1"></i> Mencari lokasi...</div>';
                 destinationList.style.display = 'block';
 
-                const res = await fetch(`/api/search-city?search=${encodeURIComponent(q)}`);
+                // FIX ROUTE JALUR: Sesuaikan endpoint panggilannya
+                const res = await fetch(`/search-city?search=${encodeURIComponent(q)}`);
                 const json = await res.json();
 
                 if (!res.ok || json.status === false) {
@@ -428,7 +376,7 @@
                 }
 
                 if (!json.data || json.data.length === 0) {
-                    destinationList.innerHTML = '<div class="dest-item text-muted small py-2 text-center">Lokasi atau kode pos tidak ditemukan</div>';
+                    destinationList.innerHTML = '<div class="dest-item text-muted small py-2 text-center">Lokasi tidak ditemukan</div>';
                     return;
                 }
 
@@ -436,7 +384,6 @@
                     <div class="dest-item"
                          data-id="${item.id}"
                          data-base_cost="${item.base_cost}"
-                         data-postal_code="${item.label.includes('(') ? item.label.split('(')[1].replace(')', '').trim() : ''}"
                          data-label="${item.label.replace(/"/g, '&quot;')}">
                         <i class="mdi mdi-map-marker-radius text-gold me-1.5"></i>${item.label}
                     </div>
@@ -452,18 +399,12 @@
         const item = e.target.closest('.dest-item[data-id]');
         if (!item) return;
 
-        destinationId.value           = item.dataset.label;
+        destinationId.value           = item.dataset.id; // Amankan ID untuk dikirim ke request store
         searchInput.value             = item.dataset.label;
         baseOngkirInput.value         = item.dataset.base_cost; 
 
-        // DISESUAIKAN: Jika hasil dropdown mengandung kode pos, otomatis isi input kode pos mandiri
-        if(item.dataset.postal_code) {
-            kodePosField.value = item.dataset.postal_code;
-        }
-
         destinationList.innerHTML     = '';
         destinationList.style.display = 'none';
-
         resetOngkir();
     });
 
@@ -474,9 +415,6 @@
         }
     });
 
-    /* -------------------------------------------------- */
-    /* Logika Kalkulasi Grand Total & Simulasi Kurir      */
-    /* -------------------------------------------------- */
     function resetOngkir() {
         ongkirValue.value      = '-1';
         ongkirText.textContent = '— Belum Dihitung';
@@ -497,13 +435,12 @@
 
     btnCekOngkir.addEventListener('click', function () {
         const destination = destinationId.value;
-        const courier     = courierSelect.value;
         const baseCost    = parseFloat(baseOngkirInput.value);
 
         hideOngkirError();
 
         if (!destination || isNaN(baseCost)) {
-            showOngkirError('Silakan pilih kota / kecamatan / kode pos tujuan terlebih dahulu melalui kolom pencarian.');
+            showOngkirError('Silakan pilih lokasi tujuan terlebih dahulu melalui kolom pencarian.');
             searchInput.focus();
             return;
         }
@@ -511,49 +448,39 @@
         setOngkirLoading(true);
 
         setTimeout(() => {
+            const courier = courierSelect.value;
             let costs = [];
 
             if (courier === 'jne') {
                 costs = [
                     { service: 'REG', description: 'Layanan Reguler', cost: baseCost, etd: '2-3 Hari' },
-                    { service: 'YES', description: 'Yakin Esok Sampai', cost: baseCost + 12000, etd: '1 Hari' },
-                    { service: 'OKE', description: 'Ongkos Kirim Ekonomis', cost: baseCost > 5000 ? baseCost - 4000 : baseCost, etd: '4-5 Hari' }
+                    { service: 'YES', description: 'Yakin Esok Sampai', cost: baseCost + 12000, etd: '1 Hari' }
                 ];
             } else if (courier === 'jnt') {
                 costs = [
-                    { service: 'EZ', description: 'Reguler Service', cost: baseCost + 1000, etd: '2-3 Hari' },
-                    { service: 'J&T Super', description: 'Pengiriman Prioritas', cost: baseCost + 15000, etd: '1-2 Hari' }
+                    { service: 'EZ', description: 'Reguler Service', cost: baseCost + 1000, etd: '2-3 Hari' }
                 ];
             } else if (courier === 'sicepat') {
                 costs = [
-                    { service: 'SIUNTUNG', description: 'Layanan Cepat & Murah', cost: baseCost, etd: '2-3 Hari' },
-                    { service: 'HALU', description: 'Harga Mulai Lima Ribu', cost: baseCost > 7000 ? baseCost - 5000 : baseCost, etd: '3-5 Hari' },
-                    { service: 'BEST', description: 'Besok Sampai Tujuan', cost: baseCost + 14000, etd: '1 Hari' }
+                    { service: 'SIUNTUNG', description: 'Layanan Cepat', cost: baseCost, etd: '2-3 Hari' },
+                    { service: 'HALU', description: 'Harga Mulai Lima Ribu', cost: baseCost > 7000 ? baseCost - 4000 : baseCost, etd: '3-5 Hari' }
                 ];
             }
 
             renderOngkirOptions(costs);
             setOngkirLoading(false);
-        }, 500);
+        }, 400);
     });
 
     function renderOngkirOptions(costs) {
         ongkirResult.innerHTML = '';
-
-        if (!Array.isArray(costs) || costs.length === 0) {
-            showOngkirError('Tidak ada opsi pengiriman yang valid.');
-            return;
-        }
-
         costs.forEach(service => {
             const cost = service.cost;
-
             const div = document.createElement('div');
             div.className    = 'service-option';
-            div.dataset.cost = cost;
             div.innerHTML = `
                 <div>
-                    <div class="svc-name">${service.service} ${service.description ? `(${service.description})` : ''}</div>
+                    <div class="svc-name">${service.service} (${service.description})</div>
                     <div class="svc-etd"><i class="mdi mdi-clock-outline me-1"></i>Estimasi: ${service.etd}</div>
                 </div>
                 <div class="svc-cost">${formatRupiah(cost)}</div>

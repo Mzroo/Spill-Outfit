@@ -13,6 +13,17 @@ use Illuminate\Validation\Rule;
 
 class ProdukVarianController extends Controller
 {
+
+    // =========================================================================
+    // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
+    // =========================================================================
+    public function __construct()
+    {
+        // Memaksa SELURUH fungsi/method di dalam controller ini wajib lolos 
+        // satpam login ('auth') DAN wajib memiliki role admin ('admin')
+        $this->middleware(['auth', 'admin']);
+    }
+
     // =========================================================================
     // 1. INDEX (Mengirim data Varian, Ukuran, dan Warna sekaligus untuk Modal)
     // =========================================================================

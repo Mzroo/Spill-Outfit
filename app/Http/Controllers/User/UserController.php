@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\CommunityPost;
 use App\Models\Produk; 
+use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,30 +16,47 @@ class UserController extends Controller
     |--------------------------------------------------------------------------
     | INDEX (DASHBOARD USER)
     |--------------------------------------------------------------------------
-    | Menampilkan halaman depan dashboard user beserta 3 postingan terbaru
-    | dari komunitas yang statusnya sudah 'published'.
+    | Menampilkan halaman depan dashboard user beserta data kategori,
+    | produk trending, produk rekomendasi, dan data postingan komunitas.
     |
     */
     public function index()
     {
-        // Mengambil 3 data postingan terbaru.
-        // Eager loading diarahkan langsung ke 'user' (tanpa .profile) karena tabel profile sudah dihapus.
+        // 1. Ambil semua data kategori untuk section "Explore Style"
+        $kategori = Kategori::all();
+
+        // 2. Ambil 4 data produk teranyar dengan status 'public' untuk dipasang di section "Trending"
+        $produk_trending = Produk::with(['kategori'])
+                            ->where('status', 'public')
+                            ->latest()
+                            ->take(4) // Sesuai dengan pembagian grid desktop 4 kolom
+                            ->get();
+
+        // =========================================================================
+        // TAMBAHAN BARU: Query Data untuk Section "Rekomendasi Outfit"
+        // =========================================================================
+        // Menggunakan inRandomOrder() agar item berbeda dengan isi yang ada di Trending
+        $produk_rekomendasi = Produk::with(['kategori', 'varian'])
+                                ->where('status', 'public')
+                                ->inRandomOrder() 
+                                ->take(4) // Mengambil 4 item untuk susunan grid catalog
+                                ->get();
+
+        // 3. Ambil 3 data postingan terbaru dari komunitas forum
         $posts = CommunityPost::with(['user'])
                     ->where('status', 'published')
                     ->latest()
-                    ->take(3) // Batasi hanya 3 data agar pas dengan grid col-lg-4
+                    ->take(3)
                     ->get();
 
-        // Kirim variabel $posts ke file blade utama Anda
-        return view('users.dashboard', compact('posts'));
+        // 4. Lempar semua data ke halaman dashboard utama user (Compact produk_rekomendasi disertakan)
+        return view('users.dashboard', compact('kategori', 'produk_trending', 'posts', 'produk_rekomendasi'));
     }
 
     /*
     |--------------------------------------------------------------------------
     | ABOUT
     |--------------------------------------------------------------------------
-    | Menampilkan halaman informasi/tentang aplikasi toko bunga.
-    |
     */
     public function about()
     {
@@ -49,8 +67,6 @@ class UserController extends Controller
     |--------------------------------------------------------------------------
     | SETTINGS (HALAMAN EDIT PROFILE)
     |--------------------------------------------------------------------------
-    | Menampilkan form pengaturan akun dan alamat pengiriman user.
-    |
     */
     public function settings()
     {
@@ -61,13 +77,9 @@ class UserController extends Controller
     |--------------------------------------------------------------------------
     | UPDATE SETTINGS (PROSES SIMPAN DATA PROFIL & ALAMAT)
     |--------------------------------------------------------------------------
-    | Memperbarui data pribadi user (nama, hp, alamat lengkap) dan foto profil.
-    | Data disimpan langsung ke tabel 'users' menggunakan mass assignment.
-    |
     */
     public function updateSettings(Request $request)
     {
-        // Validasi data input yang dikirim dari form blade settings
         $request->validate([
             'name'     => 'required|string|max:255',
             'phone'    => 'nullable|string|max:20',
@@ -75,28 +87,19 @@ class UserController extends Controller
             'kota'     => 'nullable|string|max:100',
             'kode_pos' => 'nullable|string|max:10',
             'alamat'   => 'nullable|string',
-            'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Batas maksimal 2MB
+            'foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048', 
         ]);
 
         $user = auth()->user();
-
-        // Ambil nama file avatar yang saat ini tersimpan di database (default)
         $avatar = $user->avatar;
 
-        // Cek jika user mengunggah file foto profil baru
         if ($request->hasFile('foto')) {
-
-            // Hapus foto lama dari lokal storage jika ada, dan pastikan foto lama tersebut
-            // bukan merupakan tautan eksternal (bukan link gambar profil dari Google Login)
             if ($user->avatar && !str_starts_with($user->avatar, 'http')) {
                 Storage::disk('public')->delete($user->avatar);
             }
-
-            // Simpan file foto baru ke folder 'profile' di dalam disk public (storage/app/public/profile)
             $avatar = $request->file('foto')->store('profile', 'public');
         }
 
-        // Jalankan perintah update data ke model User (sudah aman karena fillable sudah didaftarkan)
         $user->update([
             'name'     => $request->name,
             'phone'    => $request->phone,
@@ -107,7 +110,6 @@ class UserController extends Controller
             'avatar'   => $avatar,
         ]);
 
-        // Kembalikan ke halaman sebelumnya dengan membawa session sukses
         return back()->with('success', 'Profile berhasil diperbarui');
     }
 
@@ -115,32 +117,24 @@ class UserController extends Controller
     |--------------------------------------------------------------------------
     | SEARCH PRODUK
     |--------------------------------------------------------------------------
-    | Fitur pencarian produk katalog toko bunga berdasarkan keyword tertentu.
-    |
     */
     public function search(Request $request)
     {
-        // 1. Ambil keyword dari form pencarian dan bersihkan spasi liar di awal/akhir
         $keyword = trim($request->input('search'));
         
-        // Jika kolom search kosong, langsung alihkan ke halaman utama katalog produk user
         if (empty($keyword)) {
             return redirect()->route('user.produk.index');
         }
 
-        // 2. Jalankan Query Pencarian Produk yang sinkron dengan struktur database terbarumu
         $produk = Produk::with(['kategori', 'varian'])
-                    ->where('status', 'public') // Memastikan produk yang dicari berstatus 'public'
+                    ->where('status', 'public') 
                     ->where(function($q) use ($keyword) {
-                        // Mencari kecocokan berdasarkan nama produk (menggunakan LOWER agar case-insensitive)
                         $q->where(DB::raw('LOWER(nama)'), 'LIKE', '%' . strtolower($keyword) . '%')
-                        // Atau mencari kecocokan berdasarkan isi deskripsi produk
                           ->orWhere(DB::raw('LOWER(deskripsi)'), 'LIKE', '%' . strtolower($keyword) . '%');
                     })
                     ->latest()
-                    ->paginate(12); // Membagi hasil pencarian menjadi 12 produk per halaman
+                    ->paginate(12);
 
-        // Kirim hasil pencarian dan keyword asal ke view hasil pencarian
         return view('users.partials.search-results', compact('produk', 'keyword'));
     }
 }

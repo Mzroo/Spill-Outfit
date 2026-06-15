@@ -11,19 +11,19 @@
     <!-- RIGHT CONTROLS -->
     <div class="navbar-right">
 
-        <!-- SEARCH BOX ELEMENT -->
+        {{-- <!-- SEARCH BOX ELEMENT -->
         <div class="search-box">
             <input type="text" placeholder="Cari produk...">
             <i class="fa-solid fa-magnifying-glass"></i>
-        </div>
+        </div> --}}
 
-        <!-- NOTIFICATION ICON ALERT -->
+        {{-- <!-- NOTIFICATION ICON ALERT -->
         <button class="nav-icon-btn" type="button" title="Notifikasi Masuk">
             <i class="fa-regular fa-bell"></i>
             <span class="notif-badge">3</span>
         </button>
 
-        <!-- PROFILE DROPDOWN COMPONENT (PURE CSS DROPDOWN) -->
+        <!-- PROFILE DROPDOWN COMPONENT (PURE CSS DROPDOWN) --> --}}
         <div class="custom-profile-dropdown" id="profileDropdownContainer">
             <button class="profile-btn" type="button" id="profileDropdownBtn">
                 <div class="profile-user">

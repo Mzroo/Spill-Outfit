@@ -9,6 +9,16 @@ use App\Models\User;
 
 class AdminChatController extends Controller
 {
+        // =========================================================================
+    // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
+    // =========================================================================
+    public function __construct()
+    {
+        // Memaksa SELURUH fungsi/method di dalam controller ini wajib lolos 
+        // satpam login ('auth') DAN wajib memiliki role admin ('admin')
+        $this->middleware(['auth', 'admin']);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | LIST CHAT USER

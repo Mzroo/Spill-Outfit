@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <div class="menu-dropdown-wrapper">
+        <div class="menu-dropdown-wrapper {{ request()->routeIs('admin.pesanan.*') ? 'is-expanded' : '' }}">
             <a class="sidebar-link toggle-dropdown-trigger" href="javascript:void(0);">
                 <div class="menu-left">
                     <i class="fa-solid fa-cart-shopping"></i>
@@ -62,14 +62,14 @@
             </a>
 
             <div class="submenu-list">
-                <a href="#"><i class="fa-solid fa-receipt"></i> <span>Pesanan</span></a>
-                <a href="#"><i class="fa-solid fa-credit-card"></i> <span>Pembayaran</span></a>
-                <a href="#"><i class="fa-solid fa-circle-check"></i> <span>Konfirmasi</span></a>
-                <a href="#"><i class="fa-solid fa-truck"></i> <span>Pengiriman</span></a>
+                <a href="{{ route('admin.pesanan.index') }}" class="{{ request()->routeIs('admin.pesanan.*') ? 'submenu-active' : '' }}">
+                    <i class="fa-solid fa-receipt"></i> 
+                    <span>Pesanan</span>
+                </a>
             </div>
         </div>
 
-        <div class="menu-dropdown-wrapper {{ request()->routeIs('admin.chat.*') ? 'is-expanded' : '' }}">
+        <div class="menu-dropdown-wrapper {{ request()->routeIs('admin.users.*') || request()->routeIs('admin.chat.*') ? 'is-expanded' : '' }}">
             <a class="sidebar-link toggle-dropdown-trigger" href="javascript:void(0);">
                 <div class="menu-left">
                     <i class="fa-solid fa-users"></i>
@@ -79,31 +79,31 @@
             </a>
 
             <div class="submenu-list">
-                <a href="#"><i class="fa-solid fa-user"></i> <span>Data Customer</span></a>
-                <a href="#"><i class="fa-solid fa-heart"></i> <span>Wishlist</span></a>
-                <a href="#"><i class="fa-solid fa-cart-plus"></i> <span>Keranjang</span></a>
-                <a href="#"><i class="fa-solid fa-star"></i> <span>Review</span></a>
-                <a href="{{ route('admin.chat.index') }}" class="{{ request()->routeIs('admin.chat.index') ? 'submenu-active' : '' }}">
+                <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'submenu-active' : '' }}">
+                    <i class="fa-solid fa-user"></i> 
+                    <span>Data Customer</span>
+                </a>
+                <a href="{{ route('admin.chat.index') }}" class="{{ request()->routeIs('admin.chat.index') || request()->routeIs('admin.chat.show') ? 'submenu-active' : '' }}">
                     <i class="fa-solid fa-message"></i> 
                     <span>Chat</span>
                 </a>
             </div>
         </div>
 
-        <a href="#" class="sidebar-link">
+        <a href="{{ route('admin.laporan.index') }}" class="sidebar-link {{ request()->routeIs('admin.laporan.*') ? 'active' : '' }}">
             <div class="menu-left">
                 <i class="fa-solid fa-chart-line"></i>
                 <span>Laporan</span>
             </div>
         </a>
 
-        <a href="#" class="sidebar-link">
+        <a href="{{ route('admin.pengaturan.index') }}" class="sidebar-link {{ request()->routeIs('admin.pengaturan.*') ? 'active' : '' }}">
             <div class="menu-left">
                 <i class="fa-solid fa-gear"></i>
                 <span>Pengaturan</span>
             </div>
         </a>
-
+        
     </div>
 </div>
 
@@ -129,12 +129,10 @@
     box-sizing: border-box;
 }
 
-/* KONDISI SIDEBAR DI-COLLAPSE (DISEMBUNYIKAN VIA NAV TOGGLE) */
 .sidebar.hide {
     transform: translateX(-100%);
 }
 
-/* LOGO BANNER AREA */
 .sidebar-logo {
     display: flex;
     align-items: center;
@@ -168,7 +166,6 @@
     font-size: 12px;
 }
 
-/* MAIN MENU LIST */
 .sidebar-menu {
     display: flex;
     flex-direction: column;
@@ -196,20 +193,17 @@
     font-size: 17px;
 }
 
-/* HOVER & INDIKATOR UTAMA AKTIF */
 .sidebar-link:hover,
 .sidebar-link.active {
     background: linear-gradient(135deg, #8C6A2F, #C9A227);
     color: #ffffff;
 }
 
-/* CHEVRON ARROW TRANSITION */
 .arrow {
     font-size: 12px;
     transition: transform .3s ease;
 }
 
-/* DROPDOWN SUBMENU STRUCTURAL WRAPPER */
 .menu-dropdown-wrapper {
     display: flex;
     flex-direction: column;
@@ -221,12 +215,11 @@
     gap: 4px;
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s cubic-bezier(0, 1, 0, 1); /* Transisi halus buka tutup CSS */
+    transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
 }
 
-/* KETIKA STATE DROPDOWN TERBUKA */
 .menu-dropdown-wrapper.is-expanded .submenu-list {
-    max-height: 500px; /* Nilai aman penampung list menu */
+    max-height: 500px;
     transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
     padding-top: 8px;
 }
@@ -234,7 +227,6 @@
     transform: rotate(180deg);
 }
 
-/* SUBMENU LINKS ITEM STYLE */
 .submenu-list a {
     display: flex;
     align-items: center;
@@ -248,21 +240,19 @@
     transition: all .3s ease;
 }
 .submenu-list a:hover {
-    background: #faf6ef;
+    background: #faf6ed;
     color: #B68D40;
 }
 
-/* SUBMENU LINK SEDANG AKTIF (MATCH WITH APP COLOR THEME) */
 .submenu-list a.submenu-active {
     background-color: #faf6ed;
     color: #8C6A2F;
     font-weight: 600;
     border-left: 3.5px solid #8C6A2F;
     border-radius: 4px 14px 14px 4px;
-    padding-left: 11.5px; /* Kompensasi border kiri */
+    padding-left: 11.5px;
 }
 
-/* CUSTOM SCROLLBAR BAR */
 .sidebar::-webkit-scrollbar {
     width: 5px;
 }
@@ -271,7 +261,6 @@
     border-radius: 50px;
 }
 
-/* ==================== SCREEN RESPONSIVE BREAKPOINTS ==================== */
 @media(max-width: 991px) {
     .sidebar {
         transform: translateX(-100%);
@@ -283,9 +272,6 @@
 </style>
 
 <script>
-// =========================================================================
-// JAVASCRIPT LOGIC PURE UNTUK INTERAKSI SUBMENU DROPDOWN SIDEBAR
-// =========================================================================
 document.addEventListener("DOMContentLoaded", function () {
     const dropdownTriggers = document.querySelectorAll('.toggle-dropdown-trigger');
 
@@ -293,18 +279,19 @@ document.addEventListener("DOMContentLoaded", function () {
         trigger.addEventListener('click', function (e) {
             e.preventDefault();
             const parentWrapper = this.parentElement;
-            
-            // Simpan status aktif sebelum ditutup
             const wasExpanded = parentWrapper.classList.contains('is-expanded');
 
-            // Opsional: Tutup dropdown lain yang sedang terbuka (Mode Akordion)
+            // Akordion: Tutup dropdown lain kecuali yang punya submenu sedang aktif
             document.querySelectorAll('.menu-dropdown-wrapper').forEach(wrapper => {
-                wrapper.classList.remove('is-expanded');
+                if (!wrapper.querySelector('.submenu-active')) {
+                    wrapper.classList.remove('is-expanded');
+                }
             });
 
-            // Toggle status menu saat ini
             if (!wasExpanded) {
                 parentWrapper.classList.add('is-expanded');
+            } else {
+                parentWrapper.classList.remove('is-expanded');
             }
         });
     });

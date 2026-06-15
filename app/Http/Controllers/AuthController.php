@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -31,15 +32,23 @@ class AuthController extends Controller
 
         // Menggunakan DB Transaction untuk mencegah bentroknya nomor urut 'user_code'
         DB::transaction(function () use ($validated) {
-            $lastUser = User::latest('id')->first();
-            $number = $lastUser ? $lastUser->id + 1 : 1;
-            $userCode = 'US' . str_pad($number, 3, '0', STR_PAD_LEFT);
+            // 1. Ambil format Bulan (MM) dan Tahun (YY) saat ini
+            $bulan = Carbon::now()->format('m'); // Contoh: "06"
+            $tahun = Carbon::now()->format('y'); // Contoh: "26"
+            $prefix = 'USO' . $bulan . $tahun;  // Hasil: "USO0626"
+
+            // 2. Hitung berapa user yang sudah terdaftar dengan prefix bulan & tahun ini
+            $countUserBulanIni = User::where('user_code', 'LIKE', $prefix . '%')->count();
+            $number = $countUserBulanIni + 1;
+
+            // 3. Gabungkan menjadi USO + MM + YY + 3 digit nomor urut (contoh: USO0626001)
+            $userCode = $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
 
             User::create([
                 'user_code' => $userCode,
                 'name'      => $validated['name'],
                 'email'     => $validated['email'],
-                'password'  => bcrypt($validated['password']), // Lebih aman di-hash manual di sini jika cast belum aktif
+                'password'  => bcrypt($validated['password']),
                 'role'      => 'user',
                 'is_active' => true,
             ]);
@@ -61,13 +70,11 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            // Proteksi akun non-aktif
             if (isset($user->is_active) && !$user->is_active) {
                 Auth::logout();
                 return back()->with('error', 'Akun Anda dinonaktifkan.');
             }
 
-            // Proteksi role admin
             if ($user->role !== 'user') {
                 Auth::logout();
                 return back()->with('error', 'Akun admin tidak dapat login di halaman user.');
@@ -89,14 +96,19 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
-            // Gunakan DB::transaction agar proses pengecekan & pembuatan code aman
             $user = DB::transaction(function () use ($googleUser) {
                 $existingUser = User::where('email', $googleUser->getEmail())->first();
 
                 if (!$existingUser) {
-                    $lastUser = User::latest('id')->first();
-                    $number = $lastUser ? $lastUser->id + 1 : 1;
-                    $userCode = 'USR' . str_pad($number, 3, '0', STR_PAD_LEFT);
+                    // Sama seperti register biasa, gunakan format bulan dan tahun saat ini
+                    $bulan = Carbon::now()->format('m');
+                    $tahun = Carbon::now()->format('y');
+                    $prefix = 'USO' . $bulan . $tahun;
+
+                    $countUserBulanIni = User::where('user_code', 'LIKE', $prefix . '%')->count();
+                    $number = $countUserBulanIni + 1;
+
+                    $userCode = $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
 
                     return User::create([
                         'user_code' => $userCode,
@@ -104,7 +116,7 @@ class AuthController extends Controller
                         'email'     => $googleUser->getEmail(),
                         'google_id' => $googleUser->getId(),
                         'avatar'    => $googleUser->getAvatar(),
-                        'password'  => bcrypt(Str::random(32)), // Hash password random demi keamanan
+                        'password'  => bcrypt(Str::random(32)),
                         'role'      => 'user',
                         'is_active' => true,
                     ]);
@@ -113,7 +125,6 @@ class AuthController extends Controller
                 return $existingUser;
             });
 
-            // --- PERBAIKAN VALIDASI ROLE DAN STATUS UNTUK GOOGLE AUTH ---
             if (isset($user->is_active) && !$user->is_active) {
                 return redirect()->route('login')->with('error', 'Akun Anda dinonaktifkan.');
             }
@@ -123,7 +134,7 @@ class AuthController extends Controller
             }
 
             Auth::login($user);
-            request()->session()->regenerate(); // Regenerasi session setelah login berhasil
+            request()->session()->regenerate();
 
             return redirect()->route('user.dashboard');
 
