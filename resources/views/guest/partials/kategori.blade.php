@@ -19,11 +19,7 @@
             @forelse($kategori as $cat)
                 <div class="col-lg-3 col-md-6">
                     
-                    @auth
-                        <a href="{{ route('user.kategori.show', $cat->id) }}" class="text-decoration-none text-white d-block">
-                    @else
                         <a href="javascript:void(0)" onclick="pemicuKategoriLoginAlert()" class="text-decoration-none text-white d-block">
-                    @endauth
 
                         <div class="style-card">
 

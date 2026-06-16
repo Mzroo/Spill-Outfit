@@ -21,11 +21,11 @@ class HomeController extends Controller
         $kategori = Kategori::where('status', 'aktif')->get();
 
         // 2. Ambil 8 data produk teranyar untuk section "Trending"
-        // Diubah menjadi take(8) agar variasi filter kategori lebih berasa dan pas 2 baris grid (4x2)
-        $produk_trending = Produk::with(['kategori'])
+        // FIX: Kita simpan ke variabel $produk agar sinkron dengan yang diminta view depan!
+        $produk = Produk::with(['kategori'])
                             ->where('status', 'public')
                             ->latest()
-                            ->take(8) // <-- OPTIMASI DI SINI
+                            ->take(8)
                             ->get();
 
         // 3. Ambil 4 data produk acak untuk section "Rekomendasi Outfit"
@@ -35,8 +35,8 @@ class HomeController extends Controller
                                 ->take(4)
                                 ->get();
 
-        // 4. Kirim ketiga data di atas ke view 'guest.index'
-        return view('guest.index', compact('kategori', 'produk_trending', 'produk_rekomendasi'));
+        // 4. Kirim data ke view 'guest.index' (Variabel $produk dijamin aman tanpa undefined error)
+        return view('guest.index', compact('kategori', 'produk', 'produk_rekomendasi'));
     }
 
     /*
@@ -51,11 +51,20 @@ class HomeController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | PRODUK KATALOG (PERBAIKAN: SEKARANG 100% DINAMIS & SUPORT FILTER)
+    | PRODUK KATALOG (SATPAM SISI CONTROLLER: BLOKIR TOTAL AKSES JIKA BELUM LOGIN)
     |--------------------------------------------------------------------------
     */
     public function produk(Request $request)
     {
+        // =====================================================================
+        // GERBANG KEAMANAN UTAMA BACK-END
+        // =====================================================================
+        // Jika kedapatan guest nakal langsung menembak url atau klik filter kategori,
+        // kita tendang balik ke beranda dan kirimkan flash message!
+        if (!auth()->check()) {
+            return redirect()->route('index')->with('harus_login', 'Oops! Silakan masuk akun terlebih dahulu untuk melihat katalog outfit premium.');
+        }
+
         // 1. Ambil semua kategori aktif untuk tombol filter
         $kategori = Kategori::where('status', 'aktif')->get();
 
@@ -71,7 +80,7 @@ class HomeController extends Controller
             $query->where('kategori_id', $kategoriId);
         }
 
-        // Saring berdasarkan Kata Kunci Search jika ada (Mencari di nama atau deskripsi produk)
+        // Saring berdasarkan Kata Kunci Search jika ada
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nama', 'like', '%' . $search . '%')
@@ -98,7 +107,6 @@ class HomeController extends Controller
                     ->take(6)
                     ->get();
 
-        // Kirim data $posts ke view guest.community
         return view('guest.community', compact('posts'));
     }
 }

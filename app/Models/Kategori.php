@@ -11,7 +11,6 @@ class Kategori extends Model
 
     protected $table = 'kategori';
 
-    // Daftarkan 'kode_kategori' agar diizinkan dalam Mass Assignment
     protected $fillable = [
         'kode_kategori',
         'nama',
@@ -22,17 +21,14 @@ class Kategori extends Model
     ];
 
     /**
-     * Logika otomatisasi pembuatan kode kustom unik
+     * Logika otomatisasi pembuatan kode kustom unik tanpa tahun
      */
     protected static function booted()
     {
         static::creating(function ($kategori) {
-            $tahunSaatIni = date('Y'); // Mengambil tahun saat ini
             
-            // Cari data kategori terakhir yang dibuat pada tahun ini
-            $dataTerakhir = static::whereYear('created_at', $tahunSaatIni)
-                                  ->latest('id')
-                                  ->first();
+            // 1. Hapus whereYear agar mengecek seluruh data terbaru tanpa batas tahun
+            $dataTerakhir = static::latest('id')->first();
             
             $nomorUrut = 1;
             
@@ -42,20 +38,17 @@ class Kategori extends Model
                 $nomorUrut = $nomorTerakhir + 1;
             }
 
-            // Gabungkan menjadi string berformat: KTG-2026-0001
-            $kategori->kode_kategori = 'KSO' . $tahunSaatIni . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+            // 2. Ubah format pembuatan string di sini (Menghilangkan bagian tahun)
+            // Hasilnya akan menjadi: KSO-0001, KSO-0002, dst.
+            $kategori->kode_kategori = 'KSO' . '-' . str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
         });
     }
 
     /**
-     * ========================================================
-     * RELASI ONE-TO-MANY (Satu Kategori punya banyak Produk)
-     * ========================================================
-     * Hubungkan model Kategori ini ke model Produk Spill Outfit kamu.
+     * RELASI ONE-TO-MANY
      */
     public function produk()
     {
-        // Parameter kedua ('kategori_id') adalah foreign key yang ada di tabel produk
         return $this->hasMany(Produk::class, 'kategori_id');
     }
 }

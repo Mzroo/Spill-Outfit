@@ -11,16 +11,17 @@
     <div class="main-detail-layout">
         
         <div class="gallery-card">
+            <!-- WADAH GAMBAR UTAMA SEAMLESS RESPONSIVE -->
             <div class="image-wrapper">
                 <img id="mainImage"
-                     src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/600' }}"
+                     src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/600x800' }}"
                      class="main-image" 
                      alt="{{ $produk->nama }}">
             </div>
 
             <div class="thumb-wrapper">
                 <img class="thumb active"
-                     src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/100' }}"
+                     src="{{ $produk->gambar ? asset('storage/'.$produk->gambar) : 'https://via.placeholder.com/100x130' }}"
                      onclick="setImage(this)">
 
                 @if(isset($produk->gambarTambahan))
@@ -41,11 +42,6 @@
             <h2 class="product-title">
                 {{ $produk->nama }}
             </h2>
-
-            <div class="rating-bar">
-                <span class="stars">★★★★★</span>
-                <span class="review-count">(120 ulasan customer)</span>
-            </div>
 
             <h3 id="priceBox" class="product-price">
                 Rp {{ number_format($produk->harga, 0, ',', '.') }}
@@ -114,18 +110,22 @@
 
     </div>
 
+    <!-- ================= SECTION PRODUK SERUPA (SEAMLESS GRID) ================= -->
     <div class="related-section">
         <h3 class="section-title">Produk Serupa Untukmu ✨</h3>
         
         <div class="related-products-grid">
             @foreach($rekomendasi as $item)
                 <a href="{{ route('produk.show', $item->id) }}" class="card-related">
+                    <!-- BINGKAI FOTO MENYATU PENUH TANPA CELAH BORDER/PADDING -->
                     <div class="related-img-wrapper">
-                        <img src="{{ $item->gambar ? asset('storage/'.$item->gambar) : 'https://via.placeholder.com/300' }}" alt="{{ $item->nama }}">
+                        <img src="{{ $item->gambar ? asset('storage/'.$item->gambar) : 'https://via.placeholder.com/300x400' }}" alt="{{ $item->nama }}">
                     </div>
                     <div class="related-body">
-                        <small class="related-cat">{{ optional($item->kategori)->nama }}</small>
-                        <h6 class="related-title">{{ $item->nama }}</h6>
+                        <div>
+                            <small class="related-cat">{{ optional($item->kategori)->nama }}</small>
+                            <h6 class="related-title">{{ $item->nama }}</h6>
+                        </div>
                         <span class="related-price">Rp {{ number_format($item->harga, 0, ',', '.') }}</span>
                     </div>
                 </a>
@@ -141,17 +141,32 @@
 .product-detail-container *, .product-detail-container *::before, .product-detail-container *::after { box-sizing: border-box; }
 .main-detail-layout { display: grid; grid-template-columns: 1.1fr 1.3fr; gap: 40px; align-items: start; margin-bottom: 60px; }
 .gallery-card { background: #ffffff; padding: 20px; border-radius: 24px; border: 1px solid #f6f0e5; box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03); }
-.image-wrapper { width: 100%; height: 480px; border-radius: 16px; overflow: hidden; background: #fafaf8; }
-.main-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+
+/* GAMBAR UTAMA DETAIL */
+.image-wrapper { 
+    width: 100%; 
+    aspect-ratio: 3 / 4; 
+    max-height: 580px; 
+    border-radius: 16px; 
+    overflow: hidden; 
+    background: #ffffff; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.main-image { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* Mengisi penuh frame gambar detail */
+    transition: transform 0.3s ease; 
+}
+
 .thumb-wrapper { display: flex; gap: 12px; margin-top: 16px; overflow-x: auto; padding-bottom: 4px; }
-.thumb { width: 76px; height: 76px; border-radius: 12px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; }
+.thumb { width: 70px; height: 90px; border-radius: 10px; object-fit: cover; cursor: pointer; border: 2px solid transparent; transition: all 0.2s ease; background: #ffffff; }
 .thumb.active, .thumb:hover { border-color: #8C6A2F; transform: translateY(-2px); }
 .product-info-card { background: #ffffff; padding: 35px; border-radius: 24px; border: 1px solid #f6f0e5; box-shadow: 0 10px 30px rgba(140, 106, 47, 0.03); }
 .category-tag { color: #8C6A2F; text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: 1px; display: inline-block; margin-bottom: 8px; }
 .product-title { font-size: 28px; font-weight: 800; color: #1a1a1a; margin: 0 0 12px 0; line-height: 1.3; }
-.rating-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-.stars { color: #C9A227; font-size: 16px; }
-.review-count { color: #888; font-size: 13px; }
 .product-price { font-size: 30px; font-weight: 800; color: #8C6A2F; margin: 0 0 16px 0; }
 .stock-status { font-size: 14px; color: #555; display: flex; align-items: center; gap: 8px; }
 .stock-highlight { font-weight: 700; color: #222; }
@@ -168,40 +183,93 @@
 .qty-btn:hover:not(:disabled) { background: #f0e6d2; }
 .qty-btn:disabled { color: #ccc; cursor: not-allowed; }
 #qty { width: 60px; height: 44px; text-align: center; border: none; background: transparent; font-size: 15px; font-weight: 700; color: #222; }
-.action-form-wrapper { mt: 30px; }
 .btn-submit-cart { width: 100%; background: linear-gradient(135deg, #8C6A2F, #C9A227); color: white; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s ease; }
 .btn-submit-cart:hover:not(:disabled) { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(140, 106, 47, 0.25); }
 .btn-submit-cart:disabled { background: #e0e0e0; color: #999; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn-login-redirect { width: 100%; background: #222222; color: white; text-decoration: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; transition: background 0.2s; }
 .btn-login-redirect:hover { background: #444444; }
+
+/* ======================== PERBAIKAN SEAMLESS LOOKS & RESPONSIVE PRODUK SERUPA ======================== */
 .related-section { margin-top: 50px; }
 .section-title { font-size: 20px; font-weight: 800; color: #1a1a1a; margin-bottom: 24px; }
-.related-products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.card-related { background: #ffffff; border-radius: 18px; overflow: hidden; text-decoration: none; border: 1px solid #f6f0e5; box-shadow: 0 6px 20px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+.related-products-grid { 
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 24px; 
+    align-items: stretch;
+}
+.card-related { 
+    background: #ffffff; 
+    border-radius: 18px; 
+    overflow: hidden; 
+    text-decoration: none; 
+    border: 1px solid #f6f0e5; 
+    box-shadow: 0 6px 20px rgba(0,0,0,0.02); 
+    transition: all 0.3s ease; 
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
 .card-related:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(140, 106, 47, 0.08); }
-.related-img-wrapper { width: 100%; height: 240px; overflow: hidden; background: #fbfbf9; }
-.related-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-.related-body { padding: 16px; }
+
+/* FIX TERBAIK: Bingkai menyatu penuh mengikuti ukuran lengkungan atas card */
+.related-img-wrapper { 
+    width: 100%; 
+    aspect-ratio: 3 / 4; /* Rasio potret presisi responsif otomatis di HP/Laptop */
+    overflow: hidden; 
+    background: #ffffff; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.related-img-wrapper img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* FIX: Gambar mengisi penuh card tanpa padding / pembatas kasar */
+    transition: transform 0.3s ease;
+}
+.card-related:hover .related-img-wrapper img { transform: scale(1.04); }
+
+.related-body { 
+    padding: 16px; 
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+    background: #ffffff;
+    border-top: 1px solid #f6f0e5; /* Garis pemisah tipis antara area foto dan info teks */
+}
 .related-cat { color: #8C6A2F; font-size: 11px; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 4px; }
-.related-title { font-size: 14px; font-weight: 600; color: #222; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.related-title { 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #222; 
+    margin: 0 0 8px 0; 
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    line-height: 1.4;
+    height: 40px; 
+}
 .related-price { font-size: 15px; font-weight: 700; color: #222; display: block; }
 
 @media (max-width: 991px) {
     .main-detail-layout { grid-template-columns: 1fr; gap: 30px; }
-    .image-wrapper { height: 400px; }
     .related-products-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
 }
 @media (max-width: 576px) {
     .product-info-card { padding: 20px; }
-    .image-wrapper { height: 320px; }
     .related-products-grid { grid-template-columns: 1fr; }
 }
 </style>
 
 <script>
-// AMBIL REKAPAN LENGKAP VARIAN & HARGA UTAMA DARI LARAVEL BACKEND
+// JavaScript Tetap Sama Aman Terjaga Bawaan Kode Kamu
 const listVarian = @json($produk->varian);
-const hargaProdukUtama = {{ $produk->harga }}; // Amankan data harga master produk
+const hargaProdukUtama = {{ $produk->harga }};
 
 let warnaTerpilih = null;
 let ukuranTerpilih = null;
@@ -213,7 +281,6 @@ function setImage(el) {
     el.classList.add('active');
 }
 
-// LOGIKA PILIH WARNA
 document.querySelectorAll('.warna-btn').forEach(btn => {
     btn.onclick = function() {
         if (this.classList.contains('active')) {
@@ -229,7 +296,6 @@ document.querySelectorAll('.warna-btn').forEach(btn => {
     };
 });
 
-// LOGIKA PILIH UKURAN
 document.querySelectorAll('.ukuran-btn').forEach(btn => {
     btn.onclick = function() {
         if (this.classList.contains('active')) {
@@ -275,27 +341,22 @@ function validasiKetersediaanOpsi() {
     });
 }
 
-// UPDATE INTERFACES (HARGA, STOK, DAN INPUT FORM) KETIKA DUONYA MATCH
 function sinkronisasiDataVarian() {
     const match = listVarian.find(v => v.warna_id == warnaTerpilih && v.ukuran_id == ukuranTerpilih);
     const btnCart = document.getElementById('btnCart');
 
     if (!warnaTerpilih || !ukuranTerpilih || !match) {
-        // Kembali ke harga produk utama saat varian di-unclick / belum lengkap
         document.getElementById('priceBox').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaProdukUtama);
         document.getElementById('stockBox').innerHTML = `<span style="color:#e67e22;">Pilih warna & ukuran dahulu</span>`;
         document.getElementById('produkVarianInput').value = '';
-        
         if(btnCart) {
             btnCart.disabled = true;
             btnCart.innerHTML = `<i class="fa-solid fa-cart-plus"></i> Silakan Pilih Varian`;
         }
-        
         kontrolAksesQty(0);
         return;
     }
 
-    // FIX LOGIKA HARGA FALLBACK: Jika harga varian null, undefined, atau 0, pakai harga produk utama
     const hargaFinal = (match.harga && parseInt(match.harga) > 0) ? match.harga : hargaProdukUtama;
     document.getElementById('priceBox').innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(hargaFinal);
 

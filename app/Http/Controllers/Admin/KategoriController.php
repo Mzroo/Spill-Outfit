@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class KategoriController extends Controller
 {
-        // =========================================================================
+    // =========================================================================
     // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
     // =========================================================================
     public function __construct()
@@ -39,9 +39,9 @@ class KategoriController extends Controller
             });
         }
 
-        // 4. Urutkan dari data terbaru lalu pecah menjadi paginasi (10 data per halaman)
+        // 4. PERBAIKAN: Mengubah urutan dari data terbaru menjadi urut berdasarkan kode terkecil (KSO-0001, KSO-0002, dst)
         // appends() digunakan agar saat klik halaman 2, kata kunci pencarian tidak hilang di URL
-        $kategori = $query->latest('id')->paginate(10);
+        $kategori = $query->orderBy('kode_kategori', 'asc')->paginate(10);
 
         return view('admin.kategori.index', compact('kategori'));
     }

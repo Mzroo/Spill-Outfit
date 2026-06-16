@@ -24,10 +24,9 @@
 
     <div class="product-pure-grid">
 
-        {{-- Looping data produk trending asli dari database lewat compact controller --}}
-        @forelse($produk_trending as $item)
+        {{-- SINKRONISASI: Menggunakan array $produk dari HomeController versi terbaru --}}
+        @forelse($produk as $item)
             @php
-                // Menangkap nama kategori database untuk dijadikan penanda filter (contoh: "minimalist-aesthetic")
                 $slugKategori = $item->kategori ? Str::lower(Str::slug($item->kategori->nama)) : 'uncategorized';
             @endphp
 
@@ -45,15 +44,9 @@
                     </span>
 
                     <div class="overlay-produk">
-                        @auth
-                            <a href="{{ route('produk.show', $item->id) }}">
-                                View Detail
-                            </a>
-                        @else
                             <a href="javascript:void(0)" onclick="pemicuLoginAlert()">
                                 View Detail
                             </a>
-                        @endauth
                     </div>
 
                     <div class="wishlist-btn">
@@ -88,16 +81,10 @@
                             </span>
                         </div>
 
-                        @auth
-                            <a href="{{ route('produk.show', $item->id) }}" class="btn-detail-arrow">
-                                <i class="mdi mdi-arrow-right"></i>
-                            </a>
-                        @else
+                      
                             <a href="javascript:void(0)" onclick="pemicuLoginAlert()" class="btn-detail-arrow">
                                 <i class="mdi mdi-arrow-right"></i>
                             </a>
-                        @endauth
-
                     </div>
 
                 </div>
@@ -135,27 +122,23 @@
 
         tombolFilter.forEach(button => {
             button.addEventListener("click", function () {
-                // 1. Pindahkan status class .active ke tombol yang baru di-klik
                 tombolFilter.forEach(btn => btn.classList.remove("active"));
                 this.classList.add("active");
 
-                // 2. Ambil kata kunci target kategori
                 const targetKategori = this.getAttribute("data-target");
                 let produkDitemukan = false;
 
-                // 3. Looping semua kartu produk untuk disembunyikan / ditampilkan
                 kartuProduk.forEach(card => {
                     const kategoriCard = card.getAttribute("data-category");
 
                     if (targetKategori === "all" || kategoriCard === targetKategori) {
-                        card.style.display = "flex"; // Tampilkan kotak
+                        card.style.display = "flex"; 
                         produkDitemukan = true;
                     } else {
-                        card.style.display = "none"; // Sembunyikan kotak
+                        card.style.display = "none"; 
                     }
                 });
 
-                // 4. Jika kategori yang diklik tidak punya produk minggu ini, munculkan alert kosong
                 if (!produkDitemukan) {
                     alertKosong.classList.remove("d-none");
                 } else {
@@ -188,12 +171,10 @@
 </script>
 
 <style>
-/* Helper CSS jika template belum menyediakan utilities d-none global */
 .d-none {
     display: none !important;
 }
 
-/* ======================== INTEGRASI PENYAMAAAN UKURAN CARD & LAYOUT ======================== */
 .trending-section {
     font-family: 'Poppins', sans-serif;
     margin-top: 50px;
@@ -266,7 +247,7 @@
     gap: 30px;
 }
 
-/* KOTAK CASING CARD (IDENTIK DENGAN HALAMAN PRODUK) */
+/* KOTAK CASING CARD */
 .produk-card {
     background: #ffffff;
     border-radius: 24px;
@@ -293,7 +274,7 @@
 .produk-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Foto memenuhi cover grid secara gagah */
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 .produk-card:hover .produk-image img {
@@ -315,7 +296,7 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* WISHLIST BUTTON DENGAN AKSI HOVER MERAH MERONA ACCURATE */
+/* WISHLIST BUTTON */
 .wishlist-btn {
     position: absolute;
     top: 15px;
@@ -458,7 +439,6 @@
     margin: 0 auto 16px;
 }
 
-/* CSS MODIFIKASI KELAS POP-UP SWEETALERT AGAR MEMBAL OVAL SEMPURNA */
 .rounded-5 {
     border-radius: 28px !important;
 }

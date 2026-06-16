@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
-        // =========================================================================
+    // =========================================================================
     // CONSTRUCTOR MIDDLEWARE (Satpam Pengaman Sisi Backend)
     // =========================================================================
     public function __construct()
@@ -26,7 +26,9 @@ class BrandController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->get('search');
-        $query = Brand::latest('id');
+        
+        // PERBAIKAN: Mengubah urutan dari data terbaru menjadi urut berdasarkan kode brand terkecil (BRD-0001, BRD-0002, dst)
+        $query = Brand::orderBy('kode_brand', 'asc');
 
         if (!empty($keyword)) {
             $query->where(function($q) use ($keyword) {

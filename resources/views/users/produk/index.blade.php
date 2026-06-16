@@ -10,7 +10,6 @@ use Illuminate\Support\Str;
 
 <div class="produk-section">
 
-    <!-- ================= PREMIUM CATALOG HEADER ================= -->
     <div class="produk-header">
         <div class="header-inner">
             <span class="sub-title">SPILL OUTFIT COLLECTION</span>
@@ -19,7 +18,6 @@ use Illuminate\Support\Str;
         </div>
     </div>
 
-    <!-- ================= PURE CSS PRODUCT GRID ================= -->
     <div class="product-pure-grid">
 
         @forelse($produk as $item)
@@ -32,7 +30,6 @@ use Illuminate\Support\Str;
 
             <div class="produk-card">
 
-                <!-- IMAGE ARCHITECTURE -->
                 <div class="produk-image">
 
                     @if($totalStok <= 0)
@@ -57,7 +54,6 @@ use Illuminate\Support\Str;
 
                 </div>
 
-                <!-- BODY INFO -->
                 <div class="produk-body">
 
                     <small class="kategori">
@@ -72,7 +68,6 @@ use Illuminate\Support\Str;
                         {{ Str::limit($item->deskripsi, 65) }}
                     </p>
 
-                    <!-- CARD FOOTER MATRIX -->
                     <div class="produk-footer">
 
                         <div class="price-info-side">
@@ -100,7 +95,6 @@ use Illuminate\Support\Str;
 
         @empty
 
-            <!-- FALLBACK EMPTY STATE -->
             <div class="empty-catalog-state">
                 <div class="empty-icon-box">
                     <i class="mdi mdi-shopping-outline"></i>
@@ -113,9 +107,33 @@ use Illuminate\Support\Str;
 
     </div>
 
-    <!-- ================= PAGINATION NAVIGATION ================= -->
     <div class="pagination-container-center">
-        {{ $produk->links() }}
+        @if ($produk->hasPages())
+            <ul class="pagination">
+                {{-- Tombol Halaman Sebelumnya (Prev) --}}
+                @if ($produk->onFirstPage())
+                    <li class="page-item disabled"><span class="page-link"><i class="mdi mdi-chevron-left"></i></span></li>
+                @else
+                    <li class="page-item"><a class="page-link" href="{{ $produk->previousPageUrl() }}" rel="prev"><i class="mdi mdi-chevron-left"></i></a></li>
+                @endif
+
+                {{-- Loop Angka Numerik Halaman --}}
+                @foreach ($produk->render()->elements[0] as $page => $url)
+                    @if ($page == $produk->currentPage())
+                        <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
+                    @else
+                        <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                    @endif
+                @endforeach
+
+                {{-- Tombol Halaman Selanjutnya (Next) --}}
+                @if ($produk->hasMorePages())
+                    <li class="page-item"><a class="page-link" href="{{ $produk->nextPageUrl() }}" rel="next"><i class="mdi mdi-chevron-right"></i></a></li>
+                @else
+                    <li class="page-item disabled"><span class="page-link"><i class="mdi mdi-chevron-right"></i></span></li>
+                @endif
+            </ul>
+        @endif
     </div>
 
 </div>
@@ -238,8 +256,8 @@ use Illuminate\Support\Str;
     z-index: 2;
 }
 .wishlist-btn:hover {
-    background: #e74c3c;
-    color: #ffffff;
+    background: #fff0f0;
+    color: #e74c3c;
 }
 
 /* FLUID MOUSE HOVER OVERLAY */
@@ -387,14 +405,12 @@ use Illuminate\Support\Str;
     margin: 0;
 }
 
-/* ================= LARAVEL PAGINATION ALIGNMENT ================= */
+/* ================= RE-TUNING USER PAGINATION DESIGN SYSTEM ================= */
 .pagination-container-center {
     margin-top: 50px;
     display: flex;
     justify-content: center;
 }
-
-/* Override Vendor Default Pagination System UI for Premium Looks */
 .pagination-container-center .pagination {
     display: flex;
     gap: 8px;
@@ -416,6 +432,8 @@ use Illuminate\Support\Str;
     justify-content: center;
     box-shadow: 0 4px 12px rgba(140, 106, 47, 0.02);
     transition: all 0.2s ease;
+    text-decoration: none !important; /* Reset garis bawah text link */
+    box-sizing: border-box;
 }
 .pagination-container-center .page-item.active .page-link,
 .pagination-container-center .page-item .page-link:hover {
@@ -423,6 +441,13 @@ use Illuminate\Support\Str;
     color: #ffffff !important;
     border-color: transparent !important;
     box-shadow: 0 4px 12px rgba(140, 106, 47, 0.2);
+}
+.pagination-container-center .page-item.disabled .page-link {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f5f5f5 !important;
+    color: #aaa !important;
+    border-color: #e3d5ba !important;
 }
 
 /* ================= MEDIA RESPONSIVE GRAPHICS BREAKPOINTS ================= */

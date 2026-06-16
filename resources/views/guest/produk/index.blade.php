@@ -23,105 +23,110 @@
 
         <div class="product-filter">
             <a href="{{ route('guest.produk.index') }}" 
+               data-kategori="all"
                class="filter-btn {{ !request('kategori') ? 'active' : '' }}">
                 Semua Produk
             </a>
 
             @foreach($kategori as $cat)
                 <a href="{{ route('guest.produk.index', ['kategori' => $cat->id]) }}" 
+                   data-kategori="{{ $cat->id }}"
                    class="filter-btn {{ request('kategori') == $cat->id ? 'active' : '' }}">
                     {{ $cat->nama }}
                 </a>
             @endforeach
         </div>
 
-        <div class="product-pure-grid">
+        <div id="ajax-product-container" class="smooth-fade">
+            
+            @if(request('search'))
+                <div class="search-result-alert text-center mb-4" style="margin-bottom: 40px;">
+                    <p class="text-muted" style="font-size: 14px;">
+                        Menampilkan hasil pencarian untuk kata kunci: <strong style="color: #8C6A2F;">"{{ request('search') }}"</strong>
+                        <a href="{{ route('guest.produk.index', request()->except('search')) }}" class="ms-2 text-danger text-decoration-none small" style="margin-left: 10px; color: #e74c3c; text-decoration: none;">
+                            <i class="mdi mdi-close-circle"></i> Hapus Pencarian
+                        </a>
+                    </p>
+                </div>
+            @endif
 
-            @forelse($produk as $item)
-                @php
-                    // Hitung akumulasi ketersediaan dari database
-                    $totalStok = $item->varian->sum('stok') ?? 0;
-                @endphp
+            <div class="product-pure-grid">
+                @forelse($produk as $item)
+                    @php
+                        $totalStok = $item->varian->sum('stok') ?? 0;
+                    @endphp
 
-                <div class="produk-card">
-                    <div class="produk-image">
-                        @if($totalStok <= 0)
-                            <div class="out-of-stock-badge">Stok Habis</div>
-                        @endif
+                    <div class="produk-card">
+                        <div class="produk-image">
+                            @if($totalStok <= 0)
+                                <div class="out-of-stock-badge">Stok Habis</div>
+                            @endif
 
-                        @if($item->gambar)
-                            <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama }}" loading="lazy">
-                        @else
-                            <img src="https://via.placeholder.com/500x700?text=No+Image" alt="No Image">
-                        @endif
-
-                        <div class="overlay-produk">
-                            @auth
-                                <a href="{{ route('produk.show', $item->id) }}">
-                                    View Detail
-                                </a>
+                            @if($item->gambar)
+                                <img src="{{ asset('storage/' . $item->gambar) }}" alt="{{ $item->nama }}" loading="lazy">
                             @else
-                                <a href="javascript:void(0)" onclick="pemicuKatalogLoginAlert()">
-                                    View Detail
-                                </a>
-                            @endauth
-                        </div>
+                                <img src="https://via.placeholder.com/500x700?text=No+Image" alt="No Image">
+                            @endif
 
-                        <div class="wishlist-btn">
-                            <i class="mdi mdi-heart-outline"></i>
-                        </div>
-                    </div>
-
-                    <div class="produk-body">
-                        <small class="kategori">
-                            {{ $item->kategori ? $item->kategori->nama : 'Casual Style' }}
-                        </small>
-
-                        <h4 class="produk-title">
-                            {{ $item->nama }}
-                        </h4>
-
-                        <p class="produk-deskripsi">
-                            {{ Str::limit($item->deskripsi, 65, '...') }}
-                        </p>
-
-                        <div class="produk-footer" style="align-items: center;">
-                            
-                            <div class="trending-info-lokal" style="margin-left: 0; margin-right: auto;">
-                                <span><i class="mdi mdi-heart-outline"></i> {{ rand(1, 5) }},{{ rand(1,9) }}k</span>
-                                <span><i class="mdi mdi-eye-outline"></i> {{ rand(5, 12) }},{{ rand(1,9) }}k</span>
+                            <div class="overlay-produk">
+                                    <a href="javascript:void(0)" onclick="pemicuKatalogLoginAlert()">View Detail</a>
                             </div>
 
-                            @auth
-                                <a href="{{ route('produk.show', $item->id) }}" class="btn-detail-arrow">
-                                    <i class="mdi mdi-arrow-right"></i>
-                                </a>
-                            @else
-                                <a href="javascript:void(0)" onclick="pemicuKatalogLoginAlert()" class="btn-detail-arrow">
-                                    <i class="mdi mdi-arrow-right"></i>
-                                </a>
-                            @endauth
+                            <div class="wishlist-btn">
+                                <i class="mdi mdi-heart-outline"></i>
+                            </div>
+                        </div>
 
+                        <div class="produk-body">
+                            <small class="kategori">{{ $item->kategori ? $item->kategori->nama : 'Casual Style' }}</small>
+                            <h4 class="produk-title">{{ $item->nama }}</h4>
+                            <p class="produk-deskripsi">{{ Str::limit($item->deskripsi, 65, '...') }}</p>
+
+                            <div class="produk-footer" style="align-items: center;">
+                                <div class="trending-info-lokal" style="margin-left: 0; margin-right: auto;">
+                                    <span><i class="mdi mdi-heart-outline"></i> {{ rand(1, 5) }},{{ rand(1,9) }}k</span>
+                                    <span><i class="mdi mdi-eye-outline"></i> {{ rand(5, 12) }},{{ rand(1,9) }}k</span>
+                                </div>
+                                    <a href="javascript:void(0)" onclick="pemicuKatalogLoginAlert()" class="btn-detail-arrow"><i class="mdi mdi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @empty
-                <div class="empty-catalog-state">
-                    <div class="empty-icon-box">
-                        <i class="mdi mdi-shopping-outline"></i>
+                @empty
+                    <div class="empty-catalog-state">
+                        <div class="empty-icon-box"><i class="mdi mdi-shopping-outline"></i></div>
+                        <h4>Produk Tidak Ditemukan</h4>
+                        <p>Maaf, belum ada item pakaian untuk kategori atau kata kunci pencarian ini 😢</p>
                     </div>
-                    <h4>Produk Tidak Ditemukan</h4>
-                    <p>Maaf, belum ada item pakaian untuk kategori gaya busana ini 😢</p>
-                </div>
-            @endforelse
+                @endforelse
+            </div>
 
-        </div>
+            <div class="pagination-container-center">
+                @if ($produk->hasPages())
+                    <ul class="pagination">
+                        @if ($produk->onFirstPage())
+                            <li class="page-item disabled"><span class="page-link"><i class="mdi mdi-chevron-left"></i></span></li>
+                        @else
+                            <li class="page-item"><a class="page-link" href="{{ $produk->previousPageUrl() }}" rel="prev"><i class="mdi mdi-chevron-left"></i></a></li>
+                        @endif
 
-        <div class="pagination-container-center">
-            {{ $produk->links() }}
-        </div>
+                        @foreach ($produk->render()->elements[0] as $page => $url)
+                            @if ($page == $produk->currentPage())
+                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
+                            @else
+                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                            @endif
+                        @endforeach
 
-    </div>
+                        @if ($produk->hasMorePages())
+                            <li class="page-item"><a class="page-link" href="{{ $produk->nextPageUrl() }}" rel="next"><i class="mdi mdi-chevron-right"></i></a></li>
+                        @else
+                            <li class="page-item disabled"><span class="page-link"><i class="mdi mdi-chevron-right"></i></span></li>
+                        @endif
+                    </ul>
+                @endif
+            </div>
+
+        </div> </div>
 </section>
 
 @include('guest.partials.footer')
@@ -129,6 +134,64 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const container = document.getElementById('ajax-product-container');
+        
+        // Intersepsi semua klik tombol filter dan link pagination agar tidak reload kasar
+        document.body.addEventListener('click', function(e) {
+            const targetLink = e.target.closest('.filter-btn, .pagination a');
+            
+            if (targetLink) {
+                e.preventDefault(); // Kunci jalur reload bawaan browser
+                
+                const url = targetLink.getAttribute('href');
+                if(!url || url === 'javascript:void(0)') return;
+
+                // 1. Jalankan animasi pudar (fade-out)
+                container.classList.add('fade-hidden');
+
+                // Jika yang diklik tombol filter, ubah status visual active-nya secara instan
+                if(targetLink.classList.contains('filter-btn')) {
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    targetLink.classList.add('active');
+                }
+
+                // 2. Tembak data via AJAX Fetch
+                fetch(url, {
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Buat parser virtual untuk memotong HTML hasil fetch
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById('ajax-product-container').innerHTML;
+                    
+                    // 3. Masukkan data baru dan kembalikan efek transisi pudar (fade-in)
+                    setTimeout(() => {
+                        container.innerHTML = newContent;
+                        container.classList.remove('fade-hidden');
+                        
+                        // Push URL ke address bar browser agar filter tersinkronisasi jika di-refresh
+                        window.history.pushState({ path: url }, '', url);
+                        
+                        // Otomatis scroll halus ke atas grid produk agar user tahu halaman berganti
+                        document.querySelector('.product-filter').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 250); // Delay halus milidetik untuk transisi mata
+                })
+                .catch(error => {
+                    console.error("Gagal memuat katalog AJAX:", error);
+                    container.classList.remove('fade-hidden');
+                });
+            }
+        });
+
+        // Menjaga fungsionalitas tombol Back/Forward browser tetap aman
+        window.addEventListener('popstate', function() {
+            window.location.reload();
+        });
+    });
+
     function pemicuKatalogLoginAlert() {
         Swal.fire({
             title: 'Akses Terbatas! ✨',
@@ -140,9 +203,7 @@
             confirmButtonText: '<i class="mdi mdi-login me-1"></i> Login Sekarang',
             cancelButtonText: 'Nanti Saja',
             background: '#ffffff',
-            customClass: {
-                popup: 'rounded-5 border shadow-sm'
-            }
+            customClass: { popup: 'rounded-5 border shadow-sm' }
         }).then((result) => {
             if (result.isConfirmed) {
                 window.location.href = "{{ route('login') }}";
@@ -152,6 +213,17 @@
 </script>
 
 <style>
+/* ======================== EFFEK SMOOTH TRANSITION GRAPHICS ENGINE ======================== */
+.smooth-fade {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s cubic-bezier(0.25, 1, 0.5, 1), transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.smooth-fade.fade-hidden {
+    opacity: 0;
+    transform: translateY(15px); /* Efek turun sedikit saat memudar keluar */
+}
+
 /* ======================== INTEGRASI LAYOUT KATALOG PREMIUM (PURE CSS) ======================== */
 .all-product-section {
     font-family: 'Poppins', sans-serif;
@@ -196,7 +268,7 @@
     font-size: 14.5px;
 }
 
-/* RE-ENGINEERING FILTER NAVIGATION AREA */
+/* RE-ENGINEERING FILTER NAVIGATION AREA UNTUK SINKRONISASI TINGGI FIX */
 .product-filter {
     display: flex;
     justify-content: center;
@@ -204,6 +276,7 @@
     gap: 12px;
     flex-wrap: wrap;
     margin-bottom: 50px;
+    min-height: 50px; /* Mengunci tinggi agar button bar tidak bergetar / lari atas bawah */
 }
 .filter-btn {
     border: none;
@@ -214,7 +287,9 @@
     font-weight: 600;
     color: #444;
     text-decoration: none;
-    transition: all 0.25s ease;
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    display: inline-block;
+    white-space: nowrap;
 }
 .filter-btn:hover, .filter-btn.active {
     background: linear-gradient(135deg, #8C6A2F, #C9A227);
@@ -277,19 +352,6 @@
     border-radius: 8px;
     z-index: 3;
     box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
-}
-.trending-label-popular {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: white;
-    color: #8C6A2F;
-    padding: 5px 14px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    z-index: 3;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 /* TRANSISI HOVER LOVE MERAH MERONA (WISHLIST CORNER) */
@@ -409,21 +471,46 @@
     border-color: transparent;
 }
 
-/* LARAVEL PAGINATION CONTROLLER CENTERED SYSTEM OVERRIDE */
+/* ======================== FIXED CUSTOM PAGINATION BAR DESIGN ======================== */
 .pagination-container-center {
     margin-top: 60px;
     display: flex;
     justify-content: center;
 }
-.pagination-container-center .pagination { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.pagination-container-center .pagination { 
+    display: flex; 
+    gap: 8px; 
+    list-style: none; 
+    padding: 0; 
+    margin: 0; 
+}
 .pagination-container-center .page-item .page-link {
-    border: 1px solid #e3d5ba !important; background: #ffffff !important; color: #8C6A2F !important;
-    font-weight: 600; border-radius: 12px !important; width: 46px; height: 46px;
-    display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+    border: 1px solid #e3d5ba !important; 
+    background: #ffffff !important; 
+    color: #8C6A2F !important;
+    font-weight: 600; 
+    border-radius: 12px !important; 
+    width: 46px; 
+    height: 46px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all 0.2s ease;
+    text-decoration: none !important;
+    box-sizing: border-box;
 }
 .pagination-container-center .page-item.active .page-link,
 .pagination-container-center .page-item .page-link:hover {
-    background: linear-gradient(135deg, #8C6A2F, #C9A227) !important; color: #ffffff !important; border-color: transparent !important;
+    background: linear-gradient(135deg, #8C6A2F, #C9A227) !important; 
+    color: #ffffff !important; 
+    border-color: transparent !important;
+}
+.pagination-container-center .page-item.disabled .page-link {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f5f5f5 !important;
+    color: #aaa !important;
+    border-color: #e3d5ba !important;
 }
 
 /* BLANK RECOVERY GRID MODULE */

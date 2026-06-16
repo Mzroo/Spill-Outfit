@@ -1,30 +1,27 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Kategori')
+@section('title', 'Edit Kategori')
 
 @section('content')
 
 <div class="container-fluid">
 
-    <!-- ================= PAGE HEADER ================= -->
     <div class="page-header mb-4">
         <div>
-            <h1 class="page-title">Tambah Kategori</h1>
-            <p class="page-subtitle">Buat grup kategori baru untuk mengelompokkan koleksi outfit.</p>
+            <h1 class="page-title">Edit Kategori</h1>
+            <p class="page-subtitle">Ubah data grup kategori untuk koleksi outfit: <strong>{{ $kategori->nama }}</strong></p>
         </div>
     </div>
 
-    <!-- ================= MAIN DATA CARD ================= -->
     <div class="custom-card">
-        <form action="{{ route('admin.kategori.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.kategori.update', $kategori->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
+            @method('PUT') {{-- WAJIB UNTUK PROSES UPDATE LARAVEL --}}
 
             <div class="row g-5">
 
-                <!-- KIRI: ISIAN FORM UTAMA -->
                 <div class="col-lg-7">
                     
-                    <!-- NAMA KATEGORI -->
                     <div class="form-group-custom">
                         <label class="form-label-custom" for="namaKategori">
                             Nama Kategori <span class="text-danger">*</span>
@@ -35,7 +32,7 @@
                             id="namaKategori"
                             class="form-control-custom @error('nama') is-invalid @enderror"
                             placeholder="Contoh: Campus Style"
-                            value="{{ old('nama') }}"
+                            value="{{ old('nama', $kategori->nama) }}"
                             required
                         >
                         @error('nama')
@@ -45,7 +42,6 @@
                         @enderror
                     </div>
 
-                    <!-- SLUG OTOMATIS -->
                     <div class="form-group-custom mt-4">
                         <label class="form-label-custom">
                             Slug URL Otomatis
@@ -57,6 +53,7 @@
                                 id="slugKategori"
                                 class="form-control-custom readonly-custom"
                                 placeholder="slug-otomatis-terisi"
+                                value="{{ Str::slug($kategori->nama) }}"
                                 readonly
                             >
                         </div>
@@ -65,7 +62,6 @@
                         </small>
                     </div>
 
-                    <!-- DESKRIPSI KATEGORI (KOLOM BARU) -->
                     <div class="form-group-custom mt-4">
                         <label class="form-label-custom" for="deskripsiKategori">
                             Deskripsi Kategori
@@ -76,7 +72,7 @@
                             rows="4"
                             class="form-control-custom textarea-custom @error('deskripsi') is-invalid @enderror"
                             placeholder="Tuliskan penjelasan singkat mengenai jenis gaya pakaian ini..."
-                        >{{ old('deskripsi') }}</textarea>
+                        >{{ old('deskripsi', $kategori->deskripsi) }}</textarea>
                         @error('deskripsi')
                             <small class="text-danger mt-1 d-block fw-semibold">
                                 <i class="fa-solid fa-circle-exclamation me-1"></i>{{ $message }}
@@ -84,10 +80,9 @@
                         @enderror
                     </div>
 
-                    <!-- UPLOAD GAMBAR -->
                     <div class="form-group-custom mt-4">
                         <label class="form-label-custom" for="gambarKategori">
-                            Gambar Kategori
+                            Gambar Kategori <small class="text-muted fw-normal">(Biarkan kosong jika tidak ingin mengubah)</small>
                         </label>
                         <div class="custom-file-upload">
                             <input
@@ -99,7 +94,7 @@
                             >
                             <label for="gambarKategori" class="file-upload-label">
                                 <i class="fa-solid fa-cloud-arrow-up mb-2 upload-icon"></i>
-                                <span>Pilih berkas gambar atau seret ke sini</span>
+                                <span>Pilih berkas baru untuk mengganti gambar</span>
                                 <small class="text-muted mt-1">Mendukung Format: JPG, JPEG, PNG, WEBP (Maksimal 2MB)</small>
                             </label>
                         </div>
@@ -110,14 +105,13 @@
                         @enderror
                     </div>
 
-                    <!-- STATUS PUBLIKASI (KOLOM BARU) -->
                     <div class="form-group-custom mt-4">
                         <label class="form-label-custom">
                             Status Kategori <span class="text-danger">*</span>
                         </label>
                         <div class="status-radio-container">
                             <label class="radio-card">
-                                <input type="radio" name="status" value="aktif" {{ old('status', 'aktif') == 'aktif' ? 'checked' : '' }}>
+                                <input type="radio" name="status" value="aktif" {{ old('status', $kategori->status) == 'aktif' ? 'checked' : '' }}>
                                 <div class="radio-content">
                                     <i class="fa-solid fa-circle-check text-success icon-status"></i>
                                     <div>
@@ -128,7 +122,7 @@
                             </label>
 
                             <label class="radio-card">
-                                <input type="radio" name="status" value="nonaktif" {{ old('status') == 'nonaktif' ? 'checked' : '' }}>
+                                <input type="radio" name="status" value="nonaktif" {{ old('status', $kategori->status) == 'nonaktif' ? 'checked' : '' }}>
                                 <div class="radio-content">
                                     <i class="fa-solid fa-circle-minus text-warning icon-status"></i>
                                     <div>
@@ -140,10 +134,9 @@
                         </div>
                     </div>
 
-                    <!-- ACTION BUTTONS CONTROLLER -->
                     <div class="d-flex align-items-center gap-3 mt-5 action-container">
                         <button type="submit" class="btn-save">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Simpan Kategori
+                            <i class="fa-solid fa-square-check me-2"></i>Perbarui Kategori
                         </button>
                         <a href="{{ route('admin.kategori.index') }}" class="btn-back">
                             Batal
@@ -152,7 +145,6 @@
 
                 </div>
 
-                <!-- KANAN: LIVE INTERACTIVE PREVIEW CARD -->
                 <div class="col-lg-5">
                     <div class="sticky-preview-wrapper">
                         <div class="preview-card">
@@ -161,22 +153,22 @@
                             <div class="preview-image-box">
                                 <img
                                     id="previewImage"
-                                    src="https://placehold.co/500x350/faf6ef/B68D40?text=Spill+Outfit"
+                                    src="{{ $kategori->gambar ? asset('storage/' . $kategori->gambar) : 'https://placehold.co/500x350/faf6ef/B68D40?text=No+Image' }}"
                                     alt="Pratinjau Gambar Kategori"
                                 >
                             </div>
 
                             <div class="preview-details text-start">
-                                <h2 id="previewNama" class="preview-name text-truncate">Nama Kategori</h2>
+                                <h2 id="previewNama" class="preview-name text-truncate">{{ $kategori->nama }}</h2>
                                 <div>
                                     <span id="previewSlug" class="preview-slug-badge">
-                                        <i class="fa-solid fa-link me-1" style="font-size: 10px;"></i>slug-kategori
+                                        <i class="fa-solid fa-link me-1" style="font-size: 10px;"></i>{{ Str::slug($kategori->nama) }}
                                     </span>
                                 </div>
                                 <hr class="divider-preview">
                                 <p class="preview-desc-title mb-1 fw-bold text-muted">Deskripsi Kategori:</p>
                                 <p id="previewDeskripsi" class="preview-desc-text text-muted">
-                                    Belum ada deskripsi yang dituliskan. Detail penjelasan mengenai karakteristik kategori busana akan tampil di bagian ini secara dinamis...
+                                    {{ $kategori->deskripsi ?? 'Belum ada deskripsi yang dituliskan untuk jenis gaya busana ini...' }}
                                 </p>
                             </div>
                         </div>
@@ -374,7 +366,6 @@
     line-height: 1.4;
 }
 
-/* Radio Checked State Styling */
 .radio-card input[type="radio"]:checked + .radio-content {
     background: #fff;
     border-color: #8C6A2F;
@@ -392,6 +383,7 @@
     font-size: 14.5px;
     transition: all 0.2s ease;
     box-shadow: 0 6px 15px rgba(140, 106, 47, 0.2);
+    cursor: pointer;
 }
 
 .btn-save:hover {
@@ -540,14 +532,7 @@
     // EVENT LISTENER: SLUG & TEXT LIVE PREVIEW GENERATOR
     namaInput.addEventListener('keyup', function(){
         let value = namaInput.value;
-
-        // Logika konversi text input menjadi format slug URL ramah SEO
-        let slugValue = value
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '-')           // Ganti spasi dengan tanda penghubung (-)
-            .replace(/[^\w-]+/g, '');       // Bersihkan karakter spesial di luar alfanumerik
-
+        let slugValue = value.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w-]+/g, '');
         slugOutput.value = slugValue;
 
         // Perbarui Pratinjau Teks
@@ -558,7 +543,7 @@
     // EVENT LISTENER: DESKRIPSI LIVE PREVIEW
     deskripsiInput.addEventListener('keyup', function() {
         let value = deskripsiInput.value;
-        previewDeskripsi.innerText = value || 'Belum ada deskripsi yang dituliskan. Detail penjelasan mengenai karakteristik kategori busana akan tampil di bagian ini secara dinamis...';
+        previewDeskripsi.innerText = value || 'Belum ada deskripsi yang dituliskan...';
     });
 
     // EVENT LISTENER: LIVE MEDIA PREVIEW UPLOAD
